@@ -28,10 +28,14 @@ async function runCommand(command: string, description: string) {
 
 async function main() {
   if (IS_VERCEL_ENV) {
-    console.log(
-      "Running on Vercel, skipping database migration (should be handled separately).",
-    );
-    // Skip database migration on Vercel - it should be handled separately
+    console.log("Running on Vercel, attempting database migration...");
+    try {
+      await runCommand("npm run db:migrate", "Database migration");
+      console.log("Database migration completed successfully on Vercel");
+    } catch (error) {
+      console.error("Database migration failed on Vercel:", error);
+      console.log("Continuing without migration - may need manual setup");
+    }
   } else if (IS_DOCKER_ENV) {
     console.log("Running in Docker environment.");
   } else {
