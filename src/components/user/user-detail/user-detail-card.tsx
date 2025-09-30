@@ -30,7 +30,7 @@ export function UserDetailCard({
             <Avatar className="h-16 w-16 rounded-full">
               <AvatarImage src={getUserAvatar(user)} />
               <AvatarFallback>
-                {user.name.slice(0, 2).toUpperCase()}
+                {user.name?.slice(0, 2).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
             <div>

@@ -81,7 +81,7 @@ export function UserRoleSelector({
           <AlertDialogHeader>
             <AlertDialogTitle>{t("changeUserRoles")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("selectRolesFor", { name: user.name })}
+              {t("selectRolesFor", { name: user.name || "Unknown User" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
 

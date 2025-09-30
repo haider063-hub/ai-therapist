@@ -152,7 +152,7 @@ export function UserInfoCard({
           <Avatar className="h-20 w-20 ring-2 ring-border">
             <AvatarImage src={getUserAvatar(user)} />
             <AvatarFallback className="text-lg font-semibold">
-              {user.name.slice(0, 2).toUpperCase()}
+              {user.name?.slice(0, 2).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
 
@@ -161,7 +161,7 @@ export function UserInfoCard({
             <div className="flex items-center gap-2">
               {renderInlineEditField(
                 "name",
-                user.name,
+                user.name || "Unknown User",
                 <User className="h-4 w-4 text-blue-600" />,
               )}
               {user.id === currentUserId && (

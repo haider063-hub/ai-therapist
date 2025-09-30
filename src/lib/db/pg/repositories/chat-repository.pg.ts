@@ -181,9 +181,7 @@ export const pgChatRepository = {
 
       // Then delete the thread
       console.log("Deleting thread...");
-      const _result = await pgDb
-        .delete(ChatThreadSchema)
-        .where(eq(ChatThreadSchema.id, id));
+      await pgDb.delete(ChatThreadSchema).where(eq(ChatThreadSchema.id, id));
       console.log("Thread deleted successfully");
     } catch (error) {
       console.error("Error deleting thread:", error);

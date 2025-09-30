@@ -245,12 +245,12 @@ export function UsersTable({
                       <Avatar className="size-8 rounded-full">
                         <AvatarImage src={getUserAvatar(user)} />
                         <AvatarFallback className="text-sm">
-                          {user.name.slice(0, 2).toUpperCase()}
+                          {user.name?.slice(0, 2).toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <div className="font-medium flex items-center gap-2">
-                          {user.name}
+                          {user.name || "Unknown User"}
                           {user.id === currentUserId && (
                             <Badge
                               variant="outline"

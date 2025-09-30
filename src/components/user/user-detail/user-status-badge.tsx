@@ -121,8 +121,12 @@ export function UserStatusBadge({
             </AlertDialogTitle>
             <AlertDialogDescription>
               {willBan
-                ? t("banUserConfirmation", { name: user.name })
-                : t("unbanUserConfirmation", { name: user.name })}
+                ? t("banUserConfirmation", {
+                    name: user.name || "Unknown User",
+                  })
+                : t("unbanUserConfirmation", {
+                    name: user.name || "Unknown User",
+                  })}
             </AlertDialogDescription>
           </AlertDialogHeader>
 

@@ -60,7 +60,11 @@ export function UserDeleteDialog({
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="space-y-4">
-              <p>{t("deleteUserDescription", { name: user.name })}</p>
+              <p>
+                {t("deleteUserDescription", {
+                  name: user.name || "Unknown User",
+                })}
+              </p>
 
               <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
                 <p className="text-sm font-medium text-destructive mb-2">
@@ -76,10 +80,14 @@ export function UserDeleteDialog({
 
               <div>
                 <p className="text-sm font-medium text-destructive mb-2">
-                  {t("typeNameToConfirm", { name: user.name })}
+                  {t("typeNameToConfirm", {
+                    name: user.name || "Unknown User",
+                  })}
                 </p>
                 <Input
-                  placeholder={t("typeToConfirm", { name: user.name })}
+                  placeholder={t("typeToConfirm", {
+                    name: user.name || "Unknown User",
+                  })}
                   value={confirmName}
                   onChange={(e) => setConfirmName(e.target.value)}
                   className="border-destructive/30 focus:border-destructive"

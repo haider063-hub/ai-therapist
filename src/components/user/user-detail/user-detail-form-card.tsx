@@ -86,7 +86,7 @@ export function UserDetailFormCard({
             <Avatar className="size-26 rounded-full mx-auto my-4 ring ring-border">
               <AvatarImage src={getUserAvatar(user)} />
               <AvatarFallback className="text-lg font-semibold">
-                {user.name.slice(0, 2).toUpperCase()}
+                {user.name?.slice(0, 2).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -98,7 +98,7 @@ export function UserDetailFormCard({
               <Input
                 id="name"
                 name="name"
-                defaultValue={user.name}
+                defaultValue={user.name || ""}
                 required
                 disabled={isPending}
                 data-testid="user-name-input"
