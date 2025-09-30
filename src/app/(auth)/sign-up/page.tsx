@@ -4,7 +4,15 @@ import { getIsFirstUser } from "lib/auth/server";
 import { redirect } from "next/navigation";
 
 export default async function SignUp() {
-  const isFirstUser = await getIsFirstUser();
+  // Handle database connection gracefully during build
+  let isFirstUser = false;
+  try {
+    isFirstUser = await getIsFirstUser();
+  } catch (_error) {
+    console.log("Could not check first user during build, defaulting to false");
+    isFirstUser = false;
+  }
+
   const {
     emailAndPasswordEnabled,
     socialAuthenticationProviders,
