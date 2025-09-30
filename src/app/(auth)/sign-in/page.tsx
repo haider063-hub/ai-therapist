@@ -2,6 +2,9 @@ import SignIn from "@/components/auth/sign-in";
 import { getAuthConfig } from "lib/auth/config";
 import { getIsFirstUser } from "lib/auth/server";
 
+// Force dynamic rendering to avoid build-time database calls
+export const dynamic = "force-dynamic";
+
 export default async function SignInPage() {
   // Handle database connection gracefully during build
   let isFirstUser = false;

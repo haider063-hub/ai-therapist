@@ -1,6 +1,9 @@
 import EmailSignUp from "@/components/auth/email-sign-up";
 import { getIsFirstUser } from "lib/auth/server";
 
+// Force dynamic rendering to avoid build-time database calls
+export const dynamic = "force-dynamic";
+
 export default async function EmailSignUpPage() {
   // Handle database connection gracefully during build
   let isFirstUser = false;
