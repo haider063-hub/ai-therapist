@@ -21,12 +21,7 @@ export const metadata: Metadata = {
   title: "EchoNest AI Therapy",
   description:
     "EchoNest AI Therapy - Your compassionate AI therapist providing professional support and guidance for mental health and emotional well-being.",
-  icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
-    ],
-  },
+  // Favicon is automatically handled by Next.js App Router from app/ directory
 };
 
 export default async function RootLayout({
@@ -39,7 +34,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        {/* Favicon is automatically handled by Next.js App Router */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

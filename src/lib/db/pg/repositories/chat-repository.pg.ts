@@ -77,26 +77,18 @@ export const pgChatRepository = {
   },
 
   async selectMessagesByThreadId(threadId: string): Promise<ChatMessage[]> {
-    console.log("selectMessagesByThreadId called with threadId:", threadId);
-
     const messages = await pgDb
       .select()
       .from(ChatMessageSchema)
       .where(eq(ChatMessageSchema.threadId, threadId))
       .orderBy(ChatMessageSchema.createdAt);
 
-    console.log("Raw messages from database:", messages);
-    console.log("Number of messages found:", messages.length);
-
-    const processedMessages = messages.map((msg) => ({
+    return messages.map((msg) => ({
       ...msg,
       role: msg.role as UIMessage["role"],
       parts: msg.parts as UIMessage["parts"],
       metadata: msg.metadata as ChatMetadata,
     }));
-
-    console.log("Processed messages:", processedMessages);
-    return processedMessages;
   },
 
   async selectThreadsByUserId(
@@ -156,8 +148,6 @@ export const pgChatRepository = {
   },
 
   async deleteThread(id: string): Promise<void> {
-    console.log("deleteThread called with id:", id);
-
     try {
       // First check if the thread exists
       const existingThread = await pgDb
@@ -166,23 +156,17 @@ export const pgChatRepository = {
         .where(eq(ChatThreadSchema.id, id))
         .limit(1);
 
-      console.log("Existing thread found:", existingThread.length > 0);
-
       if (existingThread.length === 0) {
-        console.log("Thread not found, nothing to delete");
         return;
       }
 
       // First delete related messages manually to ensure they're removed
-      console.log("Deleting related messages first...");
       await pgDb
         .delete(ChatMessageSchema)
         .where(eq(ChatMessageSchema.threadId, id));
 
       // Then delete the thread
-      console.log("Deleting thread...");
       await pgDb.delete(ChatThreadSchema).where(eq(ChatThreadSchema.id, id));
-      console.log("Thread deleted successfully");
     } catch (error) {
       console.error("Error deleting thread:", error);
       throw error;
@@ -259,9 +243,9 @@ export const pgChatRepository = {
       : "null";
 
     const result = await pgDb.execute(sql`
-      INSERT INTO chat_message (id, thread_id, role, content, parts, metadata, created_at, updated_at)
-      VALUES (${message.id}, ${message.threadId}, ${message.role}, '', ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
-      RETURNING id, thread_id, role, parts, metadata, created_at, updated_at
+      INSERT INTO chat_message (id, "threadId", role, parts, metadata, "createdAt", "updatedAt")
+      VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
+      RETURNING id, "threadId", role, parts, metadata, "createdAt", "updatedAt"
     `);
 
     return result.rows[0] as ChatMessage;
@@ -270,13 +254,6 @@ export const pgChatRepository = {
   async upsertMessage(
     message: Omit<ChatMessage, "createdAt" | "updatedAt">,
   ): Promise<ChatMessage> {
-    console.log("upsertMessage - message.parts:", message.parts);
-    console.log("upsertMessage - message.parts type:", typeof message.parts);
-    console.log(
-      "upsertMessage - message.parts isArray:",
-      Array.isArray(message.parts),
-    );
-
     // Fix for drizzle-orm 0.44.5 JSON serialization issue
     // Ensure parts is properly formatted as a JSON array
     let formattedParts = message.parts;
@@ -292,29 +269,20 @@ export const pgChatRepository = {
       formattedParts = [message.parts];
     }
 
-    console.log("upsertMessage - formattedParts:", formattedParts);
-    console.log(
-      "upsertMessage - JSON.stringify(formattedParts):",
-      JSON.stringify(formattedParts),
-    );
-
     // Try using raw SQL to bypass Drizzle's JSON serialization issues
     const partsJson = JSON.stringify(formattedParts);
-    console.log("upsertMessage - partsJson:", partsJson);
-
     const metadataJson = message.metadata
       ? JSON.stringify(message.metadata)
       : "null";
-    console.log("upsertMessage - metadataJson:", metadataJson);
 
     const result = await pgDb.execute(sql`
-      INSERT INTO chat_message (id, thread_id, role, content, parts, metadata, created_at, updated_at)
-      VALUES (${message.id}, ${message.threadId}, ${message.role}, '', ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
+      INSERT INTO chat_message (id, "threadId", role, parts, metadata, "createdAt", "updatedAt")
+      VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
       ON CONFLICT (id) DO UPDATE SET
         parts = ${partsJson}::jsonb,
         metadata = ${metadataJson}::jsonb,
-        updated_at = ${new Date()}
-      RETURNING id, thread_id, role, parts, metadata, created_at, updated_at
+        "updatedAt" = ${new Date()}
+      RETURNING id, "threadId", role, parts, metadata, "createdAt", "updatedAt"
     `);
 
     return result.rows[0] as ChatMessage;

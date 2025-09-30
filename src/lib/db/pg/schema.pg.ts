@@ -1,11 +1,4 @@
-import {
-  pgTable,
-  text,
-  timestamp,
-  boolean,
-  json,
-  uuid,
-} from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, json } from "drizzle-orm/pg-core";
 import { UIMessage } from "ai";
 import { ChatMetadata } from "app-types/chat";
 
@@ -71,28 +64,28 @@ export const VerificationSchema = pgTable("verification", {
 
 // Chat Thread table
 export const ChatThreadSchema = pgTable("chat_thread", {
-  id: uuid("id").primaryKey().notNull().defaultRandom(),
-  userId: text("user_id")
+  id: text("id").primaryKey().notNull(),
+  userId: text("userId")
     .notNull()
     .references(() => UserSchema.id, { onDelete: "cascade" }),
   title: text("title").notNull().default(""),
   model: text("model"),
   archived: boolean("archived").default(false).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 // Chat Message table
 export const ChatMessageSchema = pgTable("chat_message", {
   id: text("id").primaryKey(),
-  threadId: uuid("thread_id")
+  threadId: text("threadId")
     .notNull()
     .references(() => ChatThreadSchema.id, { onDelete: "cascade" }),
   role: text("role").notNull().$type<UIMessage["role"]>(),
   parts: json("parts").notNull().array().$type<UIMessage["parts"]>(),
   metadata: json("metadata").$type<ChatMetadata>(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 // Archive table
@@ -113,9 +106,7 @@ export const ArchiveItemSchema = pgTable("archive_item", {
   archiveId: text("archive_id")
     .notNull()
     .references(() => ArchiveSchema.id),
-  threadId: uuid("thread_id")
-    .notNull()
-    .references(() => ChatThreadSchema.id, { onDelete: "cascade" }),
+  threadId: text("thread_id").notNull(),
   itemId: text("item_id").notNull(), // Reference to the actual item
   userId: text("user_id")
     .notNull()
@@ -130,9 +121,7 @@ export const BookmarkSchema = pgTable("bookmark", {
   userId: text("user_id")
     .notNull()
     .references(() => UserSchema.id),
-  threadId: uuid("thread_id")
-    .notNull()
-    .references(() => ChatThreadSchema.id, { onDelete: "cascade" }),
+  threadId: text("thread_id").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
