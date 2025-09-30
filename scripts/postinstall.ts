@@ -28,17 +28,19 @@ async function runCommand(command: string, description: string) {
 
 async function main() {
   if (IS_VERCEL_ENV) {
-    console.log("Running on Vercel, performing database migration.");
-    await runCommand("pnpm db:migrate", "Database migration");
+    console.log(
+      "Running on Vercel, skipping database migration (should be handled separately).",
+    );
+    // Skip database migration on Vercel - it should be handled separately
   } else if (IS_DOCKER_ENV) {
     console.log("Running in Docker environment.");
   } else {
     console.log(
       "Running in a normal environment, performing initial environment setup.",
     );
-    await runCommand("pnpm initial:env", "Initial environment setup");
+    await runCommand("npm run initial:env", "Initial environment setup");
     await runCommand(
-      "pnpm openai-compatiable:init",
+      "npm run openai-compatiable:init",
       "Initial openAI compatiable config setup",
     );
   }
