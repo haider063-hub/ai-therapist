@@ -39,28 +39,35 @@ function copyEnvFile() {
     console.info(".env file already exists. Skipping...");
   }
 
-  if (!fs.existsSync(DOCKER_ENV_PATH + "/.env")) {
-    try {
-      // Copy .env.example content first
-      const envExampleContent = fs.readFileSync(envExamplePath, "utf-8");
+  // Only create docker/.env if docker directory exists
+  if (fs.existsSync(DOCKER_ENV_PATH)) {
+    if (!fs.existsSync(DOCKER_ENV_PATH + "/.env")) {
+      try {
+        // Copy .env.example content first
+        const envExampleContent = fs.readFileSync(envExamplePath, "utf-8");
 
-      // Replace existing POSTGRES_URL with all Docker PostgreSQL settings
-      const dockerEnvContent = envExampleContent.replace(
-        /POSTGRES_URL=postgres:\/\/.*$/m,
-        DOCKER_POSTGRES_SETTINGS,
-      );
+        // Replace existing POSTGRES_URL with all Docker PostgreSQL settings
+        const dockerEnvContent = envExampleContent.replace(
+          /POSTGRES_URL=postgres:\/\/.*$/m,
+          DOCKER_POSTGRES_SETTINGS,
+        );
 
-      fs.writeFileSync(DOCKER_ENV_PATH + "/.env", dockerEnvContent, "utf-8");
-      console.log(
-        "/docker/.env file has been created with PostgreSQL settings.",
-      );
-    } catch (error) {
-      console.error("Error occurred while creating /docker/.env file.");
-      console.error(error);
-      return false;
+        fs.writeFileSync(DOCKER_ENV_PATH + "/.env", dockerEnvContent, "utf-8");
+        console.log(
+          "/docker/.env file has been created with PostgreSQL settings.",
+        );
+      } catch (error) {
+        console.error("Error occurred while creating /docker/.env file.");
+        console.error(error);
+        return false;
+      }
+    } else {
+      console.info("/docker/.env file already exists. Skipping...");
     }
   } else {
-    console.info("/docker/.env file already exists. Skipping...");
+    console.info(
+      "Docker directory not found. Skipping docker/.env creation...",
+    );
   }
 
   return true;
