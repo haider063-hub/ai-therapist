@@ -392,7 +392,6 @@ async function seedSampleUsageData(userIds: string[]) {
             id: `${userId}-msg-1-${timestamp}`,
             threadId: thread[0].id,
             role: "user" as const,
-            content: "Test user message",
             parts: [{ type: "text", text: "Test user message" }],
             metadata: null,
             createdAt: new Date(),
@@ -402,7 +401,6 @@ async function seedSampleUsageData(userIds: string[]) {
             id: `${userId}-msg-2-${timestamp}`,
             threadId: thread[0].id,
             role: "assistant" as const,
-            content: "Test assistant response",
             parts: [{ type: "text", text: "Test assistant response" }],
             metadata: {
               chatModel: { provider: "openai", model: "gpt-4o" },
@@ -419,7 +417,6 @@ async function seedSampleUsageData(userIds: string[]) {
             id: `${userId}-msg-3-${timestamp}`,
             threadId: thread[0].id,
             role: "assistant" as const,
-            content: "Another test response",
             parts: [{ type: "text", text: "Another test response" }],
             metadata: {
               chatModel: {
