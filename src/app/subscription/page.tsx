@@ -140,6 +140,29 @@ export default function SubscriptionPage() {
     }
   };
 
+  const handleManageSubscription = async () => {
+    setProcessing("portal");
+    try {
+      const response = await fetch("/api/stripe/create-portal-session", {
+        method: "POST",
+      });
+
+      if (response.ok) {
+        const { url } = await response.json();
+        if (url) {
+          window.location.href = url;
+        }
+      } else {
+        const error = await response.json();
+        toast.error(error.error || "Failed to open billing portal");
+      }
+    } catch (_error) {
+      toast.error("Error opening billing portal");
+    } finally {
+      setProcessing(null);
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
@@ -247,17 +270,30 @@ export default function SubscriptionPage() {
               )}
               {data.user.subscriptionStatus === "active" &&
                 data.user.subscriptionType !== "free_trial" && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancelSubscription}
-                    disabled={processing === "cancel"}
-                    className="w-full mt-4"
-                  >
-                    {processing === "cancel"
-                      ? "Processing..."
-                      : "Cancel Subscription"}
-                  </Button>
+                  <div className="space-y-2 mt-4">
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleManageSubscription}
+                      disabled={processing === "portal"}
+                      className="w-full"
+                    >
+                      {processing === "portal"
+                        ? "Loading..."
+                        : "Manage Billing"}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancelSubscription}
+                      disabled={processing === "cancel"}
+                      className="w-full"
+                    >
+                      {processing === "cancel"
+                        ? "Processing..."
+                        : "Cancel Subscription"}
+                    </Button>
+                  </div>
                 )}
             </div>
           </CardContent>

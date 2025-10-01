@@ -35,16 +35,40 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Prevent duplicate subscription purchases (but allow multiple top-ups)
-    if (
-      planType !== "VOICE_TOPUP" &&
-      user.subscriptionType === plan.name &&
-      user.subscriptionStatus === "active"
-    ) {
-      return NextResponse.json(
-        { error: "You already have an active subscription to this plan" },
-        { status: 400 },
-      );
+    // Handle subscription plan switching
+    if (planType !== "VOICE_TOPUP") {
+      // Prevent buying the same plan twice
+      if (
+        user.subscriptionType === plan.name &&
+        user.subscriptionStatus === "active"
+      ) {
+        return NextResponse.json(
+          { error: "You already have an active subscription to this plan" },
+          { status: 400 },
+        );
+      }
+
+      // If user has an existing active subscription, cancel it first
+      if (
+        user.stripeSubscriptionId &&
+        user.subscriptionStatus === "active" &&
+        user.subscriptionType !== "free_trial"
+      ) {
+        try {
+          await stripe!.subscriptions.update(user.stripeSubscriptionId, {
+            cancel_at_period_end: false, // Don't wait for period end
+          });
+          await stripe!.subscriptions.cancel(user.stripeSubscriptionId, {
+            prorate: true, // Give them credit for unused time
+          });
+          logger.info(
+            `Canceled previous subscription ${user.stripeSubscriptionId} for plan switch`,
+          );
+        } catch (error) {
+          logger.error("Failed to cancel previous subscription:", error);
+          // Continue anyway - new subscription will be created
+        }
+      }
     }
 
     // Create or get Stripe customer
