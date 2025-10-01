@@ -33,7 +33,7 @@ export default function SubscriptionCancelPage() {
             <p className="text-yellow-800">
               No charges were made to your account. You can continue using
               EchoNest AI Therapy with your current free trial credits, or try
-              subscribing again when you're ready.
+              subscribing again when you&apos;re ready.
             </p>
           </div>
 
