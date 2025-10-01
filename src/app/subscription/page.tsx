@@ -61,6 +61,10 @@ interface SubscriptionData {
     creditsAdded: number;
     status: string;
     createdAt: string;
+    metadata?: {
+      planType?: string;
+      [key: string]: any;
+    };
   }>;
 }
 
@@ -437,7 +441,9 @@ export default function SubscriptionPage() {
                     <div>
                       <div className="font-medium capitalize">
                         {transaction.type === "subscription"
-                          ? "Subscription"
+                          ? transaction.metadata?.planType
+                            ? `${transaction.metadata.planType.replace(/_/g, " ")} Plan`
+                            : "Subscription"
                           : "Voice Top-Up"}
                       </div>
                       <div className="text-sm text-gray-500">
