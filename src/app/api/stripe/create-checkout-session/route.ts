@@ -54,8 +54,10 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Get base URL with fallback
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+    // Get base URL from request headers or environment variable
+    const host = request.headers.get("host");
+    const protocol = request.headers.get("x-forwarded-proto") || "http";
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `${protocol}://${host}`;
 
     // Create checkout session
     const sessionParams: any = {
