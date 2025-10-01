@@ -361,16 +361,20 @@ export default function SubscriptionPage() {
                       : "default"
                   }
                   disabled={
-                    plan.id === data.user.subscriptionType ||
+                    (plan.id === data.user.subscriptionType &&
+                      plan.id !== "voice_topup") ||
                     processing === plan.id
                   }
                   onClick={() => handleCheckout(plan.id.toUpperCase())}
                 >
                   {processing === plan.id
                     ? "Processing..."
-                    : plan.id === data.user.subscriptionType
+                    : plan.id === data.user.subscriptionType &&
+                        plan.id !== "voice_topup"
                       ? "Current Plan"
-                      : "Upgrade"}
+                      : plan.id === "voice_topup"
+                        ? "Buy Credits"
+                        : "Upgrade"}
                 </Button>
               </CardContent>
             </Card>
@@ -401,7 +405,14 @@ export default function SubscriptionPage() {
                           : "Voice Top-Up"}
                       </div>
                       <div className="text-sm text-gray-500">
-                        {new Date(transaction.createdAt).toLocaleDateString()}
+                        {new Date(transaction.createdAt).toLocaleDateString()}{" "}
+                        {new Date(transaction.createdAt).toLocaleTimeString(
+                          [],
+                          {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          },
+                        )}
                       </div>
                     </div>
                     <div className="text-right">

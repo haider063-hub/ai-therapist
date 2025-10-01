@@ -35,6 +35,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
+    // Prevent duplicate subscription purchases (but allow multiple top-ups)
+    if (
+      planType !== "VOICE_TOPUP" &&
+      user.subscriptionType === plan.name &&
+      user.subscriptionStatus === "active"
+    ) {
+      return NextResponse.json(
+        { error: "You already have an active subscription to this plan" },
+        { status: 400 },
+      );
+    }
+
     // Create or get Stripe customer
     let customerId = user.stripeCustomerId;
 
