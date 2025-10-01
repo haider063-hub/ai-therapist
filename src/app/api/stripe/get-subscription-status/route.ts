@@ -74,6 +74,7 @@ export async function GET(_request: NextRequest) {
         creditsAdded: t.creditsAdded,
         status: t.status,
         createdAt: t.createdAt,
+        metadata: t.metadata,
       })),
     });
   } catch (error) {
