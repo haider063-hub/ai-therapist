@@ -201,18 +201,29 @@ async function handleSubscriptionUpdated(subscription: any) {
 async function handleSubscriptionDeleted(subscription: any) {
   const userId = subscription.metadata?.userId;
   if (!userId) {
-    // Try to find user by subscription ID
-    const user = await subscriptionRepository.getUserById(""); // This needs to be implemented
-    if (!user) return;
+    logger.error("Missing userId in subscription deletion:", subscription.id);
+    return;
   }
 
+  // Revert user to free trial with 500 credits
   await subscriptionRepository.updateUserSubscription(userId, {
     subscriptionType: "free_trial",
-    subscriptionStatus: "canceled",
+    subscriptionStatus: "active", // Active free trial, not canceled
     subscriptionEndDate: null,
+    stripeSubscriptionId: null,
   });
 
-  logger.info(`Subscription canceled for user ${userId}`);
+  // Reset credits to free trial amount (500)
+  const user = await subscriptionRepository.getUserById(userId);
+  if (user) {
+    await subscriptionRepository.updateUserSubscription(userId, {
+      credits: 500,
+    });
+  }
+
+  logger.info(
+    `Subscription deleted for user ${userId} - reverted to free trial with 500 credits`,
+  );
 }
 
 async function handleInvoicePaymentSucceeded(invoice: any) {
