@@ -16,7 +16,6 @@ import {
   MessageSquare,
   Mic,
   Star,
-  X,
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
