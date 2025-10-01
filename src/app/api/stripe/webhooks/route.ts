@@ -167,35 +167,43 @@ async function handleSubscriptionCreated(subscription: any) {
 async function handleSubscriptionUpdated(subscription: any) {
   const userId = subscription.metadata?.userId;
   if (!userId) {
-    // Try to find user by subscription ID
-    const user = await subscriptionRepository.getUserById(""); // This needs to be implemented
-    if (!user) return;
+    logger.error("Missing userId in subscription update:", subscription.id);
+    return;
   }
 
   const status = subscription.status;
   let subscriptionStatus = "active";
 
-  switch (status) {
-    case "active":
-      subscriptionStatus = "active";
-      break;
-    case "canceled":
-      subscriptionStatus = "canceled";
-      break;
-    case "past_due":
-      subscriptionStatus = "past_due";
-      break;
-    case "incomplete":
-      subscriptionStatus = "incomplete";
-      break;
-    default:
-      subscriptionStatus = "canceled";
+  // Check if subscription is scheduled to cancel
+  if (subscription.cancel_at_period_end) {
+    subscriptionStatus = "canceled"; // Show as canceled even though still active
+  } else {
+    switch (status) {
+      case "active":
+        subscriptionStatus = "active";
+        break;
+      case "canceled":
+        subscriptionStatus = "canceled";
+        break;
+      case "past_due":
+        subscriptionStatus = "past_due";
+        break;
+      case "incomplete":
+        subscriptionStatus = "incomplete";
+        break;
+      default:
+        subscriptionStatus = "canceled";
+    }
   }
 
   await subscriptionRepository.updateUserSubscription(userId, {
     subscriptionStatus,
     subscriptionEndDate: new Date(subscription.current_period_end * 1000),
   });
+
+  logger.info(
+    `Subscription updated for user ${userId}, status: ${subscriptionStatus}, cancel_at_period_end: ${subscription.cancel_at_period_end}`,
+  );
 }
 
 async function handleSubscriptionDeleted(subscription: any) {
