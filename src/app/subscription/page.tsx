@@ -312,25 +312,37 @@ export default function SubscriptionPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Available Credits:</span>
-                <span className="font-bold text-blue-600">
-                  {data.credits.current}
-                </span>
-              </div>
+              {/* Free Trial: Show total credits */}
+              {data.user.subscriptionType === "free_trial" && (
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Available Credits:</span>
+                  <span className="font-bold text-blue-600">
+                    {data.credits.current}
+                  </span>
+                </div>
+              )}
 
-              {/* Only show voice limits for non-free-trial users */}
-              {data.user.subscriptionType !== "free_trial" && (
+              {/* Chat Only: Show unlimited chat */}
+              {data.user.subscriptionType === "chat_only" && (
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Chat Access:</span>
+                  <span className="font-bold text-green-600">Unlimited</span>
+                </div>
+              )}
+
+              {/* Voice Only & Premium: Show voice credits */}
+              {(data.user.subscriptionType === "voice_only" ||
+                data.user.subscriptionType === "premium") && (
                 <>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Daily Voice Used:</span>
+                    <span className="font-medium">Daily Voice Credits:</span>
                     <span>
                       {data.credits.dailyVoiceUsed} /{" "}
                       {data.credits.dailyVoiceLimit}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Monthly Voice Used:</span>
+                    <span className="font-medium">Monthly Voice Credits:</span>
                     <span>
                       {data.credits.monthlyVoiceUsed} /{" "}
                       {data.credits.monthlyVoiceLimit}
@@ -339,22 +351,25 @@ export default function SubscriptionPage() {
                 </>
               )}
 
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Chat Access:</span>
-                {data.features.canUseChat ? (
-                  <Check className="h-5 w-5 text-green-500" />
-                ) : (
-                  <X className="h-5 w-5 text-red-500" />
+              {/* Premium: Also show unlimited chat */}
+              {data.user.subscriptionType === "premium" && (
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Chat Access:</span>
+                  <span className="font-bold text-green-600">Unlimited</span>
+                </div>
+              )}
+
+              {/* Show top-up credits if user has extra credits from purchases */}
+              {data.credits.current > 0 &&
+                (data.user.subscriptionType === "voice_only" ||
+                  data.user.subscriptionType === "chat_only") && (
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Bonus Credits:</span>
+                    <span className="font-bold text-purple-600">
+                      {data.credits.current} (from top-ups)
+                    </span>
+                  </div>
                 )}
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Voice Access:</span>
-                {data.features.canUseVoice ? (
-                  <Check className="h-5 w-5 text-green-500" />
-                ) : (
-                  <X className="h-5 w-5 text-red-500" />
-                )}
-              </div>
             </div>
           </CardContent>
         </Card>
