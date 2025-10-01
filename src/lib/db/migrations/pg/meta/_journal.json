@@ -27,7 +27,14 @@
       "idx": 3,
       "version": "7",
       "when": 1759247080010,
-      "tag": "0003_easy_madripoor",
+      "tag": "0003_fix_chat_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1759247080011,
+      "tag": "0004_remove_content_column",
       "breakpoints": true
     }
   ]
