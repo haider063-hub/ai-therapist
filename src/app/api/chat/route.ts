@@ -32,6 +32,7 @@ import {
 import { getSession } from "auth/server";
 import { colorize } from "consola/utils";
 import { generateUUID } from "lib/utils";
+import { creditService } from "lib/services/credit-service";
 
 const logger = globalLogger.withDefaults({
   message: colorize("blackBright", `Chat API: `),
@@ -45,6 +46,25 @@ export async function POST(request: Request) {
 
     if (!session?.user.id) {
       return new Response("Unauthorized", { status: 401 });
+    }
+
+    // Check if user can use chat feature
+    const creditCheck = await creditService.canUseFeature(
+      session.user.id,
+      "chat",
+    );
+    if (!creditCheck.canUse) {
+      return new Response(
+        JSON.stringify({
+          error: "Insufficient credits or subscription limits reached",
+          reason: creditCheck.reason,
+          creditsNeeded: creditCheck.creditsNeeded,
+        }),
+        {
+          status: 402, // Payment Required
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
     const {
       id,
@@ -184,23 +204,19 @@ export async function POST(request: Request) {
 
       generateId: generateUUID,
       onFinish: async ({ responseMessage }) => {
-        console.log("onFinish - responseMessage.parts:", responseMessage.parts);
-        console.log(
-          "onFinish - responseMessage.parts type:",
-          typeof responseMessage.parts,
-        );
-        console.log(
-          "onFinish - responseMessage.parts isArray:",
-          Array.isArray(responseMessage.parts),
-        );
-
         const convertedParts = responseMessage.parts.map(convertToSavePart);
-        console.log("onFinish - convertedParts:", convertedParts);
-        console.log("onFinish - convertedParts type:", typeof convertedParts);
-        console.log(
-          "onFinish - convertedParts isArray:",
-          Array.isArray(convertedParts),
-        );
+
+        // Deduct credits for chat usage
+        try {
+          await creditService.deductCreditsForUsage(
+            session.user.id,
+            "chat",
+            thread!.id,
+          );
+        } catch (error) {
+          logger.error("Failed to deduct credits for chat usage:", error);
+          // Don't block the response, just log the error
+        }
 
         if (responseMessage.id == message.id) {
           await chatRepository.upsertMessage({

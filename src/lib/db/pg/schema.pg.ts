@@ -1,4 +1,12 @@
-import { pgTable, text, timestamp, boolean, json } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  json,
+  integer,
+  decimal,
+} from "drizzle-orm/pg-core";
 import { UIMessage } from "ai";
 import { ChatMetadata } from "app-types/chat";
 
@@ -17,6 +25,28 @@ export const UserSchema = pgTable("user", {
   lastLogin: timestamp("last_login"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+
+  // Subscription and Credit System Fields
+  credits: integer("credits").default(500).notNull(), // Free trial starts with 500 credits
+  subscriptionType: text("subscription_type").default("free_trial").notNull(), // free_trial, chat_only, voice_only, premium, topup
+  subscriptionStatus: text("subscription_status").default("active").notNull(), // active, canceled, past_due, incomplete
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  subscriptionEndDate: timestamp("subscription_end_date"),
+
+  // Voice Plan Credit Tracking (configurable from DB)
+  dailyVoiceCredits: integer("daily_voice_credits").default(300).notNull(), // Configurable daily limit
+  monthlyVoiceCredits: integer("monthly_voice_credits").default(9000).notNull(), // Configurable monthly limit
+  voiceCreditsUsedToday: integer("voice_credits_used_today")
+    .default(0)
+    .notNull(),
+  voiceCreditsUsedThisMonth: integer("voice_credits_used_this_month")
+    .default(0)
+    .notNull(),
+
+  // Credit Reset Tracking
+  lastDailyReset: timestamp("last_daily_reset").defaultNow().notNull(),
+  lastMonthlyReset: timestamp("last_monthly_reset").defaultNow().notNull(),
 });
 
 // Session table
@@ -125,6 +155,59 @@ export const BookmarkSchema = pgTable("bookmark", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Transactions table - logs Stripe payments and top-ups
+export const TransactionSchema = pgTable("transaction", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => UserSchema.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'subscription' or 'topup'
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(), // Amount in dollars
+  creditsAdded: integer("credits_added").default(0).notNull(),
+  stripePaymentId: text("stripe_payment_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
+  status: text("status").notNull(), // 'pending', 'succeeded', 'failed', 'canceled'
+  metadata: json("metadata"), // Additional payment metadata
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Usage logs table - tracks each credit deduction
+export const UsageLogSchema = pgTable("usage_log", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => UserSchema.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'chat' or 'voice'
+  creditsUsed: integer("credits_used").notNull(),
+  threadId: text("thread_id"), // Reference to chat thread if applicable
+  metadata: json("metadata"), // Additional usage metadata
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+});
+
+// Subscription Plans Configuration table - configurable limits
+export const SubscriptionPlanSchema = pgTable("subscription_plan", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(), // 'chat_only', 'voice_only', 'premium'
+  displayName: text("display_name").notNull(), // 'Chat Only', 'Voice Only', 'Premium'
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  stripePriceId: text("stripe_price_id").notNull(),
+  chatCreditsPerMessage: integer("chat_credits_per_message")
+    .default(5)
+    .notNull(),
+  voiceCreditsPerInteraction: integer("voice_credits_per_interaction")
+    .default(10)
+    .notNull(),
+  dailyVoiceCredits: integer("daily_voice_credits").default(300).notNull(),
+  monthlyVoiceCredits: integer("monthly_voice_credits").default(9000).notNull(),
+  unlimitedChat: boolean("unlimited_chat").default(false).notNull(),
+  unlimitedVoice: boolean("unlimited_voice").default(false).notNull(),
+  features: json("features").$type<string[]>(), // Array of feature descriptions
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Type exports - using direct Drizzle types instead of Zod
 export type UserEntity = typeof UserSchema.$inferSelect;
 export type SessionEntity = typeof SessionSchema.$inferSelect;
@@ -135,3 +218,6 @@ export type ChatMessageEntity = typeof ChatMessageSchema.$inferSelect;
 export type ArchiveEntity = typeof ArchiveSchema.$inferSelect;
 export type ArchiveItemEntity = typeof ArchiveItemSchema.$inferSelect;
 export type BookmarkEntity = typeof BookmarkSchema.$inferSelect;
+export type TransactionEntity = typeof TransactionSchema.$inferSelect;
+export type UsageLogEntity = typeof UsageLogSchema.$inferSelect;
+export type SubscriptionPlanEntity = typeof SubscriptionPlanSchema.$inferSelect;

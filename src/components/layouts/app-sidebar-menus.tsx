@@ -16,7 +16,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { WriteIcon } from "ui/write-icon";
-import { FolderOpenIcon, FolderSearchIcon, PlusIcon } from "lucide-react";
+import {
+  FolderOpenIcon,
+  FolderSearchIcon,
+  PlusIcon,
+  CreditCardIcon,
+} from "lucide-react";
 import { useCallback, useState } from "react";
 import { Skeleton } from "ui/skeleton";
 import { useArchives } from "@/hooks/queries/use-archives";
@@ -60,6 +65,7 @@ export function AppSidebarMenus({ user }: { user?: BasicUser }) {
             </SidebarMenuItem>
           </Tooltip>
         </SidebarMenu>
+
         {getIsUserAdmin(user) && <AppSidebarAdmin />}
         <SidebarMenu className="group/archive">
           <Tooltip>
@@ -125,6 +131,32 @@ export function AppSidebarMenus({ user }: { user?: BasicUser }) {
           )}
         </SidebarMenu>
       </SidebarGroupContent>
+
+      {/* Subscription Management */}
+      <SidebarGroup>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <Tooltip>
+              <SidebarMenuItem className="mb-1">
+                <Link
+                  href="/subscription"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setOpenMobile(false);
+                    router.push("/subscription");
+                  }}
+                >
+                  <SidebarMenuButton className="flex font-semibold group/subscription bg-secondary/40 border border-border/40">
+                    <CreditCardIcon className="size-4" />
+                    Subscription
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            </Tooltip>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+
       <ArchiveDialog
         open={addArchiveDialogOpen}
         onOpenChange={setAddArchiveDialogOpen}

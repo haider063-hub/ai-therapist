@@ -163,6 +163,11 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
         greetingRef.current = session.greeting;
       }
 
+      // Notify credit display to refresh
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("credits-updated"));
+      }
+
       return session;
     }, [
       model,

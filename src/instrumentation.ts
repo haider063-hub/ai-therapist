@@ -8,10 +8,8 @@ export async function register() {
         (m) => m.runMigrate,
       );
       await runMigrate().catch((e) => {
-        // If tables already exist, that's okay - just log and continue
-        if (e.message && e.message.includes("already exists")) {
-          console.log("✅ Database tables already exist, skipping migration");
-        } else {
+        // If tables already exist, that's okay - just continue silently
+        if (!e.message || !e.message.includes("already exists")) {
           console.error("❌ Migration failed:", e);
           process.exit(1);
         }

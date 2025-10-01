@@ -10,6 +10,7 @@ import {
 
 import { DEFAULT_VOICE_TOOLS } from "lib/ai/speech";
 import logger from "logger";
+import { creditService } from "lib/services/credit-service";
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,6 +27,25 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user.id) {
       return new Response("Unauthorized", { status: 401 });
+    }
+
+    // Check if user can use voice feature
+    const creditCheck = await creditService.canUseFeature(
+      session.user.id,
+      "voice",
+    );
+    if (!creditCheck.canUse) {
+      return new Response(
+        JSON.stringify({
+          error: "Insufficient credits or subscription limits reached",
+          reason: creditCheck.reason,
+          creditsNeeded: creditCheck.creditsNeeded,
+        }),
+        {
+          status: 402, // Payment Required
+          headers: { "Content-Type": "application/json" },
+        },
+      );
     }
 
     const { voice, currentThreadId } = (await request.json()) as {
@@ -85,6 +105,18 @@ export async function POST(request: NextRequest) {
     });
 
     const sessionData = await r.json();
+
+    // Deduct credits for voice usage
+    try {
+      await creditService.deductCreditsForUsage(
+        session.user.id,
+        "voice",
+        currentThreadId,
+      );
+    } catch (error) {
+      logger.error("Failed to deduct credits for voice usage:", error);
+      // Don't block the response, just log the error
+    }
 
     // Add greeting to response
     return new Response(

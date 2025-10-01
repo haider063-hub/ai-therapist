@@ -20,6 +20,7 @@ import { useTranslations } from "next-intl";
 import { TextShimmer } from "ui/text-shimmer";
 import { buildReturnUrl } from "lib/admin/navigation-utils";
 import { BackButton } from "@/components/layouts/back-button";
+import CreditDisplay from "@/components/credits/credit-display";
 
 export function AppHeader() {
   const t = useTranslations();
@@ -83,6 +84,9 @@ export function AppHeader() {
       <div className="flex-1" />
       {showActionButtons && (
         <div className="flex items-center gap-2">
+          {/* Credit Display */}
+          <CreditDisplay compact={true} showUpgradeButton={false} />
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button

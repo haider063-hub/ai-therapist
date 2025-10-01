@@ -109,6 +109,9 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
     } else if (latestRef.current.threadList[0]?.id !== threadId) {
       mutate("/api/thread");
     }
+
+    // Notify credit display to refresh
+    window.dispatchEvent(new Event("credits-updated"));
   }, []);
 
   const [input, setInput] = useState("");
