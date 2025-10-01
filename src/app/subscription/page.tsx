@@ -83,7 +83,7 @@ export default function SubscriptionPage() {
       } else {
         toast.error("Failed to load subscription data");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error loading subscription data");
     } finally {
       setLoading(false);
@@ -110,7 +110,7 @@ export default function SubscriptionPage() {
         const error = await response.json();
         toast.error(error.error || "Failed to create checkout session");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error creating checkout session");
     } finally {
       setProcessing(null);
@@ -133,7 +133,7 @@ export default function SubscriptionPage() {
         const error = await response.json();
         toast.error(error.error || "Failed to cancel subscription");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error canceling subscription");
     } finally {
       setProcessing(null);

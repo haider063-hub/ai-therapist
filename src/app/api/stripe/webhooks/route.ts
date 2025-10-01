@@ -6,6 +6,13 @@ import logger from "logger";
 import { headers } from "next/headers";
 
 export async function POST(request: NextRequest) {
+  if (!stripe) {
+    return NextResponse.json(
+      { error: "Stripe is not configured" },
+      { status: 500 },
+    );
+  }
+
   const body = await request.text();
   const headersList = await headers();
   const signature = headersList.get("stripe-signature");
@@ -116,7 +123,7 @@ async function handleCheckoutSessionCompleted(session: any) {
     // Handle subscription plan
     const subscriptionId = session.subscription;
     if (subscriptionId) {
-      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      const subscription = await stripe!.subscriptions.retrieve(subscriptionId);
       const plan =
         SUBSCRIPTION_PLANS[planType as keyof typeof SUBSCRIPTION_PLANS];
 
@@ -212,7 +219,7 @@ async function handleInvoicePaymentSucceeded(invoice: any) {
   const subscriptionId = invoice.subscription;
   if (!subscriptionId) return;
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const subscription = await stripe!.subscriptions.retrieve(subscriptionId);
   const userId = subscription.metadata?.userId;
 
   if (!userId) return;
@@ -248,7 +255,7 @@ async function handleInvoicePaymentFailed(invoice: any) {
   const subscriptionId = invoice.subscription;
   if (!subscriptionId) return;
 
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const subscription = await stripe!.subscriptions.retrieve(subscriptionId);
   const userId = subscription.metadata?.userId;
 
   if (!userId) return;

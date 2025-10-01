@@ -54,7 +54,7 @@ export default function CheckoutButton({
         const error = await response.json();
         toast.error(error.error || "Failed to create checkout session");
       }
-    } catch (error) {
+    } catch (_error) {
       toast.error("Error creating checkout session");
     } finally {
       setLoading(false);

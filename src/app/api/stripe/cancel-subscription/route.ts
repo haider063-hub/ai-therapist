@@ -4,8 +4,15 @@ import { stripe } from "lib/stripe/server";
 import { subscriptionRepository } from "lib/db/pg/repositories/subscription-repository.pg";
 import logger from "logger";
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
+    if (!stripe) {
+      return NextResponse.json(
+        { error: "Stripe is not configured" },
+        { status: 500 },
+      );
+    }
+
     const session = await getSession();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

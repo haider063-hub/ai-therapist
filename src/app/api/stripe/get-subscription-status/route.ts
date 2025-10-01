@@ -4,7 +4,7 @@ import { creditService } from "lib/services/credit-service";
 import { subscriptionRepository } from "lib/db/pg/repositories/subscription-repository.pg";
 import { SUBSCRIPTION_PLANS } from "lib/stripe/server";
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getSession();
     if (!session?.user?.id) {
