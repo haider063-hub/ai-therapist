@@ -237,6 +237,12 @@ export default function CreditDisplay({
       );
     } else {
       // GLOBAL VIEW (navbar/header - not on specific page)
+      // Show combined view with both chat and voice status
+      const totalChatCredits =
+        creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
+      const totalVoiceCredits =
+        creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup;
+
       return (
         <div className="flex items-center gap-3 text-sm">
           {/* Chat Status */}
@@ -249,6 +255,8 @@ export default function CreditDisplay({
               >
                 Unlimited
               </Badge>
+            ) : totalChatCredits > 0 ? (
+              <span className="text-xs font-medium">{totalChatCredits}</span>
             ) : (
               getFeatureIcon(creditStatus.canUseChat)
             )}
@@ -264,6 +272,8 @@ export default function CreditDisplay({
               >
                 Unlimited
               </Badge>
+            ) : totalVoiceCredits > 0 ? (
+              <span className="text-xs font-medium">{totalVoiceCredits}</span>
             ) : (
               getFeatureIcon(creditStatus.canUseVoice)
             )}
