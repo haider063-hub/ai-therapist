@@ -193,7 +193,7 @@ export function ChatBotVoice() {
   return (
     <Drawer dismissible={false} open={voiceChat.isOpen} direction="top">
       <DrawerPortal>
-        <DrawerContent className="max-h-[100vh]! h-full border-none! rounded-none! flex flex-col bg-card">
+        <DrawerContent className="max-h-[100vh]! h-full border-none! rounded-none! flex flex-col bg-card z-[100]">
           <div className="w-full h-full flex flex-col ">
             <div
               className="w-full flex p-6 gap-2"
