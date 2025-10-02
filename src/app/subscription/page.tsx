@@ -34,6 +34,10 @@ interface SubscriptionData {
   };
   credits: {
     current: number;
+    chatCredits: number;
+    voiceCredits: number;
+    chatCreditsFromTopup: number;
+    voiceCreditsFromTopup: number;
     dailyVoiceUsed: number;
     dailyVoiceLimit: number;
     monthlyVoiceUsed: number;
@@ -320,14 +324,38 @@ export default function SubscriptionPage() {
                 </div>
               )}
 
-              {/* Show top-up credits if user has extra credits from purchases */}
-              {data.credits.current > 0 &&
-                (data.user.subscriptionType === "voice_only" ||
-                  data.user.subscriptionType === "chat_only") && (
+              {/* Show voice credits breakdown for Chat Only users */}
+              {data.user.subscriptionType === "chat_only" &&
+                (data.credits.voiceCredits > 0 ||
+                  data.credits.voiceCreditsFromTopup > 0) && (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Bonus Credits:</span>
+                    <span className="font-medium">Voice Credits:</span>
                     <span className="font-bold text-purple-600">
-                      {data.credits.current} (from top-ups)
+                      {data.credits.voiceCredits +
+                        data.credits.voiceCreditsFromTopup}
+                      {data.credits.voiceCreditsFromTopup > 0
+                        ? ` (${data.credits.voiceCredits} free trial + ${data.credits.voiceCreditsFromTopup} top-ups)`
+                        : data.credits.voiceCredits > 0
+                          ? " (free trial)"
+                          : ""}
+                    </span>
+                  </div>
+                )}
+
+              {/* Show chat credits breakdown for Voice Only users */}
+              {data.user.subscriptionType === "voice_only" &&
+                (data.credits.chatCredits > 0 ||
+                  data.credits.chatCreditsFromTopup > 0) && (
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Chat Credits:</span>
+                    <span className="font-bold text-purple-600">
+                      {data.credits.chatCredits +
+                        data.credits.chatCreditsFromTopup}
+                      {data.credits.chatCreditsFromTopup > 0
+                        ? ` (${data.credits.chatCredits} free trial + ${data.credits.chatCreditsFromTopup} top-ups)`
+                        : data.credits.chatCredits > 0
+                          ? " (free trial)"
+                          : ""}
                     </span>
                   </div>
                 )}
