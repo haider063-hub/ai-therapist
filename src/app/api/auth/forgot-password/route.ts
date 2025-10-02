@@ -172,17 +172,20 @@ async function sendPasswordResetEmail(
             
             <!-- Header -->
             <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
-              <div style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <!-- Heart Icon -->
-                <svg width="40" height="40" viewBox="0 0 24 24" 
-                     fill="none" stroke="white" stroke-width="2" 
-                     stroke-linecap="round" stroke-linejoin="round" 
-                     xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 
-                           5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 
-                           1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                </svg>
-              </div>
+              <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto 20px;">
+                <tr>
+                  <td style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; text-align: center; vertical-align: middle;">
+                    <!-- Heart Icon -->
+                    <svg width="40" height="40" viewBox="0 0 24 24" 
+                         fill="none" stroke="white" stroke-width="2" 
+                         stroke-linecap="round" stroke-linejoin="round" 
+                         xmlns="http://www.w3.org/2000/svg"
+                         style="display: inline-block; vertical-align: middle;">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                  </td>
+                </tr>
+              </table>
               <h1 class="header-title" style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Password Reset Request</h1>
             </div>
             
