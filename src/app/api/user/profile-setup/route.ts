@@ -29,39 +29,20 @@ export async function POST(request: NextRequest) {
     const profileData: any = {
       profileCompleted: true,
       profileLastUpdated: new Date(),
+      updatedAt: new Date(), // Force update timestamp
     };
 
-    if (data.dateOfBirth) {
-      // Validate date format (YYYY-MM-DD)
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (dateRegex.test(data.dateOfBirth)) {
-        profileData.dateOfBirth = data.dateOfBirth;
-      }
-    }
+    // Always update all fields (even if empty, to allow clearing)
+    profileData.dateOfBirth = data.dateOfBirth || null;
+    profileData.gender = data.gender || null;
+    profileData.country = data.country?.trim() || null;
+    profileData.religion = data.religion || null;
+    profileData.preferredTherapyStyle = data.preferredTherapyStyle || null;
+    profileData.specificConcerns = data.specificConcerns?.trim() || null;
 
-    if (data.gender) {
-      profileData.gender = data.gender;
-    }
-
-    if (data.country) {
-      profileData.country = data.country.trim();
-    }
-
-    if (data.religion) {
-      profileData.religion = data.religion;
-    }
-
+    // Therapy needs must be an array
     if (data.therapyNeeds && Array.isArray(data.therapyNeeds)) {
-      // Store as JSON string
       profileData.therapyNeeds = JSON.stringify(data.therapyNeeds);
-    }
-
-    if (data.preferredTherapyStyle) {
-      profileData.preferredTherapyStyle = data.preferredTherapyStyle;
-    }
-
-    if (data.specificConcerns) {
-      profileData.specificConcerns = data.specificConcerns.trim();
     }
 
     // Update user profile
