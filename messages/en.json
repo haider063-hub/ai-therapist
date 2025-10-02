@@ -164,7 +164,30 @@
       "noAccount": "Don't have an account? ",
       "signUp": "Sign up",
       "signIn": "Sign in",
-      "orContinueWith": "OR CONTINUE WITH"
+      "orContinueWith": "OR CONTINUE WITH",
+      "forgotPassword": "Forgot Password?"
+    },
+    "ForgotPassword": {
+      "title": "Reset Password",
+      "description": "Enter your email address and we'll send you a link to reset your password",
+      "emailLabel": "Email Address",
+      "sendResetLink": "Send Reset Link",
+      "backToSignIn": "Back to Sign In",
+      "checkYourEmail": "Check Your Email",
+      "resetLinkSent": "If an account exists for {email}, you will receive a password reset link shortly.",
+      "emailSent": "Email sent successfully",
+      "errorSendingEmail": "Error sending reset link. Please try again."
+    },
+    "ResetPassword": {
+      "title": "Set New Password",
+      "description": "Enter your new password below",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "resetPassword": "Reset Password",
+      "passwordResetSuccess": "Password reset successfully! Redirecting to sign in...",
+      "passwordResetError": "Failed to reset password. The link may be invalid or expired.",
+      "invalidToken": "Invalid or expired reset token",
+      "passwordMismatch": "Passwords do not match"
     },
     "SignUp": {
       "title": "Create an account",
