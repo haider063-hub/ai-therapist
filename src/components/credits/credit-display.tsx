@@ -164,7 +164,7 @@ export default function CreditDisplay({
                 creditStatus.dailyVoiceCreditsUsed}
               /{creditStatus.dailyVoiceCreditsLimit}
             </span>
-          ) : creditStatus.canUseVoice && creditStatus.credits > 0 ? (
+          ) : creditStatus.credits > 0 ? (
             <Badge
               variant="secondary"
               className="text-xs px-2 py-0 h-5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
