@@ -166,7 +166,7 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, gender: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your gender" />
                 </SelectTrigger>
                 <SelectContent>
@@ -193,7 +193,7 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, country: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your country" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
@@ -235,7 +235,7 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, religion: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your religion/beliefs" />
                 </SelectTrigger>
                 <SelectContent>
@@ -296,7 +296,7 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, preferredTherapyStyle: value })
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select your preferred approach" />
                 </SelectTrigger>
                 <SelectContent>
