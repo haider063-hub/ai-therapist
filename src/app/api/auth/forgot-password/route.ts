@@ -117,7 +117,7 @@ async function sendPasswordResetEmail(
     const resend = new Resend(process.env.RESEND_API_KEY);
 
     await resend.emails.send({
-      from: "EchoNest AI Therapy <onboarding@resend.dev>", // Use onboarding@resend.dev for testing
+      from: "Acme <onboarding@resend.dev>", // Simplified from address for testing
       to: email,
       subject: "Reset Your Password - EchoNest AI Therapy",
       html: `
