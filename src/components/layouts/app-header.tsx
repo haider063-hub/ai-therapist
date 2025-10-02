@@ -31,6 +31,14 @@ export function AppHeader() {
     return true;
   }, [currentPaths]);
 
+  // Determine credit display context based on current page
+  const creditContext = useMemo(() => {
+    if (currentPaths.startsWith("/chat")) {
+      return "chat" as const;
+    }
+    return "global" as const;
+  }, [currentPaths]);
+
   const componentByPage = useMemo(() => {
     if (currentPaths.startsWith("/chat/")) {
       return <ThreadDropdownComponent />;
@@ -79,8 +87,12 @@ export function AppHeader() {
       <div className="flex-1" />
       {showActionButtons && (
         <div className="flex items-center gap-2">
-          {/* Credit Display */}
-          <CreditDisplay compact={true} showUpgradeButton={false} />
+          {/* Credit Display - Context-aware based on current page */}
+          <CreditDisplay
+            compact={true}
+            showUpgradeButton={false}
+            context={creditContext}
+          />
 
           <Tooltip>
             <TooltipTrigger asChild>
