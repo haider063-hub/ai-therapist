@@ -172,13 +172,6 @@ async function sendPasswordResetEmail(
             
             <!-- Header -->
             <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
-              <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto 20px;">
-                <tr>
-                  <td style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; text-align: center; vertical-align: middle; font-size: 40px; line-height: 80px;">
-                    ❤️
-                  </td>
-                </tr>
-              </table>
               <h1 class="header-title" style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Password Reset Request</h1>
             </div>
             
@@ -221,38 +214,20 @@ async function sendPasswordResetEmail(
               
               <!-- Expiry Warning -->
               <div class="warning-box" style="background-color: #fef3e7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px 20px; margin: 25px 0;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px; line-height: 20px;">
-                      ⏰
-                    </td>
-                    <td style="vertical-align: top;">
-                      <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 500;">
-                        This link will expire in 1 hour
-                      </p>
-                      <p style="margin: 5px 0 0 0; color: #b45309; font-size: 13px;">
-                        For security reasons, please reset your password as soon as possible.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
+                <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 500;">
+                  This link will expire in 1 hour
+                </p>
+                <p style="margin: 5px 0 0 0; color: #b45309; font-size: 13px;">
+                  For security reasons, please reset your password as soon as possible.
+                </p>
               </div>
               
               <!-- Security Notice -->
               <div class="security-box" style="background-color: #f0f4f8; border-radius: 12px; padding: 20px; margin: 25px 0;">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                  <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px; line-height: 20px;">
-                      🛡️
-                    </td>
-                    <td style="vertical-align: top;">
-                      <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
-                        <strong>Didn't request this?</strong><br>
-                        If you didn't request a password reset, you can safely ignore this email. Your account remains secure and your password won't be changed.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
+                <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
+                  <strong>Didn't request this?</strong><br>
+                  If you didn't request a password reset, you can safely ignore this email. Your account remains secure and your password won't be changed.
+                </p>
               </div>
             </div>
             
