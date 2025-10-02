@@ -3,6 +3,7 @@ import { pgUserRepository } from "lib/db/pg/repositories/user-repository.pg";
 import { pgDb } from "lib/db/pg/db.pg";
 import { sql } from "drizzle-orm";
 import crypto from "crypto";
+import { Resend } from "resend";
 
 // Create a simple password reset tokens table schema
 // You'll need to run a migration to create this table
@@ -90,44 +91,90 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Email sending function - implement based on your email provider
+// Email sending function using Resend
 async function sendPasswordResetEmail(
   email: string,
   resetLink: string,
   name: string,
 ) {
-  // TODO: Implement email sending with your preferred email service
-  // Options: Resend, SendGrid, Nodemailer, AWS SES, etc.
+  // Check if Resend API key is configured
+  if (!process.env.RESEND_API_KEY) {
+    console.log("=".repeat(60));
+    console.log("⚠️  RESEND_API_KEY not configured - Email will be logged only");
+    console.log("=".repeat(60));
+    console.log(`To: ${email}`);
+    console.log(`Name: ${name}`);
+    console.log(`Reset Link: ${resetLink}`);
+    console.log("=".repeat(60));
+    console.log("Add RESEND_API_KEY to your .env file to send real emails");
+    console.log("=".repeat(60));
+    return;
+  }
 
-  console.log("=".repeat(60));
-  console.log("PASSWORD RESET EMAIL");
-  console.log("=".repeat(60));
-  console.log(`To: ${email}`);
-  console.log(`Name: ${name}`);
-  console.log(`Reset Link: ${resetLink}`);
-  console.log("=".repeat(60));
-  console.log("\nNOTE: Email sending is not configured.");
-  console.log("For production, implement sendPasswordResetEmail() function");
-  console.log("with your email provider (Resend, SendGrid, etc.)");
-  console.log("=".repeat(60));
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-  // Example with Resend (uncomment and configure):
-  /*
-  const { Resend } = require("resend");
-  const resend = new Resend(process.env.RESEND_API_KEY);
+    await resend.emails.send({
+      from: "EchoNest AI Therapy <onboarding@resend.dev>", // Use onboarding@resend.dev for testing
+      to: email,
+      subject: "Reset Your Password - EchoNest AI Therapy",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #333; margin: 0;">EchoNest AI Therapy</h1>
+          </div>
+          
+          <h2 style="color: #333;">Hello ${name || "there"},</h2>
+          
+          <p style="color: #555; line-height: 1.6;">
+            You requested to reset your password for your EchoNest AI Therapy account.
+          </p>
+          
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" 
+               style="display: inline-block; 
+                      background-color: #0070f3; 
+                      color: white; 
+                      padding: 14px 32px; 
+                      text-decoration: none; 
+                      border-radius: 8px; 
+                      font-weight: 600;
+                      font-size: 16px;">
+              Reset Password
+            </a>
+          </div>
+          
+          <p style="color: #666; font-size: 14px;">
+            Or copy and paste this link into your browser:
+          </p>
+          <p style="word-break: break-all; color: #0070f3; font-size: 14px; background: #f5f5f5; padding: 12px; border-radius: 4px;">
+            ${resetLink}
+          </p>
+          
+          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0; border-radius: 4px;">
+            <p style="margin: 0; color: #856404; font-size: 14px;">
+              <strong>⏰ This link will expire in 1 hour.</strong>
+            </p>
+          </div>
+          
+          <p style="color: #666; font-size: 14px; line-height: 1.6;">
+            If you didn't request this password reset, you can safely ignore this email. 
+            Your password will not be changed.
+          </p>
+          
+          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
+          
+          <p style="color: #999; font-size: 12px; text-align: center;">
+            This is an automated email from EchoNest AI Therapy.<br>
+            Please do not reply to this email.
+          </p>
+        </div>
+      `,
+    });
 
-  await resend.emails.send({
-    from: "noreply@yourdomain.com",
-    to: email,
-    subject: "Reset Your Password",
-    html: `
-      <h2>Hello ${name},</h2>
-      <p>You requested to reset your password.</p>
-      <p>Click the link below to reset your password:</p>
-      <a href="${resetLink}">${resetLink}</a>
-      <p>This link will expire in 1 hour.</p>
-      <p>If you didn't request this, please ignore this email.</p>
-    `,
-  });
-  */
+    console.log(`✅ Password reset email sent successfully to ${email}`);
+  } catch (error) {
+    console.error("Failed to send password reset email:", error);
+    throw error; // Re-throw to handle in the main route
+  }
 }
