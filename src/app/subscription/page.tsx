@@ -150,17 +150,15 @@ export default function SubscriptionPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+        return <Badge variant="secondary">Active</Badge>;
       case "canceled":
-        return <Badge className="bg-red-100 text-red-800">Canceled</Badge>;
+        return <Badge variant="secondary">Canceled</Badge>;
       case "past_due":
-        return (
-          <Badge className="bg-yellow-100 text-yellow-800">Past Due</Badge>
-        );
+        return <Badge variant="secondary">Past Due</Badge>;
       case "incomplete":
-        return <Badge className="bg-gray-100 text-gray-800">Incomplete</Badge>;
+        return <Badge variant="secondary">Incomplete</Badge>;
       default:
-        return <Badge className="bg-gray-100 text-gray-800">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
@@ -281,9 +279,7 @@ export default function SubscriptionPage() {
               {data.user.subscriptionType === "free_trial" && (
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Available Credits:</span>
-                  <span className="font-bold text-blue-600">
-                    {data.credits.current}
-                  </span>
+                  <span className="font-bold">{data.credits.current}</span>
                 </div>
               )}
 
@@ -291,7 +287,7 @@ export default function SubscriptionPage() {
               {data.user.subscriptionType === "chat_only" && (
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Chat Access:</span>
-                  <span className="font-bold text-green-600">Unlimited</span>
+                  <span className="font-bold">Unlimited</span>
                 </div>
               )}
 
@@ -320,7 +316,7 @@ export default function SubscriptionPage() {
               {data.user.subscriptionType === "premium" && (
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Chat Access:</span>
-                  <span className="font-bold text-green-600">Unlimited</span>
+                  <span className="font-bold">Unlimited</span>
                 </div>
               )}
 
@@ -330,7 +326,7 @@ export default function SubscriptionPage() {
                   data.credits.voiceCreditsFromTopup > 0) && (
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Voice Credits:</span>
-                    <span className="font-bold text-purple-600">
+                    <span className="font-bold">
                       {data.credits.voiceCredits +
                         data.credits.voiceCreditsFromTopup}
                       {data.credits.voiceCreditsFromTopup > 0
@@ -348,7 +344,7 @@ export default function SubscriptionPage() {
                   data.credits.chatCreditsFromTopup > 0) && (
                   <div className="flex items-center justify-between">
                     <span className="font-medium">Chat Credits:</span>
-                    <span className="font-bold text-purple-600">
+                    <span className="font-bold">
                       {data.credits.chatCredits +
                         data.credits.chatCreditsFromTopup}
                       {data.credits.chatCreditsFromTopup > 0
@@ -371,11 +367,11 @@ export default function SubscriptionPage() {
           {data.plans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative ${plan.id === data.user.subscriptionType ? "ring-2 ring-blue-500" : ""}`}
+              className={`relative ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
             >
               {plan.id === data.user.subscriptionType && (
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <Badge className="bg-blue-500 text-white">Current Plan</Badge>
+                  <Badge variant="secondary">Current Plan</Badge>
                 </div>
               )}
               <CardHeader className="text-center">
@@ -392,7 +388,7 @@ export default function SubscriptionPage() {
                 <ul className="space-y-2 mb-6">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <Check className="h-4 w-4 mt-0.5 flex-shrink-0" />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
@@ -464,7 +460,7 @@ export default function SubscriptionPage() {
                     <div className="text-right">
                       <div className="font-medium">${transaction.amount}</div>
                       {transaction.creditsAdded > 0 && (
-                        <div className="text-sm text-blue-600">
+                        <div className="text-sm text-muted-foreground">
                           +{transaction.creditsAdded} credits
                         </div>
                       )}
