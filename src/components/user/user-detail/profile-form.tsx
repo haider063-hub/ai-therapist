@@ -71,7 +71,16 @@ export function ProfileForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.therapyNeeds || formData.therapyNeeds.length === 0) {
+    // Validate required fields
+    if (
+      !formData.dateOfBirth ||
+      !formData.gender ||
+      !formData.country ||
+      !formData.religion ||
+      !formData.therapyNeeds ||
+      formData.therapyNeeds.length === 0 ||
+      !formData.preferredTherapyStyle
+    ) {
       return;
     }
 
@@ -86,10 +95,10 @@ export function ProfileForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Date of Birth */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <Label htmlFor="dateOfBirth">
           Date of Birth{" "}
-          <span className="text-xs text-muted-foreground">(Optional)</span>
+          <span className="text-xs text-muted-foreground">(Required)</span>
         </Label>
         <Input
           id="dateOfBirth"
@@ -107,16 +116,16 @@ export function ProfileForm({
       </div>
 
       {/* Gender */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <Label>
           Gender{" "}
-          <span className="text-xs text-muted-foreground">(Optional)</span>
+          <span className="text-xs text-muted-foreground">(Required)</span>
         </Label>
         <Select
           value={formData.gender}
           onValueChange={(value) => setFormData({ ...formData, gender: value })}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select gender" />
           </SelectTrigger>
           <SelectContent>
@@ -130,10 +139,10 @@ export function ProfileForm({
       </div>
 
       {/* Country */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <Label>
           Country{" "}
-          <span className="text-xs text-muted-foreground">(Optional)</span>
+          <span className="text-xs text-muted-foreground">(Required)</span>
         </Label>
         <Select
           value={formData.country}
@@ -141,7 +150,7 @@ export function ProfileForm({
             setFormData({ ...formData, country: value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select country" />
           </SelectTrigger>
           <SelectContent className="max-h-[300px]">
@@ -165,10 +174,10 @@ export function ProfileForm({
       </div>
 
       {/* Religion */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <Label>
           Religion/Beliefs{" "}
-          <span className="text-xs text-muted-foreground">(Optional)</span>
+          <span className="text-xs text-muted-foreground">(Required)</span>
         </Label>
         <Select
           value={formData.religion}
@@ -176,7 +185,7 @@ export function ProfileForm({
             setFormData({ ...formData, religion: value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select religion" />
           </SelectTrigger>
           <SelectContent>
@@ -190,9 +199,10 @@ export function ProfileForm({
       </div>
 
       {/* Therapy Needs */}
-      <div className="space-y-3">
+      <div className="space-y-3 w-full">
         <Label>
-          Therapy Needs <span className="text-xs text-red-500">(Required)</span>
+          Therapy Needs{" "}
+          <span className="text-xs text-muted-foreground">(Required)</span>
         </Label>
         <div className="grid grid-cols-2 gap-2">
           {THERAPY_NEEDS.map((need) => (
@@ -211,10 +221,10 @@ export function ProfileForm({
       </div>
 
       {/* Therapy Style */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <Label>
           Therapy Approach{" "}
-          <span className="text-xs text-muted-foreground">(Optional)</span>
+          <span className="text-xs text-muted-foreground">(Required)</span>
         </Label>
         <Select
           value={formData.preferredTherapyStyle}
@@ -222,7 +232,7 @@ export function ProfileForm({
             setFormData({ ...formData, preferredTherapyStyle: value })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select approach" />
           </SelectTrigger>
           <SelectContent>
@@ -236,7 +246,7 @@ export function ProfileForm({
       </div>
 
       {/* Specific Concerns */}
-      <div className="space-y-2">
+      <div className="space-y-2 w-full">
         <Label>
           Specific Concerns{" "}
           <span className="text-xs text-muted-foreground">(Optional)</span>
@@ -256,7 +266,15 @@ export function ProfileForm({
         <Button
           type="submit"
           className="flex-1"
-          disabled={loading || formData.therapyNeeds.length === 0}
+          disabled={
+            loading ||
+            !formData.dateOfBirth ||
+            !formData.gender ||
+            !formData.country ||
+            !formData.religion ||
+            formData.therapyNeeds.length === 0 ||
+            !formData.preferredTherapyStyle
+          }
         >
           {loading ? (
             <>
