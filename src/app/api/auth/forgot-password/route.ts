@@ -121,56 +121,120 @@ async function sendPasswordResetEmail(
       to: email,
       subject: "Reset Your Password - EchoNest AI Therapy",
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #333; margin: 0;">EchoNest AI Therapy</h1>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+          <div style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);">
+            
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
+              <div style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="white"/>
+                </svg>
+              </div>
+              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Password Reset Request</h1>
+            </div>
+            
+            <!-- Content -->
+            <div style="padding: 40px 30px;">
+              <p style="color: #1a1a1a; font-size: 18px; margin: 0 0 10px 0; font-weight: 500;">
+                Hello ${name || "there"},
+              </p>
+              
+              <p style="color: #4a5568; font-size: 15px; line-height: 1.6; margin: 0 0 30px 0;">
+                We received a request to reset the password for your EchoNest AI Therapy account. Click the button below to create a new password.
+              </p>
+              
+              <!-- CTA Button -->
+              <div style="text-align: center; margin: 35px 0;">
+                <a href="${resetLink}" 
+                   style="display: inline-block; 
+                          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                          color: #ffffff; 
+                          padding: 16px 48px; 
+                          text-decoration: none; 
+                          border-radius: 50px; 
+                          font-weight: 600;
+                          font-size: 16px;
+                          box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+                          transition: all 0.3s ease;">
+                  Reset My Password
+                </a>
+              </div>
+              
+              <!-- Alternative Link -->
+              <div style="background-color: #f8f9fa; border-radius: 12px; padding: 20px; margin: 30px 0;">
+                <p style="color: #6b7280; font-size: 13px; margin: 0 0 10px 0; font-weight: 500;">
+                  Or copy and paste this link into your browser:
+                </p>
+                <p style="word-break: break-all; color: #667eea; font-size: 13px; margin: 0; line-height: 1.5;">
+                  ${resetLink}
+                </p>
+              </div>
+              
+              <!-- Expiry Warning -->
+              <div style="background-color: #fef3e7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px 20px; margin: 25px 0; display: flex; align-items: flex-start;">
+                <div style="flex-shrink: 0; margin-right: 12px;">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V11H13V17ZM13 9H11V7H13V9Z" fill="#f59e0b"/>
+                  </svg>
+                </div>
+                <div>
+                  <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 500;">
+                    This link will expire in 1 hour
+                  </p>
+                  <p style="margin: 5px 0 0 0; color: #b45309; font-size: 13px;">
+                    For security reasons, please reset your password as soon as possible.
+                  </p>
+                </div>
+              </div>
+              
+              <!-- Security Notice -->
+              <div style="background-color: #f0f4f8; border-radius: 12px; padding: 20px; margin: 25px 0;">
+                <div style="display: flex; align-items: flex-start;">
+                  <div style="flex-shrink: 0; margin-right: 12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="#3b82f6"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
+                      <strong>Didn't request this?</strong><br>
+                      If you didn't request a password reset, you can safely ignore this email. Your account remains secure and your password won't be changed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Footer -->
+            <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="color: #9ca3af; font-size: 13px; margin: 0 0 5px 0;">
+                This is an automated message from <strong>EchoNest AI Therapy</strong>
+              </p>
+              <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                Please do not reply to this email.
+              </p>
+            </div>
+            
           </div>
           
-          <h2 style="color: #333;">Hello ${name || "there"},</h2>
-          
-          <p style="color: #555; line-height: 1.6;">
-            You requested to reset your password for your EchoNest AI Therapy account.
-          </p>
-          
-          <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetLink}" 
-               style="display: inline-block; 
-                      background-color: #0070f3; 
-                      color: white; 
-                      padding: 14px 32px; 
-                      text-decoration: none; 
-                      border-radius: 8px; 
-                      font-weight: 600;
-                      font-size: 16px;">
-              Reset Password
-            </a>
-          </div>
-          
-          <p style="color: #666; font-size: 14px;">
-            Or copy and paste this link into your browser:
-          </p>
-          <p style="word-break: break-all; color: #0070f3; font-size: 14px; background: #f5f5f5; padding: 12px; border-radius: 4px;">
-            ${resetLink}
-          </p>
-          
-          <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0; border-radius: 4px;">
-            <p style="margin: 0; color: #856404; font-size: 14px;">
-              <strong>⏰ This link will expire in 1 hour.</strong>
+          <!-- Bottom Spacing -->
+          <div style="text-align: center; padding: 20px;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+              © ${new Date().getFullYear()} EchoNest AI Therapy. All rights reserved.
             </p>
           </div>
-          
-          <p style="color: #666; font-size: 14px; line-height: 1.6;">
-            If you didn't request this password reset, you can safely ignore this email. 
-            Your password will not be changed.
-          </p>
-          
-          <hr style="margin: 30px 0; border: none; border-top: 1px solid #eee;">
-          
-          <p style="color: #999; font-size: 12px; text-align: center;">
-            This is an automated email from EchoNest AI Therapy.<br>
-            Please do not reply to this email.
-          </p>
-        </div>
+        </body>
+        </html>
       `,
     });
 
