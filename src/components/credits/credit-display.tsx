@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageSquare, Mic, RefreshCw } from "lucide-react";
+import { CreditCard, MessageSquare, Mic, RefreshCw } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 
 interface CreditStatus {
@@ -152,27 +152,27 @@ export default function CreditDisplay({
         creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
 
       return (
-        <div className="flex items-center gap-3 text-sm">
-          <MessageSquare className="h-4 w-4" />
+        <div className="flex items-center gap-2 text-sm">
+          <CreditCard className="h-4 w-4" />
 
           {hasUnlimitedChat ? (
             <Badge
               variant="secondary"
               className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
             >
-              Unlimited Chat
+              Unlimited
             </Badge>
           ) : totalChatCredits > 0 ? (
             <div className="flex items-center gap-1">
               <span className="font-medium">{totalChatCredits}</span>
               <span className="text-muted-foreground text-xs">
                 {creditStatus.chatCreditsFromTopup > 0
-                  ? `(${creditStatus.chatCredits} free + ${creditStatus.chatCreditsFromTopup} top-up)`
+                  ? `(${creditStatus.chatCredits} free trial + ${creditStatus.chatCreditsFromTopup} top-up)`
                   : "credits"}
               </span>
             </div>
           ) : (
-            <span className="text-red-500 text-xs">No chat credits</span>
+            <span className="text-red-500 text-xs">No credits</span>
           )}
 
           {showUpgradeButton &&
@@ -193,8 +193,8 @@ export default function CreditDisplay({
         creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup;
 
       return (
-        <div className="flex items-center gap-3 text-sm">
-          <Mic className="h-4 w-4" />
+        <div className="flex items-center gap-2 text-sm">
+          <CreditCard className="h-4 w-4" />
 
           {hasUnlimitedVoice ? (
             <>
@@ -202,7 +202,7 @@ export default function CreditDisplay({
                 variant="secondary"
                 className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
               >
-                Unlimited Voice
+                Unlimited
               </Badge>
               {/* Show daily usage for voice-only and premium users */}
               <span className="text-xs text-muted-foreground">
@@ -215,12 +215,12 @@ export default function CreditDisplay({
               <span className="font-medium">{totalVoiceCredits}</span>
               <span className="text-muted-foreground text-xs">
                 {creditStatus.voiceCreditsFromTopup > 0
-                  ? `(${creditStatus.voiceCredits} free + ${creditStatus.voiceCreditsFromTopup} top-up)`
+                  ? `(${creditStatus.voiceCredits} free trial + ${creditStatus.voiceCreditsFromTopup} top-up)`
                   : "credits"}
               </span>
             </div>
           ) : (
-            <span className="text-red-500 text-xs">No voice credits</span>
+            <span className="text-red-500 text-xs">No credits</span>
           )}
 
           {showUpgradeButton &&
