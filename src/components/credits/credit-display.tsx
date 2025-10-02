@@ -195,6 +195,7 @@ export default function CreditDisplay({
       return (
         <div className="flex items-center gap-2 text-sm">
           <CreditCard className="h-4 w-4" />
+          <span className="font-semibold text-xs">Credits</span>
 
           {hasUnlimitedVoice ? (
             <>
@@ -216,7 +217,7 @@ export default function CreditDisplay({
               <span className="text-muted-foreground text-xs">
                 {creditStatus.voiceCreditsFromTopup > 0
                   ? `(${creditStatus.voiceCredits} free trial + ${creditStatus.voiceCreditsFromTopup} top-up)`
-                  : "credits"}
+                  : ""}
               </span>
             </div>
           ) : (
@@ -237,14 +238,14 @@ export default function CreditDisplay({
       );
     } else {
       // GLOBAL VIEW (navbar/header - not on specific page)
-      // Show credit card icon with "credits" text
+      // Show credit card icon with "Credits" text
       const totalChatCredits =
         creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
 
       return (
         <div className="flex items-center gap-2 text-sm">
           <CreditCard className="h-4 w-4" />
-          <span className="text-muted-foreground text-xs">credits</span>
+          <span className="font-semibold text-xs">Credits</span>
 
           {hasUnlimitedChat ? (
             <Badge
