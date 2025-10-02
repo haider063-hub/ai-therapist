@@ -16,10 +16,6 @@ import {
 import { Loader, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
-import {
-  passwordRegexPattern,
-  passwordRequirementsText,
-} from "lib/validations/password";
 
 function ResetPasswordForm() {
   const t = useTranslations("Auth.ResetPassword");

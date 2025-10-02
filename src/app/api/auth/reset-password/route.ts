@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Hash the new password
-    const hashedPassword = await hash(password);
+    // Hash the new password with salt rounds
+    const hashedPassword = await hash(password, 10);
 
     // Update password in the account table
     await pgDb.execute(sql`
