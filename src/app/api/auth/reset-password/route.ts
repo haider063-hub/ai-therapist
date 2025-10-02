@@ -4,6 +4,7 @@ import { pgDb } from "lib/db/pg/db.pg";
 import { sql } from "drizzle-orm";
 import crypto from "crypto";
 import { auth } from "lib/auth/auth-instance";
+import { headers } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,11 +61,13 @@ export async function POST(request: NextRequest) {
     // Update password using better-auth's method (compatible with their hash format)
     await auth.api.setUserPassword({
       body: { userId: user.id, newPassword: password },
+      headers: await headers(),
     });
 
     // Revoke all user sessions for security
     await auth.api.revokeUserSessions({
       body: { userId: user.id },
+      headers: await headers(),
     });
 
     // Delete the used token
