@@ -3,7 +3,7 @@ import { pgUserRepository } from "lib/db/pg/repositories/user-repository.pg";
 import { pgDb } from "lib/db/pg/db.pg";
 import { sql } from "drizzle-orm";
 import crypto from "crypto";
-import { hash } from "bcrypt-ts";
+import { auth } from "auth/auth-instance";
 
 export async function POST(request: NextRequest) {
   try {
@@ -57,23 +57,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Hash the new password with salt rounds
-    const hashedPassword = await hash(password, 10);
-
-    // Update password in the account table
-    await pgDb.execute(sql`
-      UPDATE account 
-      SET password = ${hashedPassword},
-          updated_at = CURRENT_TIMESTAMP
-      WHERE user_id = ${user.id}
-      AND provider_id = 'credential'
-    `);
+    // Update password using better-auth's method (compatible with their hash format)
+    await auth.api.setUserPassword({
+      body: { userId: user.id, newPassword: password },
+    });
 
     // Revoke all user sessions for security
-    await pgDb.execute(sql`
-      DELETE FROM session 
-      WHERE user_id = ${user.id}
-    `);
+    await auth.api.revokeUserSessions({
+      body: { userId: user.id },
+    });
 
     // Delete the used token
     await pgDb.execute(sql`
