@@ -426,17 +426,17 @@ export default function SubscriptionPage() {
       <div>
         <h2 className="text-2xl font-bold mb-6">Recent Transactions</h2>
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4">
             {data.recentTransactions.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">
+              <p className="text-gray-500 text-center py-4">
                 No transactions yet
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {data.recentTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between py-3 border-b last:border-b-0"
+                    className="flex items-center justify-between py-2 border-b last:border-b-0"
                   >
                     <div>
                       <div className="font-medium capitalize">
