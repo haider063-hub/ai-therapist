@@ -227,8 +227,12 @@ async function sendPasswordResetEmail(
               <div class="warning-box" style="background-color: #fef3e7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px 20px; margin: 25px 0;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px;">
-                      ⏰
+                    <td style="width: 32px; vertical-align: top; padding-right: 12px;">
+                      <img src="https://cdn.prod.website-files.com/6846fdc25de73b0e19544b07/68de33467933732b427e61d7_clock.png" 
+                           alt="Clock" 
+                           width="20" 
+                           height="20" 
+                           style="display: block;">
                     </td>
                     <td style="vertical-align: top;">
                       <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 500;">
