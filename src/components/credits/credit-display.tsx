@@ -237,13 +237,13 @@ export default function CreditDisplay({
       );
     } else {
       // GLOBAL VIEW (navbar/header - not on specific page)
-      // Only show chat status in global view
+      // Show credit card icon with "credits" text
       const totalChatCredits =
         creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
 
       return (
         <div className="flex items-center gap-2 text-sm">
-          <MessageSquare className="h-4 w-4" />
+          <CreditCard className="h-4 w-4" />
 
           {hasUnlimitedChat ? (
             <Badge
