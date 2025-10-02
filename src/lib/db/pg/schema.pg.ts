@@ -60,9 +60,8 @@ export const UserSchema = pgTable("user", {
   profileCompleted: boolean("profile_completed").default(false).notNull(), // Track if user completed profile setup
   dateOfBirth: text("date_of_birth"), // Stored as YYYY-MM-DD for age calculation
   gender: text("gender"), // male, female, non-binary, prefer_not_to_say, other
-  country: text("country"), // ISO country code or full name
-  location: text("location"), // City or region (optional, more specific than country)
-  religion: text("religion"), // Optional, for therapy personalization
+  country: text("country"), // Full country name from dropdown
+  religion: text("religion"), // christianity, islam, hinduism, buddhism, judaism, atheist, spiritual, other
   therapyNeeds: text("therapy_needs"), // JSON array: ["stress", "anxiety", "depression", etc.]
   preferredTherapyStyle: text("preferred_therapy_style"), // cbt, mindfulness, supportive, other
   specificConcerns: text("specific_concerns"), // Open text field for detailed concerns

@@ -12,6 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -21,45 +34,26 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader, Shield, Info } from "lucide-react";
+import { Loader, Shield, Info, Check, ChevronsUpDown } from "lucide-react";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-const THERAPY_NEEDS = [
-  { value: "stress", label: "Stress Management" },
-  { value: "anxiety", label: "Anxiety" },
-  { value: "depression", label: "Depression" },
-  { value: "relationship", label: "Relationship Issues" },
-  { value: "self-improvement", label: "Self-Improvement" },
-  { value: "trauma", label: "Trauma / Grief" },
-  { value: "work-life", label: "Work-Life Balance" },
-  { value: "other", label: "Other" },
-];
-
-const THERAPY_STYLES = [
-  { value: "cbt", label: "CBT (Cognitive Behavioral Therapy)" },
-  { value: "mindfulness", label: "Mindfulness-based" },
-  { value: "supportive", label: "Supportive Counseling" },
-  { value: "psychodynamic", label: "Psychodynamic Therapy" },
-  { value: "other", label: "Other" },
-];
-
-const GENDERS = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-  { value: "non-binary", label: "Non-binary" },
-  { value: "prefer_not_to_say", label: "Prefer not to say" },
-  { value: "other", label: "Other" },
-];
+import { cn } from "lib/utils";
+import {
+  COUNTRIES,
+  RELIGIONS,
+  GENDERS,
+  THERAPY_NEEDS,
+  THERAPY_STYLES,
+} from "@/lib/constants/profile-options";
 
 export default function ProfileSetupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [_countryOpen, _setCountryOpen] = useState(false);
   const [formData, setFormData] = useState({
     dateOfBirth: "",
     gender: "",
     country: "",
-    location: "",
     religion: "",
     therapyNeeds: [] as string[],
     preferredTherapyStyle: "",
@@ -77,6 +71,13 @@ export default function ProfileSetupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate required fields
+    if (!formData.therapyNeeds || formData.therapyNeeds.length === 0) {
+      toast.error("Please select at least one therapy need");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -101,31 +102,14 @@ export default function ProfileSetupPage() {
     }
   };
 
-  const handleSkip = async () => {
-    setLoading(true);
-    try {
-      await fetch("/api/user/profile-setup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ skipped: true }),
-      });
-      router.push("/");
-    } catch (error) {
-      console.error("Error:", error);
-      router.push("/");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       <Card className="w-full max-w-3xl">
         <CardHeader>
           <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
           <CardDescription>
-            Help us personalize your therapy experience. All fields are optional
-            and can be updated later.
+            Help us personalize your therapy experience. This information helps
+            our AI provide better support tailored to your needs.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -197,36 +181,38 @@ export default function ProfileSetupPage() {
                   (Optional)
                 </span>
               </Label>
-              <Input
-                id="country"
-                placeholder="e.g., United States, United Kingdom"
+              <Select
                 value={formData.country}
-                onChange={(e) =>
-                  setFormData({ ...formData, country: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, country: value })
                 }
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your country" />
+                </SelectTrigger>
+                <SelectContent className="max-h-[300px]">
+                  <div className="sticky top-0 bg-background p-2 border-b">
+                    <Input
+                      placeholder="Search countries..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      className="h-8"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  {COUNTRIES.filter((country) =>
+                    country.toLowerCase().includes(countrySearch.toLowerCase()),
+                  ).map((country) => (
+                    <SelectItem key={country} value={country}>
+                      {country}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <p className="text-xs text-muted-foreground flex items-start gap-1">
                 <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                 Helps with time zones and culturally relevant recommendations
               </p>
-            </div>
-
-            {/* Location */}
-            <div className="space-y-2">
-              <Label htmlFor="location">
-                City/Region{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Optional)
-                </span>
-              </Label>
-              <Input
-                id="location"
-                placeholder="e.g., London, New York"
-                value={formData.location}
-                onChange={(e) =>
-                  setFormData({ ...formData, location: e.target.value })
-                }
-              />
             </div>
 
             {/* Religion */}
@@ -237,14 +223,23 @@ export default function ProfileSetupPage() {
                   (Optional)
                 </span>
               </Label>
-              <Input
-                id="religion"
-                placeholder="e.g., Christianity, Islam, Buddhism, Atheist, etc."
+              <Select
                 value={formData.religion}
-                onChange={(e) =>
-                  setFormData({ ...formData, religion: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, religion: value })
                 }
-              />
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your religion/beliefs" />
+                </SelectTrigger>
+                <SelectContent>
+                  {RELIGIONS.map((religion) => (
+                    <SelectItem key={religion.value} value={religion.value}>
+                      {religion.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <p className="text-xs text-muted-foreground flex items-start gap-1">
                 <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                 Helps provide therapy advice that respects your values and
@@ -256,8 +251,8 @@ export default function ProfileSetupPage() {
             <div className="space-y-3">
               <Label>
                 What brings you here?{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Select all that apply)
+                <span className="text-sm text-red-500">
+                  (Required - Select all that apply)
                 </span>
               </Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -333,30 +328,21 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button type="submit" className="flex-1" disabled={loading}>
+            <div className="pt-4">
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader className="mr-2 h-4 w-4 animate-spin" />
                     Saving...
                   </>
                 ) : (
-                  "Complete Profile"
+                  "Complete Profile & Continue"
                 )}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleSkip}
-                disabled={loading}
-                className="flex-1"
-              >
-                Skip for Now
               </Button>
             </div>
 
-            <p className="text-xs text-center text-muted-foreground">
-              You can update your profile anytime from Settings
+            <p className="text-xs text-center text-muted-foreground mt-4">
+              You can update your profile anytime from your account settings
             </p>
           </form>
         </CardContent>

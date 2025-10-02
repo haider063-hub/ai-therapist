@@ -13,17 +13,16 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    // If user skipped, just mark as completed (they can fill it later)
-    if (data.skipped) {
-      await pgDb
-        .update(UserSchema)
-        .set({
-          profileCompleted: true,
-          profileLastUpdated: new Date(),
-        })
-        .where(eq(UserSchema.id, session.user.id));
-
-      return NextResponse.json({ success: true, skipped: true });
+    // Validate therapy needs (required field)
+    if (
+      !data.therapyNeeds ||
+      !Array.isArray(data.therapyNeeds) ||
+      data.therapyNeeds.length === 0
+    ) {
+      return NextResponse.json(
+        { error: "Please select at least one therapy need" },
+        { status: 400 },
+      );
     }
 
     // Validate and sanitize data
@@ -48,12 +47,8 @@ export async function POST(request: NextRequest) {
       profileData.country = data.country.trim();
     }
 
-    if (data.location) {
-      profileData.location = data.location.trim();
-    }
-
     if (data.religion) {
-      profileData.religion = data.religion.trim();
+      profileData.religion = data.religion;
     }
 
     if (data.therapyNeeds && Array.isArray(data.therapyNeeds)) {
