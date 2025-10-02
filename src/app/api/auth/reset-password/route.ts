@@ -3,7 +3,7 @@ import { pgUserRepository } from "lib/db/pg/repositories/user-repository.pg";
 import { pgDb } from "lib/db/pg/db.pg";
 import { sql } from "drizzle-orm";
 import crypto from "crypto";
-import { hashPassword } from "bcrypt-ts";
+import { hash } from "bcrypt-ts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash the new password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await hash(password);
 
     // Update password in the account table
     await pgDb.execute(sql`
