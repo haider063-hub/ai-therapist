@@ -18,13 +18,13 @@ interface ProfileEditDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   user: {
-    dateOfBirth: string | null;
-    gender: string | null;
-    country: string | null;
-    religion: string | null;
-    therapyNeeds: string | null;
-    preferredTherapyStyle: string | null;
-    specificConcerns: string | null;
+    dateOfBirth?: string | null;
+    gender?: string | null;
+    country?: string | null;
+    religion?: string | null;
+    therapyNeeds?: string | null;
+    preferredTherapyStyle?: string | null;
+    specificConcerns?: string | null;
   };
 }
 

@@ -49,7 +49,7 @@ import {
 export default function ProfileSetupPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [_countryOpen, _setCountryOpen] = useState(false);
+  const [countrySearch, setCountrySearch] = useState("");
   const [formData, setFormData] = useState({
     dateOfBirth: "",
     gender: "",
