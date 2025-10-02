@@ -87,6 +87,9 @@ export async function POST(request: Request) {
         userId: session.user.id,
       });
       thread = await chatRepository.selectThreadDetails(newThread.id);
+
+      // Increment chat session count
+      await chatRepository.incrementUserChatSessions(session.user.id);
     }
 
     if (thread!.userId !== session.user.id) {
