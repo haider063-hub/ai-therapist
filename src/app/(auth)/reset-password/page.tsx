@@ -16,6 +16,7 @@ import {
 import { Loader, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { authClient } from "auth/client";
 
 function ResetPasswordForm() {
   const t = useTranslations("Auth.ResetPassword");
@@ -45,22 +46,16 @@ function ResetPasswordForm() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, password }),
+      // Use better-auth client method for reset password
+      await authClient.resetPassword({
+        newPassword: password,
+        token: token || undefined,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success(t("passwordResetSuccess"));
-        setTimeout(() => {
-          router.push("/sign-in");
-        }, 2000);
-      } else {
-        toast.error(data.error || t("passwordResetError"));
-      }
+      toast.success(t("passwordResetSuccess"));
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
     } catch (error) {
       console.error("Error:", error);
       toast.error(t("passwordResetError"));

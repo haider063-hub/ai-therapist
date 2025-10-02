@@ -15,6 +15,7 @@ import {
 import { Loader, Mail, ArrowLeft, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
+import { authClient } from "auth/client";
 
 export default function ForgotPasswordPage() {
   const t = useTranslations("Auth.ForgotPassword");
@@ -27,20 +28,15 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+      // Use better-auth client method for forget password
+      await authClient.forgetPassword({
+        email,
+        redirectTo: "/reset-password",
       });
 
-      if (response.ok) {
-        const _data = await response.json();
-        setEmailSent(true);
-        toast.success(t("emailSent"));
-      } else {
-        const data = await response.json();
-        toast.error(data.error || t("errorSendingEmail"));
-      }
+      // Better-auth returns success even if email doesn't exist (security)
+      setEmailSent(true);
+      toast.success(t("emailSent"));
     } catch (error) {
       console.error("Error:", error);
       toast.error(t("errorSendingEmail"));
