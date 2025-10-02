@@ -174,15 +174,8 @@ async function sendPasswordResetEmail(
             <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
               <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto 20px;">
                 <tr>
-                  <td style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; text-align: center; vertical-align: middle;">
-                    <!-- Heart Icon -->
-                    <svg width="40" height="40" viewBox="0 0 24 24" 
-                         fill="none" stroke="white" stroke-width="2" 
-                         stroke-linecap="round" stroke-linejoin="round" 
-                         xmlns="http://www.w3.org/2000/svg"
-                         style="display: inline-block; vertical-align: middle;">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-                    </svg>
+                  <td style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; text-align: center; vertical-align: middle; font-size: 40px; line-height: 80px;">
+                    ❤️
                   </td>
                 </tr>
               </table>
@@ -230,10 +223,8 @@ async function sendPasswordResetEmail(
               <div class="warning-box" style="background-color: #fef3e7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px 20px; margin: 25px 0;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px;">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V11H13V17ZM13 9H11V7H13V9Z" fill="#f59e0b"/>
-                      </svg>
+                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px;">
+                      ⏰
                     </td>
                     <td style="vertical-align: top;">
                       <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 500;">
@@ -251,10 +242,8 @@ async function sendPasswordResetEmail(
               <div class="security-box" style="background-color: #f0f4f8; border-radius: 12px; padding: 20px; margin: 25px 0;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px;">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM10 17L6 13L7.41 11.59L10 14.17L16.59 7.58L18 9L10 17Z" fill="#3b82f6"/>
-                      </svg>
+                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px;">
+                      🛡️
                     </td>
                     <td style="vertical-align: top;">
                       <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
