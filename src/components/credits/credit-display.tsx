@@ -244,6 +244,7 @@ export default function CreditDisplay({
       return (
         <div className="flex items-center gap-2 text-sm">
           <CreditCard className="h-4 w-4" />
+          <span className="text-muted-foreground text-xs">credits</span>
 
           {hasUnlimitedChat ? (
             <Badge
@@ -253,10 +254,7 @@ export default function CreditDisplay({
               Unlimited
             </Badge>
           ) : totalChatCredits > 0 ? (
-            <div className="flex items-center gap-1">
-              <span className="font-medium">{totalChatCredits}</span>
-              <span className="text-muted-foreground text-xs">credits</span>
-            </div>
+            <span className="font-medium">{totalChatCredits}</span>
           ) : (
             <span className="text-red-500 text-xs">No credits</span>
           )}
