@@ -33,12 +33,12 @@ export default function ForgotPasswordPage() {
         body: JSON.stringify({ email }),
       });
 
-      const data = await response.json();
-
       if (response.ok) {
+        const _data = await response.json();
         setEmailSent(true);
         toast.success(t("emailSent"));
       } else {
+        const data = await response.json();
         toast.error(data.error || t("errorSendingEmail"));
       }
     } catch (error) {
