@@ -3,7 +3,7 @@ import { pgUserRepository } from "lib/db/pg/repositories/user-repository.pg";
 import { pgDb } from "lib/db/pg/db.pg";
 import { sql } from "drizzle-orm";
 import crypto from "crypto";
-import { auth } from "auth/auth-instance";
+import { auth } from "lib/auth/auth-instance";
 
 export async function POST(request: NextRequest) {
   try {
