@@ -2,12 +2,7 @@
 
 import { useSidebar } from "ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
-import {
-  AudioWaveformIcon,
-  ChevronDown,
-  MessageCircleDashed,
-  PanelLeft,
-} from "lucide-react";
+import { AudioWaveformIcon, ChevronDown, PanelLeft } from "lucide-react";
 import { Button } from "ui/button";
 import { Separator } from "ui/separator";
 
@@ -109,31 +104,6 @@ export function AppHeader() {
             <TooltipContent align="end" side="bottom">
               <div className="text-xs flex items-center gap-2">
                 {t("KeyboardShortcuts.toggleVoiceChat")}
-              </div>
-            </TooltipContent>
-          </Tooltip>
-
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                size={"icon"}
-                variant={"secondary"}
-                className="bg-secondary/40"
-                onClick={() => {
-                  appStoreMutate((state) => ({
-                    temporaryChat: {
-                      ...state.temporaryChat,
-                      isOpen: !state.temporaryChat.isOpen,
-                    },
-                  }));
-                }}
-              >
-                <MessageCircleDashed className="size-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent align="end" side="bottom">
-              <div className="text-xs flex items-center gap-2">
-                {t("KeyboardShortcuts.toggleTemporaryChat")}
               </div>
             </TooltipContent>
           </Tooltip>

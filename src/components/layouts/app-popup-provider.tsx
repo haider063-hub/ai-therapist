@@ -9,16 +9,6 @@ const ChatBotVoice = dynamic(
   },
 );
 
-const ChatBotTemporary = dynamic(
-  () =>
-    import("@/components/chat-bot-temporary").then(
-      (mod) => mod.ChatBotTemporary,
-    ),
-  {
-    ssr: false,
-  },
-);
-
 const UserSettingsPopup = dynamic(
   () =>
     import("@/components/user/user-detail/user-settings-popup").then(
@@ -38,7 +28,6 @@ export function AppPopupProvider({
     <>
       <UserSettingsPopup userSettingsComponent={userSettingsComponent} />
       <ChatBotVoice />
-      <ChatBotTemporary />
     </>
   );
 }
