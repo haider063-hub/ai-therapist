@@ -97,7 +97,7 @@ export default function EmailSignUp({
     ).unwrap();
     if (success) {
       toast.success(message);
-      router.push("/");
+      router.push("/profile-setup");
     } else {
       toast.error(message);
     }
