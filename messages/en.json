@@ -187,7 +187,8 @@
       "passwordResetSuccess": "Password reset successfully! Redirecting to sign in...",
       "passwordResetError": "Failed to reset password. The link may be invalid or expired.",
       "invalidToken": "Invalid or expired reset token",
-      "passwordMismatch": "Passwords do not match"
+      "passwordMismatch": "Passwords do not match",
+      "backToSignIn": "Back to Sign In"
     },
     "SignUp": {
       "title": "Create an account",
