@@ -2,7 +2,7 @@
 
 import { useSidebar } from "ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
-import { AudioWaveformIcon, ChevronDown, PanelLeft } from "lucide-react";
+import { Mic, ChevronDown, PanelLeft } from "lucide-react";
 import { Button } from "ui/button";
 import { Separator } from "ui/separator";
 
@@ -110,7 +110,7 @@ export function AppHeader() {
                   }));
                 }}
               >
-                <AudioWaveformIcon className="size-4" />
+                <Mic className="size-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">
