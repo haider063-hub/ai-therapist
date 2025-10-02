@@ -97,10 +97,8 @@ function ResetPasswordForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="********"
-                pattern={passwordRegexPattern}
                 minLength={8}
                 maxLength={20}
-                title={passwordRequirementsText}
                 disabled={loading}
                 required
                 autoFocus
@@ -113,10 +111,8 @@ function ResetPasswordForm() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="********"
-                pattern={passwordRegexPattern}
                 minLength={8}
                 maxLength={20}
-                title={passwordRequirementsText}
                 disabled={loading}
                 required
               />
