@@ -3,6 +3,7 @@
 import { BasicUserWithLastLogin } from "app-types/user";
 import { UserDetailFormCard } from "./user-detail-form-card";
 import { UserAccessCard } from "./user-access-card";
+import { UserProfileCard } from "./user-profile-card";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
 import { useSidebar } from "ui/sidebar";
 import useSWR, { mutate } from "swr";
@@ -83,6 +84,12 @@ export function UserDetail({
           userAccountInfo={userAccountInfo}
           view={view}
           onUserDetailsUpdate={handleUserUpdate}
+        />
+
+        <UserProfileCard
+          user={user ?? initialUser}
+          currentUserId={currentUserId}
+          view={view}
         />
 
         <div
