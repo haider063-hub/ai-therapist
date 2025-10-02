@@ -237,47 +237,29 @@ export default function CreditDisplay({
       );
     } else {
       // GLOBAL VIEW (navbar/header - not on specific page)
-      // Show combined view with both chat and voice status
+      // Only show chat status in global view
       const totalChatCredits =
         creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
-      const totalVoiceCredits =
-        creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup;
 
       return (
-        <div className="flex items-center gap-3 text-sm">
-          {/* Chat Status */}
-          <div className="flex items-center gap-1.5">
-            <MessageSquare className="h-4 w-4" />
-            {hasUnlimitedChat ? (
-              <Badge
-                variant="secondary"
-                className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-              >
-                Unlimited
-              </Badge>
-            ) : totalChatCredits > 0 ? (
-              <span className="text-xs font-medium">{totalChatCredits}</span>
-            ) : (
-              getFeatureIcon(creditStatus.canUseChat)
-            )}
-          </div>
+        <div className="flex items-center gap-2 text-sm">
+          <MessageSquare className="h-4 w-4" />
 
-          {/* Voice Status */}
-          <div className="flex items-center gap-1.5">
-            <Mic className="h-4 w-4" />
-            {hasUnlimitedVoice ? (
-              <Badge
-                variant="secondary"
-                className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-              >
-                Unlimited
-              </Badge>
-            ) : totalVoiceCredits > 0 ? (
-              <span className="text-xs font-medium">{totalVoiceCredits}</span>
-            ) : (
-              getFeatureIcon(creditStatus.canUseVoice)
-            )}
-          </div>
+          {hasUnlimitedChat ? (
+            <Badge
+              variant="secondary"
+              className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            >
+              Unlimited
+            </Badge>
+          ) : totalChatCredits > 0 ? (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">{totalChatCredits}</span>
+              <span className="text-muted-foreground text-xs">credits</span>
+            </div>
+          ) : (
+            <span className="text-red-500 text-xs">No credits</span>
+          )}
 
           {showUpgradeButton &&
             creditStatus.subscriptionType === "free_trial" && (
