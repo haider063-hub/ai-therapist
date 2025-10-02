@@ -117,22 +117,56 @@ export default function CreditDisplay({
   }
 
   if (compact) {
+    const hasUnlimitedChat =
+      creditStatus.subscriptionType === "chat_only" ||
+      creditStatus.subscriptionType === "premium";
+    const hasUnlimitedVoice = creditStatus.subscriptionType === "premium";
+
     return (
-      <div className="flex items-center gap-4 text-sm">
-        <div className="flex items-center gap-1">
-          <CreditCard className="h-4 w-4" />
-          <span className="font-medium">{creditStatus.credits}</span>
-          <span className="text-gray-500">credits</span>
-        </div>
+      <div className="flex items-center gap-3 text-sm">
+        {/* Credits Display */}
+        {creditStatus.credits > 0 && (
+          <div className="flex items-center gap-1">
+            <CreditCard className="h-4 w-4" />
+            <span className="font-medium">{creditStatus.credits}</span>
+            <span className="text-muted-foreground text-xs">credits</span>
+          </div>
+        )}
 
-        <div className="flex items-center gap-1">
+        {/* Chat Status */}
+        <div className="flex items-center gap-1.5">
           <MessageSquare className="h-4 w-4" />
-          {getFeatureIcon(creditStatus.canUseChat)}
+          {hasUnlimitedChat ? (
+            <Badge
+              variant="secondary"
+              className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            >
+              Unlimited
+            </Badge>
+          ) : (
+            getFeatureIcon(creditStatus.canUseChat)
+          )}
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* Voice Status */}
+        <div className="flex items-center gap-1.5">
           <Mic className="h-4 w-4" />
-          {getFeatureIcon(creditStatus.canUseVoice)}
+          {hasUnlimitedVoice ? (
+            <Badge
+              variant="secondary"
+              className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+            >
+              Unlimited
+            </Badge>
+          ) : creditStatus.subscriptionType === "voice_only" ? (
+            <span className="text-xs text-muted-foreground">
+              {creditStatus.dailyVoiceCreditsLimit -
+                creditStatus.dailyVoiceCreditsUsed}
+              /{creditStatus.dailyVoiceCreditsLimit}
+            </span>
+          ) : (
+            getFeatureIcon(creditStatus.canUseVoice)
+          )}
         </div>
 
         {showUpgradeButton &&
