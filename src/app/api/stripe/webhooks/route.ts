@@ -118,7 +118,7 @@ async function handleCheckoutSessionCompleted(session: any) {
     const plan = SUBSCRIPTION_PLANS.VOICE_TOPUP;
     const creditsToAdd = (plan as any).creditsAdded || 1000; // Default 1000 credits
 
-    await subscriptionRepository.addCredits(userId, creditsToAdd);
+    await subscriptionRepository.addVoiceTopupCredits(userId, creditsToAdd);
   } else {
     // Handle subscription plan
     const subscriptionId = session.subscription;

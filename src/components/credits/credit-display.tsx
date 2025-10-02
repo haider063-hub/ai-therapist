@@ -4,11 +4,15 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard, MessageSquare, Mic, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { MessageSquare, Mic, RefreshCw } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
 
 interface CreditStatus {
   credits: number;
+  chatCredits: number;
+  voiceCredits: number;
+  chatCreditsFromTopup: number;
+  voiceCreditsFromTopup: number;
   subscriptionType: string;
   subscriptionStatus: string;
   dailyVoiceCreditsUsed: number;
@@ -22,15 +26,28 @@ interface CreditStatus {
 interface CreditDisplayProps {
   compact?: boolean;
   showUpgradeButton?: boolean;
+  context?: "chat" | "voice" | "global"; // New prop for context-aware display
 }
 
 export default function CreditDisplay({
   compact = false,
   showUpgradeButton = true,
+  context = "global",
 }: CreditDisplayProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [creditStatus, setCreditStatus] = useState<CreditStatus | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Auto-detect context from pathname if not provided
+  const effectiveContext =
+    context === "global"
+      ? pathname?.includes("/voice")
+        ? "voice"
+        : pathname?.includes("/chat")
+          ? "chat"
+          : "global"
+      : context;
 
   useEffect(() => {
     fetchCreditStatus(false); // Initial load with loading state
@@ -57,6 +74,10 @@ export default function CreditDisplay({
         const data = await response.json();
         setCreditStatus({
           credits: data.credits.current,
+          chatCredits: data.credits.chatCredits || 0,
+          voiceCredits: data.credits.voiceCredits || 0,
+          chatCreditsFromTopup: data.credits.chatCreditsFromTopup || 0,
+          voiceCreditsFromTopup: data.credits.voiceCreditsFromTopup || 0,
           subscriptionType: data.user.subscriptionType,
           subscriptionStatus: data.user.subscriptionStatus,
           dailyVoiceCreditsUsed: data.credits.dailyVoiceUsed,
@@ -120,61 +141,147 @@ export default function CreditDisplay({
     const hasUnlimitedChat =
       creditStatus.subscriptionType === "chat_only" ||
       creditStatus.subscriptionType === "premium";
-    const hasUnlimitedVoice = creditStatus.subscriptionType === "premium";
+    const hasUnlimitedVoice =
+      creditStatus.subscriptionType === "voice_only" ||
+      creditStatus.subscriptionType === "premium";
 
-    return (
-      <div className="flex items-center gap-3 text-sm">
-        {/* Credits Display */}
-        {creditStatus.credits > 0 && (
-          <div className="flex items-center gap-1">
-            <CreditCard className="h-4 w-4" />
-            <span className="font-medium">{creditStatus.credits}</span>
-            <span className="text-muted-foreground text-xs">credits</span>
-          </div>
-        )}
+    // Context-aware credit display
+    if (effectiveContext === "chat") {
+      // CHAT PAGE VIEW
+      const totalChatCredits =
+        creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
 
-        {/* Chat Status */}
-        <div className="flex items-center gap-1.5">
+      return (
+        <div className="flex items-center gap-3 text-sm">
           <MessageSquare className="h-4 w-4" />
+
           {hasUnlimitedChat ? (
             <Badge
               variant="secondary"
               className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
             >
-              Unlimited
+              Unlimited Chat
             </Badge>
+          ) : totalChatCredits > 0 ? (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">{totalChatCredits}</span>
+              <span className="text-muted-foreground text-xs">
+                {creditStatus.chatCreditsFromTopup > 0
+                  ? `(${creditStatus.chatCredits} free + ${creditStatus.chatCreditsFromTopup} top-up)`
+                  : "credits"}
+              </span>
+            </div>
           ) : (
-            getFeatureIcon(creditStatus.canUseChat)
+            <span className="text-red-500 text-xs">No chat credits</span>
           )}
-        </div>
 
-        {/* Voice Status - Simple green/red dot based on availability */}
-        <div className="flex items-center gap-1">
+          {showUpgradeButton &&
+            creditStatus.subscriptionType === "free_trial" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push("/subscription")}
+              >
+                Upgrade
+              </Button>
+            )}
+        </div>
+      );
+    } else if (effectiveContext === "voice") {
+      // VOICE PAGE VIEW
+      const totalVoiceCredits =
+        creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup;
+
+      return (
+        <div className="flex items-center gap-3 text-sm">
           <Mic className="h-4 w-4" />
-          {hasUnlimitedVoice ? (
-            <Badge
-              variant="secondary"
-              className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-            >
-              Unlimited
-            </Badge>
-          ) : (
-            getFeatureIcon(creditStatus.canUseVoice || creditStatus.credits > 0)
-          )}
-        </div>
 
-        {showUpgradeButton &&
-          creditStatus.subscriptionType === "free_trial" && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => router.push("/subscription")}
-            >
-              Upgrade
-            </Button>
+          {hasUnlimitedVoice ? (
+            <>
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              >
+                Unlimited Voice
+              </Badge>
+              {/* Show daily usage for voice-only and premium users */}
+              <span className="text-xs text-muted-foreground">
+                {creditStatus.dailyVoiceCreditsUsed}/
+                {creditStatus.dailyVoiceCreditsLimit} used today
+              </span>
+            </>
+          ) : totalVoiceCredits > 0 ? (
+            <div className="flex items-center gap-1">
+              <span className="font-medium">{totalVoiceCredits}</span>
+              <span className="text-muted-foreground text-xs">
+                {creditStatus.voiceCreditsFromTopup > 0
+                  ? `(${creditStatus.voiceCredits} free + ${creditStatus.voiceCreditsFromTopup} top-up)`
+                  : "credits"}
+              </span>
+            </div>
+          ) : (
+            <span className="text-red-500 text-xs">No voice credits</span>
           )}
-      </div>
-    );
+
+          {showUpgradeButton &&
+            creditStatus.subscriptionType === "free_trial" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push("/subscription")}
+              >
+                Upgrade
+              </Button>
+            )}
+        </div>
+      );
+    } else {
+      // GLOBAL VIEW (navbar/header - not on specific page)
+      return (
+        <div className="flex items-center gap-3 text-sm">
+          {/* Chat Status */}
+          <div className="flex items-center gap-1.5">
+            <MessageSquare className="h-4 w-4" />
+            {hasUnlimitedChat ? (
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              >
+                Unlimited
+              </Badge>
+            ) : (
+              getFeatureIcon(creditStatus.canUseChat)
+            )}
+          </div>
+
+          {/* Voice Status */}
+          <div className="flex items-center gap-1.5">
+            <Mic className="h-4 w-4" />
+            {hasUnlimitedVoice ? (
+              <Badge
+                variant="secondary"
+                className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              >
+                Unlimited
+              </Badge>
+            ) : (
+              getFeatureIcon(creditStatus.canUseVoice)
+            )}
+          </div>
+
+          {showUpgradeButton &&
+            creditStatus.subscriptionType === "free_trial" && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => router.push("/subscription")}
+              >
+                Upgrade
+              </Button>
+            )}
+        </div>
+      );
+    }
   }
 
   return (

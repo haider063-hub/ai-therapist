@@ -47,22 +47,17 @@ export const subscriptionRepository = {
     const user = await this.getUserById(userId);
     if (!user) return null;
 
-    // Check if user has enough credits or unlimited access
-    if (user.subscriptionType === "premium" && type === "chat") {
-      // Premium users have unlimited chat
+    // Premium users have unlimited access to both
+    if (user.subscriptionType === "premium") {
       return user;
     }
 
-    if (user.subscriptionType === "premium" && type === "voice") {
-      // Premium users have unlimited voice
-      return user;
-    }
-
+    // Chat only plan has unlimited chat
     if (user.subscriptionType === "chat_only" && type === "chat") {
-      // Chat only plan has unlimited chat
       return user;
     }
 
+    // Voice only plan has unlimited voice (with daily/monthly limits)
     if (user.subscriptionType === "voice_only" && type === "voice") {
       // Check voice plan daily/monthly limits
       const now = new Date();
@@ -106,7 +101,7 @@ export const subscriptionRepository = {
         throw new Error("Monthly voice credit limit exceeded");
       }
 
-      // Deduct credits for voice plan
+      // Update voice usage counters
       const result = await pgDb
         .update(UserSchema)
         .set({
@@ -121,15 +116,79 @@ export const subscriptionRepository = {
       return result[0];
     }
 
-    // For free trial users, check regular credits
-    if (user.credits < amount) {
-      throw new Error("Insufficient credits");
-    }
+    // For all other cases (free trial, or using bonus credits on paid plans)
+    // Deduct from the appropriate credit pool
+    if (type === "chat") {
+      const totalChatCredits = user.chatCredits + user.chatCreditsFromTopup;
+      if (totalChatCredits < amount) {
+        throw new Error("Insufficient chat credits");
+      }
 
+      // Deduct from topup credits first, then from free credits
+      let remainingAmount = amount;
+      let newTopupCredits = user.chatCreditsFromTopup;
+      let newFreeCredits = user.chatCredits;
+
+      if (newTopupCredits >= remainingAmount) {
+        newTopupCredits -= remainingAmount;
+      } else {
+        remainingAmount -= newTopupCredits;
+        newTopupCredits = 0;
+        newFreeCredits -= remainingAmount;
+      }
+
+      const result = await pgDb
+        .update(UserSchema)
+        .set({
+          chatCredits: newFreeCredits,
+          chatCreditsFromTopup: newTopupCredits,
+          credits: user.credits - amount, // Keep legacy field in sync
+          updatedAt: new Date(),
+        })
+        .where(eq(UserSchema.id, userId))
+        .returning();
+
+      return result[0];
+    } else {
+      // Voice credits
+      const totalVoiceCredits = user.voiceCredits + user.voiceCreditsFromTopup;
+      if (totalVoiceCredits < amount) {
+        throw new Error("Insufficient voice credits");
+      }
+
+      // Deduct from topup credits first, then from free credits
+      let remainingAmount = amount;
+      let newTopupCredits = user.voiceCreditsFromTopup;
+      let newFreeCredits = user.voiceCredits;
+
+      if (newTopupCredits >= remainingAmount) {
+        newTopupCredits -= remainingAmount;
+      } else {
+        remainingAmount -= newTopupCredits;
+        newTopupCredits = 0;
+        newFreeCredits -= remainingAmount;
+      }
+
+      const result = await pgDb
+        .update(UserSchema)
+        .set({
+          voiceCredits: newFreeCredits,
+          voiceCreditsFromTopup: newTopupCredits,
+          credits: user.credits - amount, // Keep legacy field in sync
+          updatedAt: new Date(),
+        })
+        .where(eq(UserSchema.id, userId))
+        .returning();
+
+      return result[0];
+    }
+  },
+
+  async addCredits(userId: string, amount: number): Promise<UserEntity> {
     const result = await pgDb
       .update(UserSchema)
       .set({
-        credits: user.credits - amount,
+        credits: sql`${UserSchema.credits} + ${amount}`,
         updatedAt: new Date(),
       })
       .where(eq(UserSchema.id, userId))
@@ -138,11 +197,32 @@ export const subscriptionRepository = {
     return result[0];
   },
 
-  async addCredits(userId: string, amount: number): Promise<UserEntity> {
+  async addChatTopupCredits(
+    userId: string,
+    amount: number,
+  ): Promise<UserEntity> {
     const result = await pgDb
       .update(UserSchema)
       .set({
-        credits: sql`${UserSchema.credits} + ${amount}`,
+        chatCreditsFromTopup: sql`${UserSchema.chatCreditsFromTopup} + ${amount}`,
+        credits: sql`${UserSchema.credits} + ${amount}`, // Keep legacy field in sync
+        updatedAt: new Date(),
+      })
+      .where(eq(UserSchema.id, userId))
+      .returning();
+
+    return result[0];
+  },
+
+  async addVoiceTopupCredits(
+    userId: string,
+    amount: number,
+  ): Promise<UserEntity> {
+    const result = await pgDb
+      .update(UserSchema)
+      .set({
+        voiceCreditsFromTopup: sql`${UserSchema.voiceCreditsFromTopup} + ${amount}`,
+        credits: sql`${UserSchema.credits} + ${amount}`, // Keep legacy field in sync
         updatedAt: new Date(),
       })
       .where(eq(UserSchema.id, userId))
@@ -318,6 +398,12 @@ export const subscriptionRepository = {
       if (featureType === "chat") {
         return { canUse: true }; // Unlimited chat
       } else {
+        // Check if user has voice credits from topup or free trial
+        const totalVoiceCredits =
+          user.voiceCredits + user.voiceCreditsFromTopup;
+        if (totalVoiceCredits >= 10) {
+          return { canUse: true };
+        }
         return {
           canUse: false,
           reason:
@@ -385,6 +471,11 @@ export const subscriptionRepository = {
 
         return { canUse: true };
       } else {
+        // Check if user has chat credits from topup or free trial
+        const totalChatCredits = user.chatCredits + user.chatCreditsFromTopup;
+        if (totalChatCredits >= 5) {
+          return { canUse: true };
+        }
         return {
           canUse: false,
           reason: "Chat not available in Voice Only plan. Upgrade to Premium.",
@@ -392,16 +483,27 @@ export const subscriptionRepository = {
       }
     }
 
-    // Free trial or top-up users
-    const creditsNeeded = featureType === "chat" ? 5 : 10;
-    if (user.credits < creditsNeeded) {
-      return {
-        canUse: false,
-        reason: "Insufficient credits",
-        creditsNeeded: creditsNeeded - user.credits,
-      };
+    // Free trial users - check separate credit pools
+    if (featureType === "chat") {
+      const totalChatCredits = user.chatCredits + user.chatCreditsFromTopup;
+      if (totalChatCredits < 5) {
+        return {
+          canUse: false,
+          reason: "Insufficient chat credits",
+          creditsNeeded: 5 - totalChatCredits,
+        };
+      }
+      return { canUse: true };
+    } else {
+      const totalVoiceCredits = user.voiceCredits + user.voiceCreditsFromTopup;
+      if (totalVoiceCredits < 10) {
+        return {
+          canUse: false,
+          reason: "Insufficient voice credits",
+          creditsNeeded: 10 - totalVoiceCredits,
+        };
+      }
+      return { canUse: true };
     }
-
-    return { canUse: true };
   },
 };

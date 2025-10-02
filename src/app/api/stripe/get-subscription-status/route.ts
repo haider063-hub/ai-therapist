@@ -57,6 +57,10 @@ export async function GET(_request: NextRequest) {
       },
       credits: {
         current: creditStatus.credits,
+        chatCredits: creditStatus.chatCredits,
+        voiceCredits: creditStatus.voiceCredits,
+        chatCreditsFromTopup: creditStatus.chatCreditsFromTopup,
+        voiceCreditsFromTopup: creditStatus.voiceCreditsFromTopup,
         dailyVoiceUsed: creditStatus.dailyVoiceCreditsUsed,
         dailyVoiceLimit: creditStatus.dailyVoiceCreditsLimit,
         monthlyVoiceUsed: creditStatus.monthlyVoiceCreditsUsed,

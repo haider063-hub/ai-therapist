@@ -171,6 +171,10 @@ export class CreditService {
    */
   async getUserCreditStatus(userId: string): Promise<{
     credits: number;
+    chatCredits: number;
+    voiceCredits: number;
+    chatCreditsFromTopup: number;
+    voiceCreditsFromTopup: number;
     subscriptionType: string;
     subscriptionStatus: string;
     dailyVoiceCreditsUsed: number;
@@ -191,6 +195,10 @@ export class CreditService {
 
       return {
         credits: user.credits,
+        chatCredits: user.chatCredits || 0,
+        voiceCredits: user.voiceCredits || 0,
+        chatCreditsFromTopup: user.chatCreditsFromTopup || 0,
+        voiceCreditsFromTopup: user.voiceCreditsFromTopup || 0,
         subscriptionType: user.subscriptionType,
         subscriptionStatus: user.subscriptionStatus,
         dailyVoiceCreditsUsed: user.voiceCreditsUsedToday,

@@ -120,5 +120,7 @@ export const CREDIT_COSTS = {
   VOICE_INTERACTION: 10,
 } as const;
 
-// Free trial starting credits
+// Free trial starting credits (split into 250 chat + 250 voice)
 export const FREE_TRIAL_CREDITS = 500;
+export const FREE_TRIAL_CHAT_CREDITS = 250;
+export const FREE_TRIAL_VOICE_CREDITS = 250;

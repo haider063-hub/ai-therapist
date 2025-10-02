@@ -27,14 +27,22 @@ export const UserSchema = pgTable("user", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 
   // Subscription and Credit System Fields
-  credits: integer("credits").default(500).notNull(), // Free trial starts with 500 credits
-  subscriptionType: text("subscription_type").default("free_trial").notNull(), // free_trial, chat_only, voice_only, premium, topup
+  credits: integer("credits").default(500).notNull(), // Legacy field - kept for backward compatibility
+  subscriptionType: text("subscription_type").default("free_trial").notNull(), // free_trial, chat_only, voice_only, premium
   subscriptionStatus: text("subscription_status").default("active").notNull(), // active, canceled, past_due, incomplete
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   subscriptionEndDate: timestamp("subscription_end_date"),
 
-  // Voice Plan Credit Tracking (configurable from DB)
+  // Separate Chat & Voice Credits System
+  chatCredits: integer("chat_credits").default(250).notNull(), // Chat credits from free trial
+  voiceCredits: integer("voice_credits").default(250).notNull(), // Voice credits from free trial
+  chatCreditsFromTopup: integer("chat_credits_from_topup").default(0).notNull(), // Chat credits from purchases
+  voiceCreditsFromTopup: integer("voice_credits_from_topup")
+    .default(0)
+    .notNull(), // Voice credits from purchases
+
+  // Voice Plan Credit Tracking (for voice_only and premium plans)
   dailyVoiceCredits: integer("daily_voice_credits").default(300).notNull(), // Configurable daily limit
   monthlyVoiceCredits: integer("monthly_voice_credits").default(9000).notNull(), // Configurable monthly limit
   voiceCreditsUsedToday: integer("voice_credits_used_today")
