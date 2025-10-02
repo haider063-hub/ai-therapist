@@ -54,6 +54,13 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(Date.now() + PASSWORD_RESET_TOKEN_EXPIRY);
 
     // Store token in verification table
+    // First, delete any existing reset tokens for this email
+    await pgDb.execute(sql`
+      DELETE FROM verification 
+      WHERE identifier = ${`password_reset:${user.email}`}
+    `);
+
+    // Then insert the new token
     await pgDb.execute(sql`
       INSERT INTO verification (id, identifier, value, expires_at, created_at, updated_at)
       VALUES (
@@ -64,11 +71,6 @@ export async function POST(request: NextRequest) {
         CURRENT_TIMESTAMP,
         CURRENT_TIMESTAMP
       )
-      ON CONFLICT (identifier) 
-      DO UPDATE SET 
-        value = ${hashedToken},
-        expires_at = ${expiresAt.toISOString()},
-        updated_at = CURRENT_TIMESTAMP
     `);
 
     // Create reset link
