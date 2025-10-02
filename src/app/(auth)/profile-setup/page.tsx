@@ -59,8 +59,28 @@ export default function ProfileSetupPage() {
     e.preventDefault();
 
     // Validate required fields
+    if (!formData.dateOfBirth) {
+      toast.error("Please enter your date of birth");
+      return;
+    }
+    if (!formData.gender) {
+      toast.error("Please select your gender");
+      return;
+    }
+    if (!formData.country) {
+      toast.error("Please select your country");
+      return;
+    }
+    if (!formData.religion) {
+      toast.error("Please select your religion/beliefs");
+      return;
+    }
     if (!formData.therapyNeeds || formData.therapyNeeds.length === 0) {
       toast.error("Please select at least one therapy need");
+      return;
+    }
+    if (!formData.preferredTherapyStyle) {
+      toast.error("Please select your preferred therapy approach");
       return;
     }
 
@@ -110,11 +130,11 @@ export default function ProfileSetupPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Date of Birth */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="dateOfBirth">
                 Date of Birth{" "}
                 <span className="text-sm text-muted-foreground">
-                  (Optional)
+                  (Required)
                 </span>
               </Label>
               <Input
@@ -133,11 +153,11 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Gender */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="gender">
                 Gender{" "}
                 <span className="text-sm text-muted-foreground">
-                  (Optional)
+                  (Required)
                 </span>
               </Label>
               <Select
@@ -160,11 +180,11 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Country */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="country">
                 Country{" "}
                 <span className="text-sm text-muted-foreground">
-                  (Optional)
+                  (Required)
                 </span>
               </Label>
               <Select
@@ -202,11 +222,11 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Religion */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="religion">
                 Religion/Beliefs{" "}
                 <span className="text-sm text-muted-foreground">
-                  (Optional)
+                  (Required)
                 </span>
               </Label>
               <Select
@@ -234,10 +254,10 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Therapy Needs */}
-            <div className="space-y-3">
+            <div className="space-y-3 w-full">
               <Label>
                 What brings you here?{" "}
-                <span className="text-sm text-red-500">
+                <span className="text-sm text-muted-foreground">
                   (Required - Select all that apply)
                 </span>
               </Label>
@@ -263,11 +283,11 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Preferred Therapy Style */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="therapyStyle">
                 Preferred Therapy Approach{" "}
                 <span className="text-sm text-muted-foreground">
-                  (Optional)
+                  (Required)
                 </span>
               </Label>
               <Select
@@ -295,7 +315,7 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Specific Concerns */}
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="concerns">
                 Any Specific Concerns?{" "}
                 <span className="text-sm text-muted-foreground">
