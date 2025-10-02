@@ -174,12 +174,8 @@ async function sendPasswordResetEmail(
             <div class="header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
               <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin: 0 auto 20px;">
                 <tr>
-                  <td style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; text-align: center; vertical-align: middle;">
-                    <img src="https://cdn.prod.website-files.com/6846fdc25de73b0e19544b07/68de3234e92107ccba9e1cb6_9714f01a06851b186ed309e6cb30b1d4_heart-img.png" 
-                         alt="Heart" 
-                         width="40" 
-                         height="40" 
-                         style="display: inline-block; vertical-align: middle;">
+                  <td style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; text-align: center; vertical-align: middle; font-size: 40px; line-height: 80px;">
+                    ❤️
                   </td>
                 </tr>
               </table>
@@ -227,12 +223,8 @@ async function sendPasswordResetEmail(
               <div class="warning-box" style="background-color: #fef3e7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 16px 20px; margin: 25px 0;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px;">
-                      <img src="https://cdn.prod.website-files.com/6846fdc25de73b0e19544b07/68de33467933732b427e61d7_clock.png" 
-                           alt="Clock" 
-                           width="20" 
-                           height="20" 
-                           style="display: block;">
+                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px; line-height: 20px;">
+                      ⏰
                     </td>
                     <td style="vertical-align: top;">
                       <p style="margin: 0; color: #92400e; font-size: 14px; font-weight: 500;">
@@ -250,12 +242,8 @@ async function sendPasswordResetEmail(
               <div class="security-box" style="background-color: #f0f4f8; border-radius: 12px; padding: 20px; margin: 25px 0;">
                 <table cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td style="width: 32px; vertical-align: top; padding-right: 12px;">
-                      <img src="https://cdn.prod.website-files.com/6846fdc25de73b0e19544b07/68de32945838984f943b2cf6_sheild-icon.png" 
-                           alt="Shield" 
-                           width="20" 
-                           height="20" 
-                           style="display: block;">
+                    <td style="width: 32px; vertical-align: top; padding-right: 12px; font-size: 20px; line-height: 20px;">
+                      🛡️
                     </td>
                     <td style="vertical-align: top;">
                       <p style="margin: 0; color: #334155; font-size: 14px; line-height: 1.5;">
