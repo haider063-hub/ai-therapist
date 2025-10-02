@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  AudioWaveformIcon,
-  CornerRightUp,
-  PlusIcon,
-  Square,
-  XIcon,
-} from "lucide-react";
+import { Mic, CornerRightUp, PlusIcon, Square, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Button } from "ui/button";
 import { notImplementedToast } from "ui/shared-toast";
@@ -199,7 +193,7 @@ export default function PromptInput({
                         }}
                         className="rounded-full p-2!"
                       >
-                        <AudioWaveformIcon size={16} />
+                        <Mic size={16} />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>{t("VoiceChat.title")}</TooltipContent>
