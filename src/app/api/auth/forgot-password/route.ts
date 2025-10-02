@@ -135,11 +135,25 @@ async function sendPasswordResetEmail(
             
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
-              <div style="background-color: rgba(255, 255, 255, 0.2); width: 80px; height: 80px; border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM13 17H11V15H13V17ZM13 13H11V7H13V13Z" fill="white"/>
-                </svg>
-              </div>
+<div style="background-color: rgba(255, 255, 255, 0.2); 
+            width: 80px; height: 80px; 
+            border-radius: 50%; 
+            margin: 0 auto 20px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;">
+  
+  <!-- Heart Icon -->
+  <svg width="40" height="40" viewBox="0 0 24 24" 
+       fill="none" stroke="white" stroke-width="2" 
+       stroke-linecap="round" stroke-linejoin="round" 
+       xmlns="http://www.w3.org/2000/svg">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 
+             5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 
+             1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+  </svg>
+</div>
+
               <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.5px;">Password Reset Request</h1>
             </div>
             
