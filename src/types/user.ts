@@ -24,6 +24,18 @@ export type BasicUser = {
 
 export interface BasicUserWithLastLogin extends BasicUser {
   lastLogin: Date | null;
+  // Profile fields
+  dateOfBirth?: string | null;
+  gender?: string | null;
+  country?: string | null;
+  religion?: string | null;
+  therapyNeeds?: string | null;
+  preferredTherapyStyle?: string | null;
+  specificConcerns?: string | null;
+  profileCompleted?: boolean;
+  // Session tracking
+  totalChatSessions?: number;
+  totalVoiceSessions?: number;
 }
 
 export type UserSession = NonNullable<Awaited<ReturnType<typeof getSession>>>;
