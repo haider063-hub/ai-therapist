@@ -43,6 +43,7 @@ import { EnabledTools, EnabledToolsDropdown } from "./enabled-tools-dropdown";
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
 import { useTranslations } from "next-intl";
+import CreditDisplay from "@/components/credits/credit-display";
 
 // Only browser tools - no MCP integration
 const prependTools: EnabledTools[] = [
@@ -205,8 +206,17 @@ export function ChatBotVoice() {
               {/* Tools Dropdown */}
               <EnabledToolsDropdown align="start" side="bottom" tools={tools} />
 
+              {/* Credit Display - Voice Context */}
+              <div className="flex-1 flex justify-end items-center pr-4">
+                <CreditDisplay
+                  compact={true}
+                  showUpgradeButton={false}
+                  context="voice"
+                />
+              </div>
+
               {/* Settings Dropdown */}
-              <DrawerTitle className="ml-auto">
+              <DrawerTitle>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant={"ghost"} size={"icon"}>
