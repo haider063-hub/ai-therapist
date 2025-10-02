@@ -103,6 +103,18 @@ export function ChatBotVoice() {
   const endVoiceChat = useCallback(async () => {
     setIsClosing(true);
     await safe(() => stop());
+
+    // Track voice session end if there were any messages
+    if (messages.length > 0) {
+      try {
+        await fetch("/api/chat/voice-session-end", {
+          method: "POST",
+        });
+      } catch (error) {
+        console.error("Failed to track voice session:", error);
+      }
+    }
+
     setIsClosing(false);
     appStoreMutate({
       voiceChat: {
@@ -110,7 +122,7 @@ export function ChatBotVoice() {
         isOpen: false,
       },
     });
-  }, [stop, appStoreMutate, voiceChat]);
+  }, [stop, appStoreMutate, voiceChat, messages.length]);
 
   const statusMessage = useMemo(() => {
     if (isLoading) {

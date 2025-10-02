@@ -33,6 +33,7 @@ import { getSession } from "auth/server";
 import { colorize } from "consola/utils";
 import { generateUUID } from "lib/utils";
 import { creditService } from "lib/services/credit-service";
+import { checkUserHistoryAction } from "./actions";
 
 const logger = globalLogger.withDefaults({
   message: colorize("blackBright", `Chat API: `),
@@ -96,6 +97,21 @@ export async function POST(request: Request) {
       return new Response("Forbidden", { status: 403 });
     }
 
+    // Check user history for continuity
+    let historyContext = "";
+    try {
+      const historyResult = await checkUserHistoryAction(id);
+      if (
+        historyResult?.isReturningUser &&
+        historyResult.lastMessages &&
+        historyResult.lastMessages.length > 0
+      ) {
+        historyContext = `\n\nPREVIOUS CONVERSATION CONTEXT: The user previously discussed: ${historyResult.lastMessages.join(", ")}. Reference this context when appropriate to maintain conversation continuity.`;
+      }
+    } catch (error) {
+      logger.error("Failed to check user history:", error);
+    }
+
     const messages: UIMessage[] = (thread?.messages ?? []).map((m) => {
       return {
         id: m.id,
@@ -155,6 +171,7 @@ export async function POST(request: Request) {
         const systemPrompt = mergeSystemPrompt(
           buildUserSystemPrompt(session.user),
           !supportToolCall && buildToolCallUnsupportedModelSystemPrompt(),
+          historyContext, // Add previous conversation context
         );
 
         const vercelAITooles = safe({ ...APP_DEFAULT_TOOLS })

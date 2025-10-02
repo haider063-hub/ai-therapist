@@ -5,10 +5,12 @@ import { UserDetailFormCard } from "./user-detail-form-card";
 import { UserAccessCard } from "./user-access-card";
 import { UserProfileCard } from "./user-profile-card";
 import { UserSessionStatsCard } from "./user-session-stats-card";
+import { UserWeeklyMoodCard } from "./user-weekly-mood-card";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
 import { useSidebar } from "ui/sidebar";
 import useSWR, { mutate } from "swr";
 import { cn, fetcher } from "lib/utils";
+import { useEffect, useState } from "react";
 
 interface UserDetailProps {
   user: BasicUserWithLastLogin;
@@ -17,7 +19,6 @@ interface UserDetailProps {
     hasPassword: boolean;
     oauthProviders: string[];
   };
-  userStatsSlot?: React.ReactNode;
   view?: "admin" | "user";
 }
 
@@ -26,7 +27,6 @@ export function UserDetail({
   user: initialUser,
   currentUserId,
   userAccountInfo,
-  userStatsSlot,
 }: UserDetailProps) {
   const { open: sidebarOpen } = useSidebar();
   const userDetailRoute =
@@ -52,6 +52,17 @@ export function UserDetail({
     }
   };
   const { t } = useProfileTranslations(view);
+
+  // Fetch weekly mood data
+  const [weeklyMoodData, setWeeklyMoodData] = useState<any[]>([]);
+  useEffect(() => {
+    if (currentUserId === initialUser.id) {
+      fetch("/api/user/weekly-mood")
+        .then((res) => res.json())
+        .then((data) => setWeeklyMoodData(data.weeklyMoodData || []))
+        .catch(() => setWeeklyMoodData([]));
+    }
+  }, [currentUserId, initialUser.id]);
 
   return (
     <div
@@ -100,13 +111,7 @@ export function UserDetail({
           }}
         />
 
-        <div
-          className={cn("col-span-1 md:col-span-2", {
-            "col-span-1 md:col-span-1 lg:col-span-2": sidebarOpen,
-          })}
-        >
-          {userStatsSlot}
-        </div>
+        <UserWeeklyMoodCard weeklyMoodData={weeklyMoodData} />
       </div>
     </div>
   );

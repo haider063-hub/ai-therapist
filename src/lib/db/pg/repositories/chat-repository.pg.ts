@@ -1,5 +1,5 @@
 import { pgDb } from "../db.pg";
-import { ChatThreadSchema, ChatMessageSchema } from "../schema.pg";
+import { ChatThreadSchema, ChatMessageSchema, UserSchema } from "../schema.pg";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 import type { ChatThread, ChatMessage } from "app-types/chat";
 import { UIMessage } from "ai";
@@ -349,5 +349,27 @@ export const pgChatRepository = {
       parts: messages[index].parts,
       metadata: messages[index].metadata,
     }));
+  },
+
+  // Increment user's chat session count
+  async incrementUserChatSessions(userId: string): Promise<void> {
+    await pgDb
+      .update(UserSchema)
+      .set({
+        totalChatSessions: sql`${UserSchema.totalChatSessions} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(UserSchema.id, userId));
+  },
+
+  // Increment user's voice session count
+  async incrementUserVoiceSessions(userId: string): Promise<void> {
+    await pgDb
+      .update(UserSchema)
+      .set({
+        totalVoiceSessions: sql`${UserSchema.totalVoiceSessions} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(UserSchema.id, userId));
   },
 };

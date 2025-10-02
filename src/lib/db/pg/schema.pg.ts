@@ -208,6 +208,21 @@ export const UsageLogSchema = pgTable("usage_log", {
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
+// Mood tracking table - stores daily mood scores from conversations
+export const MoodTrackingSchema = pgTable("mood_tracking", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => UserSchema.id, { onDelete: "cascade" }),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  moodScore: integer("mood_score").notNull(), // 1-10 scale
+  sentiment: text("sentiment"), // positive, neutral, negative
+  threadId: text("thread_id"), // Which conversation this came from
+  sessionType: text("session_type"), // 'chat' or 'voice'
+  notes: text("notes"), // AI-generated mood notes
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Subscription Plans Configuration table - configurable limits
 export const SubscriptionPlanSchema = pgTable("subscription_plan", {
   id: text("id").primaryKey(),
@@ -238,6 +253,7 @@ export type AccountEntity = typeof AccountSchema.$inferSelect;
 export type VerificationEntity = typeof VerificationSchema.$inferSelect;
 export type ChatThreadEntity = typeof ChatThreadSchema.$inferSelect;
 export type ChatMessageEntity = typeof ChatMessageSchema.$inferSelect;
+export type MoodTrackingEntity = typeof MoodTrackingSchema.$inferSelect;
 export type ArchiveEntity = typeof ArchiveSchema.$inferSelect;
 export type ArchiveItemEntity = typeof ArchiveItemSchema.$inferSelect;
 export type BookmarkEntity = typeof BookmarkSchema.$inferSelect;
