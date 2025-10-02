@@ -66,6 +66,10 @@ export const UserSchema = pgTable("user", {
   preferredTherapyStyle: text("preferred_therapy_style"), // cbt, mindfulness, supportive, other
   specificConcerns: text("specific_concerns"), // Open text field for detailed concerns
   profileLastUpdated: timestamp("profile_last_updated"),
+
+  // Session Tracking
+  totalChatSessions: integer("total_chat_sessions").default(0).notNull(), // Count of chat threads
+  totalVoiceSessions: integer("total_voice_sessions").default(0).notNull(), // Count of completed voice sessions
 });
 
 // Session table

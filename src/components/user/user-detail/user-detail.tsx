@@ -4,6 +4,7 @@ import { BasicUserWithLastLogin } from "app-types/user";
 import { UserDetailFormCard } from "./user-detail-form-card";
 import { UserAccessCard } from "./user-access-card";
 import { UserProfileCard } from "./user-profile-card";
+import { UserSessionStatsCard } from "./user-session-stats-card";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
 import { useSidebar } from "ui/sidebar";
 import useSWR, { mutate } from "swr";
@@ -90,6 +91,13 @@ export function UserDetail({
           user={user ?? initialUser}
           currentUserId={currentUserId}
           view={view}
+        />
+
+        <UserSessionStatsCard
+          stats={{
+            totalChatSessions: (user ?? initialUser).totalChatSessions || 0,
+            totalVoiceSessions: (user ?? initialUser).totalVoiceSessions || 0,
+          }}
         />
 
         <div

@@ -106,17 +106,8 @@ export async function POST(request: NextRequest) {
 
     const sessionData = await r.json();
 
-    // Deduct credits for voice usage
-    try {
-      await creditService.deductCreditsForUsage(
-        session.user.id,
-        "voice",
-        currentThreadId,
-      );
-    } catch (error) {
-      logger.error("Failed to deduct credits for voice usage:", error);
-      // Don't block the response, just log the error
-    }
+    // Credits will be deducted per message exchange (not per session)
+    // See: /api/chat/voice-credit-deduct
 
     // Add greeting to response
     return new Response(
