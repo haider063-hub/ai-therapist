@@ -148,8 +148,8 @@ export default function CreditDisplay({
           )}
         </div>
 
-        {/* Voice Status */}
-        <div className="flex items-center gap-1.5">
+        {/* Voice Status - Simple green/red dot based on availability */}
+        <div className="flex items-center gap-1">
           <Mic className="h-4 w-4" />
           {hasUnlimitedVoice ? (
             <Badge
@@ -158,21 +158,8 @@ export default function CreditDisplay({
             >
               Unlimited
             </Badge>
-          ) : creditStatus.subscriptionType === "voice_only" ? (
-            <span className="text-xs text-muted-foreground">
-              {creditStatus.dailyVoiceCreditsLimit -
-                creditStatus.dailyVoiceCreditsUsed}
-              /{creditStatus.dailyVoiceCreditsLimit}
-            </span>
-          ) : creditStatus.credits > 0 ? (
-            <Badge
-              variant="secondary"
-              className="text-xs px-2 py-0 h-5 bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
-            >
-              {creditStatus.credits}
-            </Badge>
           ) : (
-            getFeatureIcon(creditStatus.canUseVoice)
+            getFeatureIcon(creditStatus.canUseVoice || creditStatus.credits > 0)
           )}
         </div>
 
