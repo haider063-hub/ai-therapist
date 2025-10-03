@@ -60,7 +60,7 @@ export function AppHeader() {
   }, [currentPaths, searchParams]);
 
   return (
-    <header className="sticky top-0 z-50 flex items-center px-3 py-2">
+    <header className="sticky top-0 z-50 flex items-center px-2 sm:px-3 py-2">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -86,7 +86,7 @@ export function AppHeader() {
       {componentByPage}
       <div className="flex-1" />
       {showActionButtons && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Credit Display - Context-aware based on current page */}
           <CreditDisplay
             compact={true}

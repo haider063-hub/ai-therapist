@@ -193,35 +193,43 @@ export default function CreditDisplay({
         creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup;
 
       return (
-        <div className="flex items-center gap-2 text-sm">
-          <CreditCard className="h-4 w-4" />
-          <span className="font-semibold text-xs">Voice Credits</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 text-sm">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <CreditCard className="h-3 sm:h-4 w-3 sm:w-4" />
+            <span className="font-semibold text-[10px] sm:text-xs">
+              Voice Credits
+            </span>
+          </div>
 
           {hasUnlimitedVoice ? (
-            <>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1">
               <Badge
                 variant="secondary"
-                className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0 h-4 sm:h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
               >
                 Unlimited
               </Badge>
               {/* Show daily usage for voice-only and premium users */}
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[10px] sm:text-xs text-muted-foreground">
                 {creditStatus.dailyVoiceCreditsUsed}/
-                {creditStatus.dailyVoiceCreditsLimit} used today
+                {creditStatus.dailyVoiceCreditsLimit} today
               </span>
-            </>
+            </div>
           ) : totalVoiceCredits > 0 ? (
-            <div className="flex items-center gap-1">
-              <span className="font-medium">{totalVoiceCredits}</span>
-              <span className="text-muted-foreground text-xs">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0.5 sm:gap-1">
+              <span className="font-medium text-xs sm:text-sm">
+                {totalVoiceCredits}
+              </span>
+              <span className="text-muted-foreground text-[10px] sm:text-xs">
                 {creditStatus.voiceCreditsFromTopup > 0
-                  ? `(${creditStatus.voiceCredits} free trial + ${creditStatus.voiceCreditsFromTopup} top-up)`
+                  ? `(${creditStatus.voiceCredits} trial + ${creditStatus.voiceCreditsFromTopup} top-up)`
                   : ""}
               </span>
             </div>
           ) : (
-            <span className="text-red-500 text-xs">No credits</span>
+            <span className="text-red-500 text-[10px] sm:text-xs">
+              No credits
+            </span>
           )}
 
           {showUpgradeButton &&
@@ -229,6 +237,7 @@ export default function CreditDisplay({
               <Button
                 size="sm"
                 variant="outline"
+                className="text-[10px] sm:text-xs px-2 h-6 sm:h-8"
                 onClick={() => router.push("/subscription")}
               >
                 Upgrade

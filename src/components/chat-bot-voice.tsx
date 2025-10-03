@@ -1,17 +1,14 @@
 "use client";
 
-import {
-  OPENAI_VOICE,
-  useOpenAIVoiceChat as OpenAIVoiceChat,
-} from "lib/ai/speech/open-ai/use-voice-chat.openai";
+import { useOpenAIVoiceChat as OpenAIVoiceChat } from "lib/ai/speech/open-ai/use-voice-chat.openai";
 import { cn } from "lib/utils";
 import {
-  CheckIcon,
   Loader,
   MicIcon,
   MicOffIcon,
   PhoneIcon,
-  Settings2Icon,
+  CreditCard,
+  ChevronDown,
   TriangleAlertIcon,
   XIcon,
 } from "lucide-react";
@@ -22,25 +19,14 @@ import { Alert, AlertDescription, AlertTitle } from "ui/alert";
 import { Button } from "ui/button";
 
 import { Drawer, DrawerContent, DrawerPortal, DrawerTitle } from "ui/drawer";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuPortal,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "ui/dropdown-menu";
-import { GeminiIcon } from "ui/gemini-icon";
-import { OpenAIIcon } from "ui/openai-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
+import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
 
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
 import { useTranslations } from "next-intl";
-import CreditDisplay from "@/components/credits/credit-display";
+import useSWR from "swr";
+import { fetcher } from "lib/utils";
 
 export function ChatBotVoice() {
   const t = useTranslations("Chat");
@@ -54,7 +40,30 @@ export function ChatBotVoice() {
 
   const [isClosing, setIsClosing] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
-  // Voice-only mode - no view toggle needed
+
+  // Fetch credit status
+  const { data: creditStatus, mutate: mutateCredits } = useSWR(
+    "/api/stripe/get-subscription-status",
+    fetcher,
+  );
+
+  const totalVoiceCredits = creditStatus?.credits
+    ? creditStatus.credits.voiceCredits +
+      creditStatus.credits.voiceCreditsFromTopup
+    : 0;
+
+  const freeTrialCredits = creditStatus?.credits?.voiceCredits || 0;
+  const topUpCredits = creditStatus?.credits?.voiceCreditsFromTopup || 0;
+
+  // Listen for credit updates
+  useEffect(() => {
+    const handleCreditsUpdate = () => {
+      mutateCredits();
+    };
+    window.addEventListener("credits-updated", handleCreditsUpdate);
+    return () =>
+      window.removeEventListener("credits-updated", handleCreditsUpdate);
+  }, [mutateCredits]);
 
   // No agent or MCP tool mentions - only browser tools
   const toolMentions = useMemo(() => [], []);
@@ -205,107 +214,90 @@ export function ChatBotVoice() {
     <Drawer dismissible={false} open={voiceChat.isOpen} direction="top">
       <DrawerPortal>
         <DrawerContent className="max-h-[100vh]! h-full border-none! rounded-none! flex flex-col bg-card z-[100]">
+          <DrawerTitle className="sr-only">Voice Therapy Session</DrawerTitle>
           <div className="w-full h-full flex flex-col ">
+            {/* Mobile: Header with Credits on Right, Desktop: Horizontal Layout */}
             <div
-              className="w-full flex p-6 gap-2"
+              className="w-full flex flex-row items-start sm:items-center p-3 sm:p-4 md:p-6 gap-2"
               style={{
                 userSelect: "text",
               }}
             >
-              {/* Voice Session Header */}
-              <div className="flex items-center gap-2 px-4">
-                <div className="text-sm font-medium text-muted-foreground">
+              {/* Left side: Voice Session Header */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Voice Therapy Session
                 </div>
               </div>
 
-              {/* Credit Display - Voice Context */}
-              <div className="flex-1 flex justify-end items-center pr-4">
-                <CreditDisplay
-                  compact={true}
-                  showUpgradeButton={false}
-                  context="voice"
-                />
-              </div>
+              {/* Spacer */}
+              <div className="flex-1" />
 
-              {/* Settings Dropdown */}
-              <DrawerTitle>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant={"ghost"} size={"icon"}>
-                      <Settings2Icon className="text-foreground size-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    side="left"
-                    className="min-w-40"
-                    align="start"
+              {/* Right side: Credits with Dropdown */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="flex items-center gap-2 h-auto px-2 py-1"
                   >
-                    <DropdownMenuGroup className="cursor-pointer">
-                      <DropdownMenuSub>
-                        <DropdownMenuSubTrigger
-                          className="flex items-center gap-2 cursor-pointer"
-                          icon=""
-                        >
-                          <OpenAIIcon className="size-3.5 stroke-none fill-foreground" />
-                          Open AI
-                        </DropdownMenuSubTrigger>
-                        <DropdownMenuPortal>
-                          <DropdownMenuSubContent>
-                            {Object.entries(OPENAI_VOICE).map(
-                              ([key, value]) => (
-                                <DropdownMenuItem
-                                  className="cursor-pointer flex items-center justify-between"
-                                  onClick={() =>
-                                    appStoreMutate({
-                                      voiceChat: {
-                                        ...voiceChat,
-                                        options: {
-                                          provider: "openai",
-                                          providerOptions: {
-                                            voice: value,
-                                          },
-                                        },
-                                      },
-                                    })
-                                  }
-                                  key={key}
-                                >
-                                  {key}
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-semibold">
+                      {totalVoiceCredits}
+                    </span>
+                    <span className="text-xs text-muted-foreground hidden sm:inline">
+                      Voice Credits
+                    </span>
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[calc(100vw-1rem)] sm:w-64 p-3 z-[200]"
+                  align="end"
+                  side="bottom"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b">
+                      <span className="text-sm font-semibold">
+                        Credit Breakdown
+                      </span>
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    </div>
 
-                                  {value ===
-                                    voiceChat.options.providerOptions
-                                      ?.voice && (
-                                    <CheckIcon className="size-3.5" />
-                                  )}
-                                </DropdownMenuItem>
-                              ),
-                            )}
-                          </DropdownMenuSubContent>
-                        </DropdownMenuPortal>
-                      </DropdownMenuSub>
-                      <DropdownMenuSub>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger
-                            className="flex items-center gap-2 text-muted-foreground"
-                            icon=""
-                          >
-                            <GeminiIcon className="size-3.5" />
-                            Gemini
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuPortal>
-                            <DropdownMenuSubContent>
-                              <div className="text-xs text-muted-foreground p-6">
-                                Not Implemented Yet
-                              </div>
-                            </DropdownMenuSubContent>
-                          </DropdownMenuPortal>
-                        </DropdownMenuSub>
-                      </DropdownMenuSub>
-                    </DropdownMenuGroup>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </DrawerTitle>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          Free Trial
+                        </span>
+                        <span className="text-sm font-medium">
+                          {freeTrialCredits}
+                        </span>
+                      </div>
+
+                      {topUpCredits > 0 && (
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-muted-foreground">
+                            Top-Up
+                          </span>
+                          <span className="text-sm font-medium">
+                            {topUpCredits}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <span className="text-sm font-semibold">Total</span>
+                        <span className="text-base font-bold">
+                          {totalVoiceCredits}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-[10px] text-muted-foreground text-center pt-2 border-t">
+                      Free trial credits are used first
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
             <div className="flex-1 min-h-0 mx-auto w-full">
               {error ? (

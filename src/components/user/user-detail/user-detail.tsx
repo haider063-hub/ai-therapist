@@ -6,6 +6,7 @@ import { UserAccessCard } from "./user-access-card";
 import { UserProfileCard } from "./user-profile-card";
 import { UserSessionStatsCard } from "./user-session-stats-card";
 import { UserWeeklyMoodCard } from "./user-weekly-mood-card";
+import { UserQuickMoodCard } from "./user-quick-mood-card";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
 import { useSidebar } from "ui/sidebar";
 import useSWR, { mutate } from "swr";
@@ -66,20 +67,23 @@ export function UserDetail({
 
   return (
     <div
-      className="min-h-full p-4 md:p-6 space-y-6"
+      className="min-h-full p-2 sm:p-4 md:p-6 space-y-4 md:space-y-6"
       data-testid="user-detail-content"
     >
       {/* Hero Section */}
-      <div className="space-y-2">
+      <div className="space-y-2 px-1 sm:px-0">
         <h1 className="text-2xl font-bold tracking-tight">{user?.name}</h1>
         <p className="text-muted-foreground">{t("userDetailDescription")}</p>
       </div>
 
       {/* Cards Layout */}
       <div
-        className={cn("grid grid-cols-1 md:grid-cols-2 gap-6", {
-          "grid-cols-1 md:grid-cols-1 lg:grid-cols-2": sidebarOpen,
-        })}
+        className={cn(
+          "grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6",
+          {
+            "grid-cols-1 md:grid-cols-1 lg:grid-cols-2": sidebarOpen,
+          },
+        )}
       >
         {/* Top Row: User Details Form & Access & Account */}
         <UserDetailFormCard
@@ -110,6 +114,8 @@ export function UserDetail({
             totalVoiceSessions: (user ?? initialUser).totalVoiceSessions || 0,
           }}
         />
+
+        <UserQuickMoodCard />
 
         <UserWeeklyMoodCard weeklyMoodData={weeklyMoodData} />
       </div>

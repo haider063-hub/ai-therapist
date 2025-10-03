@@ -7,33 +7,23 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenu,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuPortal,
-  DropdownMenuSubContent,
-  DropdownMenuCheckboxItem,
 } from "ui/dropdown-menu";
 import { AvatarFallback, AvatarImage, Avatar } from "ui/avatar";
 import { SidebarMenuButton, SidebarMenuItem, SidebarMenu } from "ui/sidebar";
 import {
   ChevronsUpDown,
   LogOutIcon,
-  Palette,
-  Languages,
   Sun,
   MoonStar,
-  ChevronRight,
   Settings,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { appStore } from "@/app/store";
-import { BASE_THEMES, COOKIE_KEY_LOCALE, SUPPORTED_LOCALES } from "lib/const";
-import { capitalizeFirstLetter, cn, fetcher } from "lib/utils";
+import { fetcher } from "lib/utils";
 import { authClient } from "auth/client";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
-import { getLocaleAction } from "@/i18n/get-locale";
-import { Suspense, useCallback } from "react";
+import { Suspense } from "react";
 import { useThemeStyle } from "@/hooks/use-theme-style";
 import { BasicUser } from "app-types/user";
 import { getUserAvatar } from "lib/user/utils";
@@ -84,7 +74,7 @@ export function AppSidebarUserInner(props: {
           </DropdownMenuTrigger>
           <DropdownMenuContent
             side="top"
-            className="bg-background w-[--radix-dropdown-menu-trigger-width] min-w-60 rounded-lg"
+            className="bg-background w-full rounded-lg"
             align="center"
           >
             <DropdownMenuLabel className="p-0 font-normal">
@@ -112,8 +102,7 @@ export function AppSidebarUserInner(props: {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <SelectTheme />
-            <SelectLanguage />
+            <ThemeToggle />
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
@@ -136,120 +125,28 @@ export function AppSidebarUserInner(props: {
   );
 }
 
-function SelectTheme() {
-  const t = useTranslations("Layout");
-
+function ThemeToggle() {
   const { theme = "light", setTheme } = useTheme();
+  const { setThemeStyle } = useThemeStyle();
 
-  const { themeStyle = "default", setThemeStyle } = useThemeStyle();
-
-  return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger
-        className="flex items-center"
-        icon={
-          <>
-            <span className="text-muted-foreground text-xs min-w-0 truncate">
-              {`${capitalizeFirstLetter(theme)} ${capitalizeFirstLetter(
-                themeStyle,
-              )}`}
-            </span>
-            <ChevronRight className="size-4 ml-2" />
-          </>
-        }
-      >
-        <Palette className="mr-2 size-4" />
-        <span className="mr-auto">{t("theme")}</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuPortal>
-        <DropdownMenuSubContent className="w-48">
-          <DropdownMenuLabel className="text-muted-foreground w-full flex items-center">
-            <span className="text-muted-foreground text-xs mr-2 select-none">
-              {capitalizeFirstLetter(theme)}
-            </span>
-            <div className="flex-1" />
-
-            <div
-              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-              className="cursor-pointer border rounded-full flex items-center"
-            >
-              <div
-                className={cn(
-                  theme === "dark" &&
-                    "bg-accent ring ring-muted-foreground/40 text-foreground",
-                  "p-1 rounded-full",
-                )}
-              >
-                <MoonStar className="size-3" />
-              </div>
-              <div
-                className={cn(
-                  theme === "light" &&
-                    "bg-accent ring ring-muted-foreground/40 text-foreground",
-                  "p-1 rounded-full",
-                )}
-              >
-                <Sun className="size-3" />
-              </div>
-            </div>
-          </DropdownMenuLabel>
-          <div className="max-h-96 overflow-y-auto">
-            {BASE_THEMES.map((t) => (
-              <DropdownMenuCheckboxItem
-                key={t}
-                checked={themeStyle === t}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setThemeStyle(t);
-                }}
-                className="text-sm"
-              >
-                {capitalizeFirstLetter(t)}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </div>
-        </DropdownMenuSubContent>
-      </DropdownMenuPortal>
-    </DropdownMenuSub>
-  );
-}
-
-function SelectLanguage() {
-  const t = useTranslations("Layout");
-  const { data: currentLocale } = useSWR(COOKIE_KEY_LOCALE, getLocaleAction, {
-    fallbackData: SUPPORTED_LOCALES[0].code,
-    revalidateOnFocus: false,
-  });
-  const handleOnChange = useCallback((locale: string) => {
-    document.cookie = `${COOKIE_KEY_LOCALE}=${locale}; path=/;`;
-    window.location.reload();
-  }, []);
+  const handleThemeToggle = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    setThemeStyle("default"); // Always use default style
+  };
 
   return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        <Languages className="mr-2 size-4" />
-        <span>{t("language")}</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuPortal>
-        <DropdownMenuSubContent className="w-48 max-h-96 overflow-y-auto">
-          <DropdownMenuLabel className="text-muted-foreground">
-            {t("language")}
-          </DropdownMenuLabel>
-          {SUPPORTED_LOCALES.map((locale) => (
-            <DropdownMenuCheckboxItem
-              key={locale.code}
-              checked={locale.code === currentLocale}
-              onCheckedChange={() =>
-                locale.code !== currentLocale && handleOnChange(locale.code)
-              }
-            >
-              {locale.name}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuPortal>
-    </DropdownMenuSub>
+    <DropdownMenuItem onClick={handleThemeToggle} className="cursor-pointer">
+      {theme === "dark" ? (
+        <Sun className="mr-2 size-4" />
+      ) : (
+        <MoonStar className="mr-2 size-4" />
+      )}
+      <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+      <span className="ml-auto text-xs text-muted-foreground">
+        Default {theme === "dark" ? "Dark" : "Light"}
+      </span>
+    </DropdownMenuItem>
   );
 }
 
