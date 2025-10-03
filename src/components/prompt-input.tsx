@@ -1,7 +1,7 @@
 "use client";
 
 import { Mic, CornerRightUp, PlusIcon, Square, XIcon } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "ui/button";
 import { notImplementedToast } from "ui/shared-toast";
 import { UIMessage, UseChatHelpers } from "@ai-sdk/react";
@@ -13,6 +13,7 @@ import { useTranslations } from "next-intl";
 import equal from "lib/equal";
 import { DefaultToolName } from "lib/ai/tools";
 import { DefaultToolIcon } from "./default-tool-icon";
+import { toast } from "sonner";
 
 interface PromptInputProps {
   placeholder?: string;
@@ -43,6 +44,8 @@ export default function PromptInput({
   threadId,
 }: PromptInputProps) {
   const t = useTranslations("Chat");
+  const [isDictating, setIsDictating] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const [threadMentions, appStoreMutate] = appStore(
     useShallow((state) => [state.threadMentions, state.mutate]),
@@ -111,6 +114,80 @@ export default function PromptInput({
     if (!editorRef.current) return;
   }, [editorRef.current]);
 
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      console.warn("Speech recognition not supported in this browser");
+      return;
+    }
+
+    recognitionRef.current = new SpeechRecognition();
+    recognitionRef.current.continuous = true;
+    recognitionRef.current.interimResults = true;
+
+    recognitionRef.current.onresult = (event: any) => {
+      let _interimTranscript = "";
+      let finalTranscript = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + " ";
+        } else {
+          _interimTranscript += transcript;
+        }
+      }
+
+      if (finalTranscript) {
+        setInput((input || "") + finalTranscript);
+      }
+    };
+
+    recognitionRef.current.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setIsDictating(false);
+      if (event.error !== "no-speech" && event.error !== "aborted") {
+        toast.error("Dictation error. Please try again.");
+      }
+    };
+
+    recognitionRef.current.onend = () => {
+      setIsDictating(false);
+    };
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, [setInput]);
+
+  const toggleDictation = useCallback(() => {
+    if (!recognitionRef.current) {
+      toast.error("Speech recognition is not supported in your browser");
+      return;
+    }
+
+    if (isDictating) {
+      recognitionRef.current.stop();
+      setIsDictating(false);
+    } else {
+      try {
+        recognitionRef.current.start();
+        setIsDictating(true);
+      } catch (error) {
+        console.error("Failed to start dictation:", error);
+        toast.error("Failed to start dictation");
+      }
+    }
+  }, [isDictating]);
+
   return (
     <div className="max-w-3xl mx-auto fade-in animate-in">
       <div className="z-10 mx-auto w-full max-w-3xl relative">
@@ -177,28 +254,27 @@ export default function PromptInput({
                 </Button>
 
                 <div className="flex-1" />
-                {!isLoading && !input.length ? (
+
+                {/* Dictate Button - Always visible when not loading */}
+                {!isLoading && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         size={"sm"}
-                        onClick={() => {
-                          appStoreMutate((state) => ({
-                            voiceChat: {
-                              ...state.voiceChat,
-                              isOpen: true,
-                              agentId: undefined,
-                            },
-                          }));
-                        }}
-                        className="rounded-full p-2!"
+                        onClick={toggleDictation}
+                        className={`rounded-full p-2! ${isDictating ? "bg-red-500 hover:bg-red-600 text-white" : ""}`}
                       >
                         <Mic size={16} />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent>{t("VoiceChat.title")}</TooltipContent>
+                    <TooltipContent>
+                      {isDictating ? "Stop Dictating" : "Dictate"}
+                    </TooltipContent>
                   </Tooltip>
-                ) : (
+                )}
+
+                {/* Send/Stop Button */}
+                {(isLoading || input.length > 0) && (
                   <div
                     onClick={() => {
                       if (isLoading) {

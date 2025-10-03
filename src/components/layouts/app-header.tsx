@@ -97,9 +97,8 @@ export function AppHeader() {
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
-                size={"icon"}
                 variant={"ghost"}
-                className="bg-secondary/40"
+                className="bg-secondary/40 px-3 py-2 h-auto"
                 onClick={() => {
                   const voiceChat = appStore.getState().voiceChat;
 
@@ -117,13 +116,11 @@ export function AppHeader() {
                   }
                 }}
               >
-                <Mic className="size-4" />
+                <span className="text-sm font-medium">Voice Session</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">
-              <div className="text-xs flex items-center gap-2">
-                {t("KeyboardShortcuts.toggleVoiceChat")}
-              </div>
+              <div className="text-xs">Voice Session</div>
             </TooltipContent>
           </Tooltip>
         </div>

@@ -10,7 +10,6 @@ import {
   CreditCard,
   ChevronDown,
   TriangleAlertIcon,
-  XIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -460,22 +459,26 @@ export function ChatBotVoice() {
                       : t("VoiceChat.openMic")}
                 </TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant={"secondary"}
-                    size={"icon"}
-                    className="rounded-full p-6"
-                    disabled={isLoading || isClosing}
-                    onClick={endVoiceChat}
-                  >
-                    <XIcon className="text-foreground size-6" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t("VoiceChat.endConversation")}</p>
-                </TooltipContent>
-              </Tooltip>
+              {/* End Conversation Button - Only show when session is active */}
+              {isActive && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"destructive"}
+                      size={"default"}
+                      className="rounded-full px-6 py-3"
+                      disabled={isLoading || isClosing}
+                      onClick={endVoiceChat}
+                    >
+                      <PhoneIcon className="size-4 mr-2 rotate-[135deg]" />
+                      End Conversation
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>End session and deduct 50 credits</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </div>
         </DrawerContent>
