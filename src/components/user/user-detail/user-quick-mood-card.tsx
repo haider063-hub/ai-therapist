@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Smile, Meh, Frown, Heart, Loader } from "lucide-react";
+import { Heart, Loader } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
