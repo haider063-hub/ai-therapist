@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Heart, Loader } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
 const MOOD_OPTIONS = [
@@ -66,8 +66,36 @@ const MOOD_OPTIONS = [
 export function UserQuickMoodCard() {
   const [isLoading, setIsLoading] = useState(false);
   const [todayMood, setTodayMood] = useState<string | null>(null);
+  const [alreadyTrackedToday, setAlreadyTrackedToday] = useState(false);
+
+  // Check if user already tracked mood today
+  useEffect(() => {
+    const checkTodayMood = async () => {
+      try {
+        const response = await fetch("/api/user/check-today-mood");
+        const data = await response.json();
+        if (data.trackedToday) {
+          setAlreadyTrackedToday(true);
+          setTodayMood(data.moodEmoji || "✓");
+        }
+      } catch (error) {
+        console.error("Error checking today's mood:", error);
+      }
+    };
+    checkTodayMood();
+  }, []);
 
   const handleMoodSelect = async (mood: (typeof MOOD_OPTIONS)[0]) => {
+    if (alreadyTrackedToday) {
+      toast.info(
+        "You already tracked your mood today! Let's try again tomorrow. 😊",
+        {
+          duration: 4000,
+        },
+      );
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch("/api/user/track-mood", {
@@ -92,10 +120,13 @@ export function UserQuickMoodCard() {
       }
 
       setTodayMood(mood.emoji);
+      setAlreadyTrackedToday(true);
       toast.success(`Mood tracked: ${mood.label} ${mood.emoji}`);
 
       // Reload the weekly mood data
-      window.location.reload();
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
     } catch (error) {
       console.error("Error tracking mood:", error);
       toast.error("Failed to track mood. Please try again.");

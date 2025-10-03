@@ -149,10 +149,10 @@ export function UserInfoCard({
       <CardContent className="space-y-6 pt-6">
         {/* Avatar and Basic Info */}
         <div className="flex items-start gap-4">
-          <Avatar className="h-20 w-20 ring-2 ring-border">
+          <Avatar className="h-20 w-20 ring-2 ring-border bg-white">
             <AvatarImage src={getUserAvatar(user)} />
-            <AvatarFallback className="text-lg font-semibold">
-              {user.name?.slice(0, 2).toUpperCase() || "U"}
+            <AvatarFallback className="bg-white text-black text-4xl font-bold uppercase">
+              {user.name?.charAt(0) || "U"}
             </AvatarFallback>
           </Avatar>
 

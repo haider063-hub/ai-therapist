@@ -242,10 +242,10 @@ export function UsersTable({
                 >
                   <TableCell>
                     <div className="flex items-center gap-3 px-2">
-                      <Avatar className="size-8 rounded-full">
+                      <Avatar className="size-8 rounded-full bg-white">
                         <AvatarImage src={getUserAvatar(user)} />
-                        <AvatarFallback className="text-sm">
-                          {user.name?.slice(0, 2).toUpperCase() || "U"}
+                        <AvatarFallback className="bg-white text-black text-base font-bold uppercase">
+                          {user.name?.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
                       <div>

@@ -58,13 +58,15 @@ export function AppSidebarUserInner(props: {
               size={"lg"}
               data-testid="sidebar-user-button"
             >
-              <Avatar className="rounded-full size-8 border">
+              <Avatar className="rounded-full size-8 border bg-white">
                 <AvatarImage
                   className="object-cover"
                   src={getUserAvatar(user)}
                   alt={user?.name || "User"}
                 />
-                <AvatarFallback>{user?.name?.slice(0, 1) || ""}</AvatarFallback>
+                <AvatarFallback className="bg-white text-black text-lg font-bold uppercase">
+                  {user?.name?.charAt(0) || "U"}
+                </AvatarFallback>
               </Avatar>
               <span className="truncate" data-testid="sidebar-user-email">
                 {user?.email}
@@ -79,13 +81,13 @@ export function AppSidebarUserInner(props: {
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                <Avatar className="h-8 w-8 rounded-full">
+                <Avatar className="h-8 w-8 rounded-full bg-white">
                   <AvatarImage
                     src={getUserAvatar(user)}
                     alt={user?.name || "User"}
                   />
-                  <AvatarFallback className="rounded-lg">
-                    {user?.name?.slice(0, 1) || ""}
+                  <AvatarFallback className="bg-white text-black text-lg font-bold uppercase rounded-full">
+                    {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">

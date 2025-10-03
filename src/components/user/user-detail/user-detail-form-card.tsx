@@ -83,10 +83,10 @@ export function UserDetailFormCard({
 
           {/* Avatar and Name Section */}
           <div className="flex items-center gap-4">
-            <Avatar className="size-26 rounded-full mx-auto my-4 ring ring-border">
+            <Avatar className="size-26 rounded-full mx-auto my-4 ring ring-border bg-white">
               <AvatarImage src={getUserAvatar(user)} />
-              <AvatarFallback className="text-lg font-semibold">
-                {user.name?.slice(0, 2).toUpperCase() || "U"}
+              <AvatarFallback className="bg-white text-black text-4xl font-bold uppercase">
+                {user.name?.charAt(0) || "U"}
               </AvatarFallback>
             </Avatar>
           </div>

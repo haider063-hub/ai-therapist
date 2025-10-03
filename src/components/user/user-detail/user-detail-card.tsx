@@ -27,10 +27,10 @@ export function UserDetailCard({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16 rounded-full">
+            <Avatar className="h-16 w-16 rounded-full bg-white">
               <AvatarImage src={getUserAvatar(user)} />
-              <AvatarFallback>
-                {user.name?.slice(0, 2).toUpperCase() || "U"}
+              <AvatarFallback className="bg-white text-black text-3xl font-bold uppercase">
+                {user.name?.charAt(0) || "U"}
               </AvatarFallback>
             </Avatar>
             <div>
