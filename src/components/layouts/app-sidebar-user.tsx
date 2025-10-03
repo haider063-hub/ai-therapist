@@ -10,15 +10,8 @@ import {
 } from "ui/dropdown-menu";
 import { AvatarFallback, AvatarImage, Avatar } from "ui/avatar";
 import { SidebarMenuButton, SidebarMenuItem, SidebarMenu } from "ui/sidebar";
-import {
-  ChevronsUpDown,
-  LogOutIcon,
-  Sun,
-  MoonStar,
-  Settings,
-} from "lucide-react";
+import { ChevronsUpDown, LogOutIcon, Sun, MoonStar } from "lucide-react";
 import { useTheme } from "next-themes";
-import { appStore } from "@/app/store";
 import { fetcher } from "lib/utils";
 import { authClient } from "auth/client";
 import { useTranslations } from "next-intl";
@@ -37,7 +30,6 @@ export function AppSidebarUserInner(props: {
     suspense: true,
     revalidateOnMount: false,
   });
-  const appStoreMutate = appStore((state) => state.mutate);
   const t = useTranslations("Layout");
 
   const logout = () => {
@@ -105,16 +97,6 @@ export function AppSidebarUserInner(props: {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <ThemeToggle />
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
-              onClick={() => appStoreMutate({ openUserSettings: true })}
-              className="cursor-pointer"
-              data-testid="user-settings-menu-item"
-            >
-              <Settings className="size-4 text-foreground" />
-              <span>User Settings</span>
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="cursor-pointer">
               <LogOutIcon className="size-4 text-foreground" />

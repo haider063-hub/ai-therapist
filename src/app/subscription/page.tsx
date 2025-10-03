@@ -18,6 +18,11 @@ import {
   Star,
   ArrowLeft,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 // import { stripePromise } from '@/lib/stripe/client'; // Not used in this component
@@ -204,15 +209,19 @@ export default function SubscriptionPage() {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => router.push("/")}
-          className="mb-4"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/")}
+              className="mb-4"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">Go Back</TooltipContent>
+        </Tooltip>
         <h1 className="text-3xl font-bold mb-2">Subscription Management</h1>
         <p className="text-gray-600">
           Manage your EchoNest AI Therapy subscription and credits

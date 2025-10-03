@@ -2,7 +2,7 @@ import { TherapistSelectionHeader } from "@/components/therapist-selection-heade
 import { getSession } from "lib/auth/server";
 import { redirect } from "next/navigation";
 
-export default async function SelectTherapistLayout({
+export default async function TherapistsLayout({
   children,
 }: {
   children: React.ReactNode;

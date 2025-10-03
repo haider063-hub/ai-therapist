@@ -1,13 +1,6 @@
 "use client";
-import {
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuSub,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
-  useSidebar,
-} from "ui/sidebar";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
+import { SidebarMenuButton, useSidebar } from "ui/sidebar";
+import { Tooltip } from "ui/tooltip";
 import { SidebarMenu, SidebarMenuItem } from "ui/sidebar";
 import { SidebarGroupContent } from "ui/sidebar";
 
@@ -16,31 +9,17 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { WriteIcon } from "ui/write-icon";
-import {
-  FolderOpenIcon,
-  FolderSearchIcon,
-  PlusIcon,
-  CreditCardIcon,
-} from "lucide-react";
-import { useCallback, useState } from "react";
-import { Skeleton } from "ui/skeleton";
-import { useArchives } from "@/hooks/queries/use-archives";
-import { ArchiveDialog } from "../archive-dialog";
+import { CreditCardIcon, LayoutDashboard } from "lucide-react";
 import { getIsUserAdmin } from "lib/user/utils";
 import { BasicUser } from "app-types/user";
 import { AppSidebarAdmin } from "./app-sidebar-menu-admin";
+import { appStore } from "@/app/store";
 
 export function AppSidebarMenus({ user }: { user?: BasicUser }) {
   const router = useRouter();
   const t = useTranslations("");
   const { setOpenMobile } = useSidebar();
-  const [expandedArchive, setExpandedArchive] = useState(false);
-  const [addArchiveDialogOpen, setAddArchiveDialogOpen] = useState(false);
-
-  const { data: archives, isLoading: isLoadingArchives } = useArchives();
-  const toggleArchive = useCallback(() => {
-    setExpandedArchive((prev) => !prev);
-  }, []);
+  const appStoreMutate = appStore((state) => state.mutate);
 
   return (
     <SidebarGroup>
@@ -67,100 +46,46 @@ export function AppSidebarMenus({ user }: { user?: BasicUser }) {
         </SidebarMenu>
 
         {getIsUserAdmin(user) && <AppSidebarAdmin />}
-        <SidebarMenu className="group/archive">
+
+        {/* Subscription Management */}
+        <SidebarMenu>
+          <Tooltip>
+            <SidebarMenuItem>
+              <Link
+                href="/subscription"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setOpenMobile(false);
+                  router.push("/subscription");
+                }}
+              >
+                <SidebarMenuButton className="font-semibold">
+                  <CreditCardIcon className="size-4 text-foreground" />
+                  Subscription
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          </Tooltip>
+        </SidebarMenu>
+
+        {/* Dashboard (User Settings) */}
+        <SidebarMenu>
           <Tooltip>
             <SidebarMenuItem>
               <SidebarMenuButton
-                onClick={toggleArchive}
                 className="font-semibold"
+                onClick={() => {
+                  setOpenMobile(false);
+                  appStoreMutate({ openUserSettings: true });
+                }}
               >
-                {expandedArchive ? (
-                  <FolderOpenIcon className="size-4" />
-                ) : (
-                  <FolderSearchIcon className="size-4" />
-                )}
-                {t("Archive.title")}
+                <LayoutDashboard className="size-4 text-foreground" />
+                Dashboard
               </SidebarMenuButton>
-              <SidebarMenuAction
-                className="group-hover/archive:opacity-100 opacity-0 transition-opacity"
-                onClick={() => setAddArchiveDialogOpen(true)}
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <PlusIcon className="size-4" />
-                  </TooltipTrigger>
-                  <TooltipContent side="right" align="center">
-                    {t("Archive.addArchive")}
-                  </TooltipContent>
-                </Tooltip>
-              </SidebarMenuAction>
             </SidebarMenuItem>
           </Tooltip>
-          {expandedArchive && (
-            <>
-              <SidebarMenuSub>
-                {isLoadingArchives ? (
-                  <div className="gap-2 flex flex-col">
-                    {Array.from({ length: 2 }).map((_, index) => (
-                      <Skeleton key={index} className="h-6 w-full" />
-                    ))}
-                  </div>
-                ) : archives!.length === 0 ? (
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton className="text-muted-foreground">
-                      {t("Archive.noArchives")}
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                ) : (
-                  archives!.map((archive) => (
-                    <SidebarMenuSubItem
-                      onClick={() => {
-                        router.push(`/archive/${archive.id}`);
-                      }}
-                      key={archive.id}
-                      className="cursor-pointer"
-                    >
-                      <SidebarMenuSubButton>
-                        {archive.name}
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))
-                )}
-              </SidebarMenuSub>
-            </>
-          )}
         </SidebarMenu>
       </SidebarGroupContent>
-
-      {/* Subscription Management */}
-      <SidebarGroup>
-        <SidebarGroupContent>
-          <SidebarMenu>
-            <Tooltip>
-              <SidebarMenuItem className="mb-1">
-                <Link
-                  href="/subscription"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setOpenMobile(false);
-                    router.push("/subscription");
-                  }}
-                >
-                  <SidebarMenuButton className="flex font-semibold group/subscription bg-secondary/40 border border-border/40">
-                    <CreditCardIcon className="size-4" />
-                    Subscription
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            </Tooltip>
-          </SidebarMenu>
-        </SidebarGroupContent>
-      </SidebarGroup>
-
-      <ArchiveDialog
-        open={addArchiveDialogOpen}
-        onOpenChange={setAddArchiveDialogOpen}
-      />
     </SidebarGroup>
   );
 }

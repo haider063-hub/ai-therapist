@@ -21,10 +21,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "ui/dropdown-menu";
-import {
-  deleteThreadsAction,
-  deleteUnarchivedThreadsAction,
-} from "@/app/api/chat/actions";
+import { deleteThreadsAction } from "@/app/api/chat/actions";
 import { fetcher } from "lib/utils";
 import { toast } from "sonner";
 import { useShallow } from "zustand/shallow";
@@ -158,18 +155,6 @@ export function AppSidebarThreads() {
     });
   };
 
-  const handleDeleteUnarchivedThreads = async () => {
-    await toast.promise(deleteUnarchivedThreadsAction(), {
-      loading: t("deletingUnarchivedChats"),
-      success: () => {
-        mutate("/api/thread");
-        router.push("/");
-        return t("unarchivedChatsDeleted");
-      },
-      error: t("failedToDeleteUnarchivedChats"),
-    });
-  };
-
   if (isLoading || threadList?.length === 0)
     return (
       <SidebarGroup>
@@ -231,13 +216,6 @@ export function AppSidebarThreads() {
                           >
                             <Trash />
                             {t("deleteAllChats")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            variant="destructive"
-                            onClick={handleDeleteUnarchivedThreads}
-                          >
-                            <Trash />
-                            {t("deleteUnarchivedChats")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

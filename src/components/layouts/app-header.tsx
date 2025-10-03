@@ -19,7 +19,6 @@ import CreditDisplay from "@/components/credits/credit-display";
 
 export function AppHeader() {
   const t = useTranslations();
-  const [appStoreMutate] = appStore(useShallow((state) => [state.mutate]));
   const { toggleSidebar, open } = useSidebar();
   const currentPaths = usePathname();
   const searchParams = useSearchParams();
@@ -102,17 +101,12 @@ export function AppHeader() {
                 onClick={() => {
                   const voiceChat = appStore.getState().voiceChat;
 
-                  // If therapist already selected, open voice chat directly
+                  // If therapist already selected, go to voice chat page directly
                   if (voiceChat.selectedTherapist) {
-                    appStoreMutate((state) => ({
-                      voiceChat: {
-                        ...state.voiceChat,
-                        isOpen: true,
-                      },
-                    }));
+                    window.location.href = "/voice-chat";
                   } else {
                     // No therapist selected, go to selection page
-                    window.location.href = "/select-therapist";
+                    window.location.href = "/therapists";
                   }
                 }}
               >

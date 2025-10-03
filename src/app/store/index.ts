@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { ChatMention, ChatModel, ChatThread } from "app-types/chat";
-import { OPENAI_VOICE } from "lib/ai/speech/open-ai/use-voice-chat.openai";
 import { AppDefaultToolkit } from "lib/ai/tools";
 import { ArchiveWithItemCount } from "app-types/archive";
 import { Therapist } from "@/lib/constants/therapists";
@@ -66,7 +65,7 @@ const initialState: AppState = {
     options: {
       provider: "openai",
       providerOptions: {
-        model: OPENAI_VOICE["Alloy"],
+        model: "alloy",
       },
     },
   },

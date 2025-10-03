@@ -14,7 +14,7 @@ import { Volume2, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { appStore } from "@/app/store";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback } from "ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "ui/avatar";
 import { toast } from "sonner";
 
 export function TherapistSelection() {
@@ -22,7 +22,19 @@ export function TherapistSelection() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const router = useRouter();
 
-  const languages = ["All", ...new Set(THERAPISTS.map((t) => t.language))];
+  // Extract individual languages from all therapists
+  const languages = [
+    "All",
+    ...new Set(
+      THERAPISTS.flatMap((t) =>
+        t.language.split(" • ").map((lang) => lang.trim()),
+      ),
+    ),
+  ].sort((a, b) => {
+    if (a === "All") return -1;
+    if (b === "All") return 1;
+    return a.localeCompare(b);
+  });
 
   const filteredTherapists = THERAPISTS.filter((therapist) => {
     const matchesSearch =
@@ -33,7 +45,8 @@ export function TherapistSelection() {
         .includes(searchQuery.toLowerCase());
 
     const matchesLanguage =
-      selectedLanguage === "All" || therapist.language === selectedLanguage;
+      selectedLanguage === "All" ||
+      therapist.language.includes(selectedLanguage);
 
     return matchesSearch && matchesLanguage;
   });
@@ -56,7 +69,6 @@ export function TherapistSelection() {
         voiceChat: {
           ...state.voiceChat,
           selectedTherapist: therapist,
-          isOpen: true,
           options: {
             ...state.voiceChat.options,
             providerOptions: {
@@ -69,8 +81,8 @@ export function TherapistSelection() {
 
       toast.success(`Selected ${therapist.name}`);
 
-      // Navigate to home where voice chat will open
-      router.push("/");
+      // Navigate to voice chat page
+      router.push("/voice-chat");
     } catch (error) {
       console.error("Error selecting therapist:", error);
       toast.error("Failed to select therapist");
@@ -135,16 +147,16 @@ export function TherapistSelection() {
         </div>
 
         {/* Search and Filters */}
-        <div className="flex flex-col sm:flex-row gap-4 items-center justify-center">
+        <div className="flex flex-col gap-4 items-center justify-center">
           <input
             type="text"
             placeholder="Search by name, language, or specialization..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full sm:w-96 px-4 py-2 rounded-lg border bg-background"
+            className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-background"
           />
 
-          <div className="flex gap-2 flex-wrap justify-center">
+          <div className="flex gap-2 flex-wrap justify-center items-center">
             <span className="text-sm text-muted-foreground flex items-center gap-2">
               🌐 Languages:
             </span>
@@ -161,13 +173,8 @@ export function TherapistSelection() {
           </div>
         </div>
 
-        {/* Results Count */}
-        <p className="text-center text-sm text-muted-foreground">
-          Showing {filteredTherapists.length} of {THERAPISTS.length} therapists
-        </p>
-
         {/* Therapist Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch auto-rows-fr mt-8">
           {filteredTherapists.map((therapist) => (
             <TherapistCard
               key={therapist.id}
@@ -214,12 +221,17 @@ function TherapistCard({
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer">
-      <CardHeader className="text-center pb-3">
+    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col">
+      <CardHeader className="text-center pb-3 flex-shrink-0">
         {/* Avatar */}
         <div className="flex justify-center mb-3">
           <div className="relative">
             <Avatar className="h-20 w-20 rounded-full bg-white ring-2 ring-primary/20">
+              <AvatarImage
+                src={therapist.avatar}
+                alt={therapist.name}
+                className="object-cover"
+              />
               <AvatarFallback className="bg-white text-black text-3xl font-bold uppercase">
                 {therapist.name.split(" ")[1]?.charAt(0) ||
                   therapist.name.charAt(0)}
@@ -238,43 +250,48 @@ function TherapistCard({
         <CardDescription className="text-sm">{therapist.title}</CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-3">
-        {/* Language Badge */}
-        <div className="flex justify-center">
-          <Badge variant="outline" className="text-xs">
-            {therapist.language}
-          </Badge>
-        </div>
-
-        {/* Specializes in */}
-        <div className="space-y-2">
-          <p className="text-xs text-muted-foreground text-center">
-            ✨ Specializes in:
-          </p>
-          <div className="flex flex-wrap gap-1.5 justify-center">
-            {therapist.focus.slice(0, 2).map((item, idx) => (
-              <span
-                key={idx}
-                className="text-xs bg-secondary px-2 py-0.5 rounded-full"
-              >
-                {item}
-              </span>
+      <CardContent className="flex flex-col justify-between flex-grow">
+        {/* Content Group - Takes up flexible space */}
+        <div className="space-y-3 flex-grow">
+          {/* Language Badges - Show each language on separate line */}
+          <div className="flex gap-1.5 justify-center items-center">
+            {therapist.language.split(" • ").map((lang, idx) => (
+              <Badge key={idx} variant="outline" className="text-xs">
+                {lang.trim()}
+              </Badge>
             ))}
-            {therapist.focus.length > 2 && (
-              <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">
-                +{therapist.focus.length - 2} more
-              </span>
-            )}
           </div>
+
+          {/* Specializes in */}
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground text-center">
+              ✨ Specializes in:
+            </p>
+            <div className="flex flex-wrap gap-1.5 justify-center">
+              {therapist.focus.slice(0, 2).map((item, idx) => (
+                <span
+                  key={idx}
+                  className="text-xs bg-secondary px-2 py-0.5 rounded-full"
+                >
+                  {item}
+                </span>
+              ))}
+              {therapist.focus.length > 2 && (
+                <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">
+                  +{therapist.focus.length - 2} more
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-xs text-muted-foreground text-center italic">
+            💝 {therapist.description}
+          </p>
         </div>
 
-        {/* Description */}
-        <p className="text-xs text-muted-foreground text-center italic">
-          💝 {therapist.description}
-        </p>
-
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        {/* Action Buttons - Always at bottom */}
+        <div className="flex gap-2 pt-4 flex-shrink-0">
           <Button
             variant="outline"
             size="sm"

@@ -253,7 +253,27 @@ export default function PromptInput({
                   <PlusIcon />
                 </Button>
 
-                <div className="flex-1" />
+                <div className="flex-1 flex items-center justify-center">
+                  {/* Recording Indicator */}
+                  {isDictating && (
+                    <div className="flex items-center gap-2 animate-in fade-in-50">
+                      <div className="flex items-center gap-1">
+                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                        <div
+                          className="w-2 h-2 bg-red-500 rounded-full animate-pulse"
+                          style={{ animationDelay: "0.2s" }}
+                        />
+                        <div
+                          className="w-2 h-2 bg-red-500 rounded-full animate-pulse"
+                          style={{ animationDelay: "0.4s" }}
+                        />
+                      </div>
+                      <span className="text-xs text-red-500 font-medium animate-pulse">
+                        Listening...
+                      </span>
+                    </div>
+                  )}
+                </div>
 
                 {/* Dictate Button - Always visible when not loading */}
                 {!isLoading && (
@@ -262,9 +282,15 @@ export default function PromptInput({
                       <Button
                         size={"sm"}
                         onClick={toggleDictation}
-                        className={`rounded-full p-2! ${isDictating ? "bg-red-500 hover:bg-red-600 text-white" : ""}`}
+                        className={`rounded-full p-2! relative ${isDictating ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : ""}`}
                       >
                         <Mic size={16} />
+                        {isDictating && (
+                          <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                          </span>
+                        )}
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>

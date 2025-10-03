@@ -58,45 +58,93 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    // Generate greeting based on user history and therapist language
-    let greeting =
-      "Hello, I'm Econest, your AI therapist. How are you feeling today?";
+    // Generate AI-powered dynamic greeting
+    let greeting = "Hello! How are you feeling today?";
     let historyContext = "";
-
-    // Generate greeting in therapist's language
-    if (therapist) {
-      const greetingsByLanguage: Record<string, string> = {
-        es: `Hola, soy ${therapist.name}. ¿Cómo te sientes hoy?`,
-        ja: `こんにちは、${therapist.name}です。今日の気分はどうですか？`,
-        ar: `مرحباً، أنا ${therapist.name}. كيف تشعر اليوم؟`,
-        fr: `Bonjour, je suis ${therapist.name}. Comment vous sentez-vous aujourd'hui?`,
-        en: `Hello, I'm ${therapist.name}. How are you feeling today?`,
-        de: `Guten Tag, ich bin ${therapist.name}. Wie fühlen Sie sich heute?`,
-        hi: `नमस्ते, मैं ${therapist.name} हूँ। आज आप कैसा महसूस कर रहे हैं?`,
-        ru: `Здравствуйте, я ${therapist.name}. Как вы себя чувствуете сегодня?`,
-      };
-      greeting = greetingsByLanguage[therapist.languageCode] || greeting;
-    }
 
     try {
       const historyResult = await checkUserHistoryAction(currentThreadId);
 
+      // Generate dynamic AI greeting using GPT
+      if (therapist) {
+        const greetingPrompt = `You are ${therapist.name}, an AI therapist from EcoNest specializing in ${therapist.specialization}.
+Generate a warm, natural, and personalized greeting for a therapy session.
+
+IMPORTANT INSTRUCTIONS:
+- Speak EXCLUSIVELY in ${therapist.language} language
+- Include your name: "${therapist.name}"
+- Mention you're from "EcoNest"
+- Make it feel natural and conversational, not robotic
+- Keep it brief (2-3 sentences max)
+${
+  historyResult &&
+  historyResult.isReturningUser &&
+  historyResult.lastMessages &&
+  historyResult.lastMessages.length > 0
+    ? `- This is a RETURNING user. Briefly reference their previous conversation topics: ${historyResult.lastMessages.join(", ")}`
+    : "- This is a NEW user. Welcome them warmly"
+}
+
+Generate ONLY the greeting message, nothing else.`;
+
+        try {
+          const greetingResponse = await fetch(
+            "https://api.openai.com/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                messages: [
+                  {
+                    role: "system",
+                    content:
+                      "You are a helpful assistant that generates therapy session greetings.",
+                  },
+                  {
+                    role: "user",
+                    content: greetingPrompt,
+                  },
+                ],
+                temperature: 0.8,
+                max_tokens: 150,
+              }),
+            },
+          );
+
+          if (greetingResponse.ok) {
+            const greetingData = await greetingResponse.json();
+            greeting =
+              greetingData.choices[0]?.message?.content?.trim() || greeting;
+          }
+        } catch (error) {
+          logger.error(
+            "Failed to generate AI greeting, using fallback:",
+            error,
+          );
+          // Fallback to simple greeting with therapist name
+          greeting = `Hello, I'm ${therapist.name} from EcoNest. How are you feeling today?`;
+        }
+      }
+
+      // Add history context to system prompt for voice chat
       if (
         historyResult &&
         historyResult.isReturningUser &&
         historyResult.lastMessages &&
         historyResult.lastMessages.length > 0
       ) {
-        // For returning users, keep greeting in therapist's language (already set above)
-        // The system prompt will enforce the language throughout the conversation
-        // Add history context to system prompt for voice chat
         historyContext = `\n\nPREVIOUS CONVERSATION CONTEXT: The user previously discussed: ${historyResult.lastMessages.join(", ")}. Reference this context when appropriate to maintain conversation continuity.`;
-      } else {
-        // New user greeting already set above based on therapist language
       }
     } catch (error) {
       logger.error(`Voice session greeting error:`, error);
       // Use fallback greeting on error
+      if (therapist) {
+        greeting = `Hello, I'm ${therapist.name} from EcoNest. How are you feeling today?`;
+      }
     }
 
     // Build therapist-specific system prompt

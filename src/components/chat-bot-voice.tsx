@@ -10,6 +10,7 @@ import {
   CreditCard,
   ChevronDown,
   TriangleAlertIcon,
+  ArrowLeft,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -20,7 +21,7 @@ import { Button } from "ui/button";
 import { Drawer, DrawerContent, DrawerPortal, DrawerTitle } from "ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
-import { Avatar, AvatarFallback } from "ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "ui/avatar";
 
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
@@ -142,6 +143,19 @@ export function ChatBotVoice() {
     });
   }, [stop, appStoreMutate, voiceChat, messages, currentThreadId]);
 
+  const handleBackButton = useCallback(() => {
+    if (!isActive) {
+      // Session not active, can safely go back
+      appStoreMutate({
+        voiceChat: {
+          ...voiceChat,
+          isOpen: false,
+        },
+      });
+    }
+    // If session is active, button is disabled, so this won't be called
+  }, [isActive, appStoreMutate, voiceChat]);
+
   const statusMessage = useMemo(() => {
     if (isLoading) {
       return (
@@ -215,6 +229,38 @@ export function ChatBotVoice() {
     }
   }, [error]);
 
+  // Handle session cleanup when user closes window/tab or navigates away
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      if (isActive && messages.length > 0) {
+        // End the session and deduct credits
+        e.preventDefault();
+
+        // Extract conversation messages for mood tracking
+        const conversationMessages = messages
+          .map((m) => {
+            const textPart = m.parts.find((p) => p.type === "text");
+            return {
+              role: m.role,
+              content: textPart ? (textPart as any).text || "" : "",
+            };
+          })
+          .filter((m) => m.content.trim().length > 0);
+
+        // Use sendBeacon for reliable request on page unload
+        const data = JSON.stringify({
+          threadId: currentThreadId,
+          messages: conversationMessages,
+        });
+
+        navigator.sendBeacon("/api/chat/voice-session-end", data);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isActive, messages, currentThreadId]);
+
   return (
     <Drawer dismissible={false} open={voiceChat.isOpen} direction="top">
       <DrawerPortal>
@@ -228,11 +274,36 @@ export function ChatBotVoice() {
                 userSelect: "text",
               }}
             >
+              {/* Back Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="flex-shrink-0"
+                    onClick={handleBackButton}
+                    disabled={isActive}
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  {isActive
+                    ? "Please end the session first to go back"
+                    : "Go back"}
+                </TooltipContent>
+              </Tooltip>
+
               {/* Left side: Voice Session Header with Therapist Info */}
               <div className="flex items-center gap-2 flex-shrink-0 flex-1">
                 {selectedTherapist ? (
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8 rounded-full bg-white">
+                      <AvatarImage
+                        src={selectedTherapist.avatar}
+                        alt={selectedTherapist.name}
+                        className="object-cover"
+                      />
                       <AvatarFallback className="bg-white text-black text-sm font-bold uppercase">
                         {selectedTherapist.name.split(" ")[1]?.charAt(0) ||
                           selectedTherapist.name.charAt(0)}
@@ -271,7 +342,7 @@ export function ChatBotVoice() {
                     });
                     // Then navigate to selection page
                     setTimeout(() => {
-                      router.push("/select-therapist");
+                      router.push("/therapists");
                     }, 100);
                   }}
                 >
