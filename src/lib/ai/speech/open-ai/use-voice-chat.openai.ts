@@ -324,6 +324,22 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
             ],
             completed: true,
           });
+
+          // Deduct credits only when USER completes speaking (not for assistant responses)
+          fetch("/api/chat/voice-credit-deduct", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ threadId: props?.currentThreadId }),
+          })
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success) {
+                // Dispatch event to update credit display
+                window.dispatchEvent(new CustomEvent("credits-updated"));
+              }
+            })
+            .catch((err) => console.error("Credit deduction failed:", err));
+
           break;
         }
         case "response.audio_transcript.delta": {
@@ -372,20 +388,8 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
             };
           });
 
-          // Deduct credits for this voice message exchange
-          fetch("/api/chat/voice-credit-deduct", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ threadId: props?.currentThreadId }),
-          })
-            .then((res) => res.json())
-            .then((data) => {
-              if (data.success) {
-                // Dispatch event to update credit display
-                window.dispatchEvent(new CustomEvent("credits-updated"));
-              }
-            })
-            .catch((err) => console.error("Credit deduction failed:", err));
+          // Credits are deducted when user speaks, not when assistant responds
+          // (See conversation.item.input_audio_transcription.completed event)
 
           break;
         }

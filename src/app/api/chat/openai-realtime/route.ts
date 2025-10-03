@@ -57,6 +57,7 @@ export async function POST(request: NextRequest) {
     // Generate greeting based on user history
     let greeting =
       "Hello, I'm Econest, your AI therapist. How are you feeling today?";
+    let historyContext = "";
 
     try {
       const historyResult = await checkUserHistoryAction(currentThreadId);
@@ -71,6 +72,8 @@ export async function POST(request: NextRequest) {
         greeting = await generateReturningUserHeaderGreetingAction(
           historyResult.lastMessages,
         );
+        // Add history context to system prompt for voice chat
+        historyContext = `\n\nPREVIOUS CONVERSATION CONTEXT: The user previously discussed: ${historyResult.lastMessages.join(", ")}. Reference this context when appropriate to maintain conversation continuity.`;
       } else {
         // New user - generate first-time greeting
         greeting = await generateNewUserHeaderGreetingAction();
@@ -82,6 +85,7 @@ export async function POST(request: NextRequest) {
 
     const systemPrompt = mergeSystemPrompt(
       buildSpeechSystemPrompt(session.user),
+      historyContext, // Add history context to voice chat system prompt
     );
 
     const bindingTools = [...DEFAULT_VOICE_TOOLS];

@@ -4,6 +4,7 @@ import {
   timestamp,
   boolean,
   json,
+  jsonb,
   integer,
   decimal,
 } from "drizzle-orm/pg-core";
@@ -135,8 +136,8 @@ export const ChatMessageSchema = pgTable("chat_message", {
     .notNull()
     .references(() => ChatThreadSchema.id, { onDelete: "cascade" }),
   role: text("role").notNull().$type<UIMessage["role"]>(),
-  parts: json("parts").notNull().array().$type<UIMessage["parts"]>(),
-  metadata: json("metadata").$type<ChatMetadata>(),
+  parts: jsonb("parts").notNull().$type<UIMessage["parts"]>(),
+  metadata: jsonb("metadata").$type<ChatMetadata>(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });

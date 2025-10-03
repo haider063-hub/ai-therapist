@@ -33,6 +33,7 @@ import { getSession } from "auth/server";
 import { colorize } from "consola/utils";
 import { generateUUID } from "lib/utils";
 import { creditService } from "lib/services/credit-service";
+import { moodTrackingService } from "lib/services/mood-tracking-service";
 import { checkUserHistoryAction } from "./actions";
 
 const logger = globalLogger.withDefaults({
@@ -259,6 +260,41 @@ export async function POST(request: Request) {
             parts: convertedParts,
             metadata,
           });
+        }
+
+        // Track mood from conversation (non-blocking)
+        try {
+          const conversationMessages = messages.map((m) => {
+            const textPart = m.parts.find((p) => p.type === "text");
+            return {
+              role: m.role,
+              content: textPart ? (textPart as any).text || "" : "",
+            };
+          });
+
+          // Add the assistant's response
+          const responseText = convertedParts
+            .filter((p) => p.type === "text")
+            .map((p) => (p as any).text || "")
+            .join(" ");
+
+          if (responseText) {
+            conversationMessages.push({
+              role: "assistant",
+              content: responseText,
+            });
+          }
+
+          moodTrackingService
+            .trackConversationMood(
+              session.user.id,
+              thread!.id,
+              conversationMessages,
+              "chat",
+            )
+            .catch((err) => logger.error("Mood tracking failed:", err));
+        } catch (error) {
+          logger.error("Error preparing mood tracking:", error);
         }
       },
       onError: handleError,

@@ -124,17 +124,19 @@ export const subscriptionRepository = {
         throw new Error("Insufficient chat credits");
       }
 
-      // Deduct from topup credits first, then from free credits
+      // Deduct from free trial credits first, then from top-up credits
       let remainingAmount = amount;
-      let newTopupCredits = user.chatCreditsFromTopup;
       let newFreeCredits = user.chatCredits;
+      let newTopupCredits = user.chatCreditsFromTopup;
 
-      if (newTopupCredits >= remainingAmount) {
-        newTopupCredits -= remainingAmount;
-      } else {
-        remainingAmount -= newTopupCredits;
-        newTopupCredits = 0;
+      if (newFreeCredits >= remainingAmount) {
+        // Enough free credits available
         newFreeCredits -= remainingAmount;
+      } else {
+        // Use all free credits, then deduct from top-up
+        remainingAmount -= newFreeCredits;
+        newFreeCredits = 0;
+        newTopupCredits -= remainingAmount;
       }
 
       const result = await pgDb
@@ -156,17 +158,19 @@ export const subscriptionRepository = {
         throw new Error("Insufficient voice credits");
       }
 
-      // Deduct from topup credits first, then from free credits
+      // Deduct from free trial credits first, then from top-up credits
       let remainingAmount = amount;
-      let newTopupCredits = user.voiceCreditsFromTopup;
       let newFreeCredits = user.voiceCredits;
+      let newTopupCredits = user.voiceCreditsFromTopup;
 
-      if (newTopupCredits >= remainingAmount) {
-        newTopupCredits -= remainingAmount;
-      } else {
-        remainingAmount -= newTopupCredits;
-        newTopupCredits = 0;
+      if (newFreeCredits >= remainingAmount) {
+        // Enough free credits available
         newFreeCredits -= remainingAmount;
+      } else {
+        // Use all free credits, then deduct from top-up
+        remainingAmount -= newFreeCredits;
+        newFreeCredits = 0;
+        newTopupCredits -= remainingAmount;
       }
 
       const result = await pgDb

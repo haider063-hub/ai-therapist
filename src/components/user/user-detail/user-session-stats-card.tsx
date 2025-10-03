@@ -84,16 +84,6 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
             </Badge>
           </div>
         )}
-
-        {/* Total Sessions */}
-        <div className="pt-3 border-t">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Total Sessions</span>
-            <span className="text-lg font-bold">
-              {stats.totalChatSessions + stats.totalVoiceSessions}
-            </span>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

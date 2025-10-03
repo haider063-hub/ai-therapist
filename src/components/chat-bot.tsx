@@ -277,6 +277,13 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
     };
   }, [threadId]);
 
+  // Reset messages when initialMessages change (e.g., switching threads)
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      setMessages(initialMessages);
+    }
+  }, [threadId, setMessages]);
+
   useEffect(() => {
     if (pendingThreadMention && threadId) {
       appStoreMutate((prev) => ({

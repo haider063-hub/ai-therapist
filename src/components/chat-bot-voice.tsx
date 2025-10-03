@@ -1,7 +1,5 @@
 "use client";
 
-import { DEFAULT_VOICE_TOOLS } from "lib/ai/speech";
-
 import {
   OPENAI_VOICE,
   useOpenAIVoiceChat as OpenAIVoiceChat,
@@ -39,22 +37,10 @@ import { GeminiIcon } from "ui/gemini-icon";
 import { OpenAIIcon } from "ui/openai-icon";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 
-import { EnabledTools, EnabledToolsDropdown } from "./enabled-tools-dropdown";
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
 import { useTranslations } from "next-intl";
 import CreditDisplay from "@/components/credits/credit-display";
-
-// Only browser tools - no MCP integration
-const prependTools: EnabledTools[] = [
-  {
-    groupName: "Browser",
-    tools: DEFAULT_VOICE_TOOLS.map((tool) => ({
-      name: tool.name,
-      description: tool.description,
-    })),
-  },
-];
 
 export function ChatBotVoice() {
   const t = useTranslations("Chat");
@@ -107,8 +93,26 @@ export function ChatBotVoice() {
     // Track voice session end if there were any messages
     if (messages.length > 0) {
       try {
+        // Extract conversation messages for mood tracking
+        const conversationMessages = messages
+          .map((m) => {
+            const textPart = m.parts.find((p) => p.type === "text");
+            return {
+              role: m.role,
+              content: textPart ? (textPart as any).text || "" : "",
+            };
+          })
+          .filter((m) => m.content.trim().length > 0);
+
         await fetch("/api/chat/voice-session-end", {
           method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            threadId: currentThreadId,
+            messages: conversationMessages,
+          }),
         });
       } catch (error) {
         console.error("Failed to track voice session:", error);
@@ -122,7 +126,7 @@ export function ChatBotVoice() {
         isOpen: false,
       },
     });
-  }, [stop, appStoreMutate, voiceChat, messages.length]);
+  }, [stop, appStoreMutate, voiceChat, messages, currentThreadId]);
 
   const statusMessage = useMemo(() => {
     if (isLoading) {
@@ -169,11 +173,6 @@ export function ChatBotVoice() {
     t,
   ]);
 
-  // Only browser tools - no MCP tools
-  const tools = useMemo<EnabledTools[]>(() => {
-    return [...prependTools];
-  }, []);
-
   // Cleanup effect - only runs on unmount or when options change significantly
   const optionsRef = useRef(voiceChat.options);
   useEffect(() => {
@@ -213,10 +212,12 @@ export function ChatBotVoice() {
                 userSelect: "text",
               }}
             >
-              {/* Voice-only mode - no view toggle needed */}
-
-              {/* Tools Dropdown */}
-              <EnabledToolsDropdown align="start" side="bottom" tools={tools} />
+              {/* Voice Session Header */}
+              <div className="flex items-center gap-2 px-4">
+                <div className="text-sm font-medium text-muted-foreground">
+                  Voice Therapy Session
+                </div>
+              </div>
 
               {/* Credit Display - Voice Context */}
               <div className="flex-1 flex justify-end items-center pr-4">

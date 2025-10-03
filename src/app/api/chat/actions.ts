@@ -52,29 +52,37 @@ export async function generateTitleFromUserMessageAction({
 export async function selectThreadWithMessagesAction(threadId: string) {
   console.log("selectThreadWithMessagesAction called with threadId:", threadId);
 
-  const session = await getSession();
-  if (!session) {
-    throw new Error("Unauthorized");
-  }
-  const thread = await chatRepository.selectThread(threadId);
+  try {
+    const session = await getSession();
+    if (!session) {
+      throw new Error("Unauthorized");
+    }
 
-  if (!thread) {
-    logger.error("Thread not found", threadId);
-    return null;
-  }
-  if (thread.userId !== session?.user.id) {
-    return null;
-  }
-  const messages = await chatRepository.selectMessagesByThreadId(threadId);
+    const thread = await chatRepository.selectThread(threadId);
 
-  console.log("selectThreadWithMessagesAction returning:", {
-    threadId,
-    threadTitle: thread.title,
-    messageCount: messages.length,
-    messages: messages,
-  });
+    if (!thread) {
+      logger.error("Thread not found", threadId);
+      return null;
+    }
+    if (thread.userId !== session?.user.id) {
+      return null;
+    }
 
-  return { ...thread, messages: messages ?? [] };
+    const messages = await chatRepository.selectMessagesByThreadId(threadId);
+
+    console.log("selectThreadWithMessagesAction returning:", {
+      threadId,
+      threadTitle: thread.title,
+      messageCount: messages.length,
+      messages: messages,
+    });
+
+    return { ...thread, messages: messages ?? [] };
+  } catch (error) {
+    logger.error("Error in selectThreadWithMessagesAction:", error);
+    console.error("selectThreadWithMessagesAction error:", error);
+    throw error; // Re-throw to see the actual error
+  }
 }
 
 export async function deleteMessageAction(messageId: string) {

@@ -25,8 +25,11 @@ export function UserWeeklyMoodCard({
 }: UserWeeklyMoodCardProps) {
   const avgMood = useMemo(() => {
     if (weeklyMoodData.length === 0) return 0;
-    const sum = weeklyMoodData.reduce((acc, day) => acc + day.score, 0);
-    return Math.round((sum / weeklyMoodData.length) * 10) / 10;
+    // Only include days with actual mood data (score > 0)
+    const daysWithData = weeklyMoodData.filter((day) => day.score > 0);
+    if (daysWithData.length === 0) return 0;
+    const sum = daysWithData.reduce((acc, day) => acc + day.score, 0);
+    return Math.round((sum / daysWithData.length) * 10) / 10;
   }, [weeklyMoodData]);
 
   const getMoodLabel = (score: number) => {
@@ -75,15 +78,32 @@ export function UserWeeklyMoodCard({
                   className="flex-1 flex flex-col items-center gap-1"
                 >
                   <div className="flex-1 flex items-end w-full">
-                    <div
-                      className="w-full bg-primary/20 rounded-t-md transition-all hover:bg-primary/30 relative group"
-                      style={{ height: `${(day.score / 10) * 100}%` }}
-                    >
-                      {/* Tooltip on hover */}
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                        {getMoodLabel(day.score)}: {day.score}/10
+                    {day.score > 0 ? (
+                      <div
+                        className="w-full bg-primary rounded-t-md transition-all hover:bg-primary/80 relative group min-h-[8px]"
+                        style={{
+                          height: `${Math.max((day.score / 10) * 100, 8)}%`,
+                          backgroundColor:
+                            day.score >= 7
+                              ? "rgb(34 197 94)"
+                              : day.score >= 4
+                                ? "rgb(234 179 8)"
+                                : "rgb(239 68 68)",
+                        }}
+                      >
+                        {/* Tooltip on hover */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          {getMoodLabel(day.score)}: {day.score}/10
+                        </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="w-full h-1 bg-muted rounded-md relative group">
+                        {/* Tooltip for no data */}
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                          No data
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {day.day}
