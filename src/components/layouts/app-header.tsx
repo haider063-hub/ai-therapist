@@ -19,7 +19,7 @@ import CreditDisplay from "@/components/credits/credit-display";
 
 export function AppHeader() {
   const t = useTranslations();
-  const [appStoreMutate] = appStore(useShallow((state) => [state.mutate]));
+  const [_appStoreMutate] = appStore(useShallow((state) => [state.mutate]));
   const { toggleSidebar, open } = useSidebar();
   const currentPaths = usePathname();
   const searchParams = useSearchParams();
@@ -101,13 +101,7 @@ export function AppHeader() {
                 variant={"ghost"}
                 className="bg-secondary/40"
                 onClick={() => {
-                  appStoreMutate((state) => ({
-                    voiceChat: {
-                      ...state.voiceChat,
-                      isOpen: true,
-                      agentId: undefined,
-                    },
-                  }));
+                  window.location.href = "/select-therapist";
                 }}
               >
                 <Mic className="size-4" />
@@ -115,7 +109,7 @@ export function AppHeader() {
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">
               <div className="text-xs flex items-center gap-2">
-                {t("KeyboardShortcuts.toggleVoiceChat")}
+                Select AI Therapist
               </div>
             </TooltipContent>
           </Tooltip>

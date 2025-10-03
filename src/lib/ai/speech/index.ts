@@ -23,6 +23,14 @@ export type VoiceChatOptions = {
   model?: string;
   voice?: string;
   currentThreadId?: string;
+  selectedTherapist?: {
+    name: string;
+    language: string;
+    languageCode: string;
+    specialization: string;
+    focus: string[];
+    description: string;
+  };
 };
 
 export type VoiceChatHook = (props?: {

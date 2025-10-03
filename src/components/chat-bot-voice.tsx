@@ -38,6 +38,8 @@ export function ChatBotVoice() {
     ]),
   );
 
+  const selectedTherapist = voiceChat.selectedTherapist;
+
   const [isClosing, setIsClosing] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
 
@@ -83,6 +85,7 @@ export function ChatBotVoice() {
   } = OpenAIVoiceChat({
     toolMentions,
     currentThreadId: currentThreadId || undefined,
+    selectedTherapist,
     ...voiceChat.options.providerOptions,
   });
 
@@ -223,11 +226,23 @@ export function ChatBotVoice() {
                 userSelect: "text",
               }}
             >
-              {/* Left side: Voice Session Header */}
+              {/* Left side: Voice Session Header with Therapist Info */}
               <div className="flex items-center gap-2 flex-shrink-0">
-                <div className="text-xs sm:text-sm font-medium text-muted-foreground">
-                  Voice Therapy Session
-                </div>
+                {selectedTherapist ? (
+                  <div className="flex flex-col">
+                    <div className="text-xs sm:text-sm font-semibold">
+                      {selectedTherapist.name}
+                    </div>
+                    <div className="text-[10px] sm:text-xs text-muted-foreground">
+                      {selectedTherapist.specialization} •{" "}
+                      {selectedTherapist.language}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-xs sm:text-sm font-medium text-muted-foreground">
+                    Voice Therapy Session
+                  </div>
+                )}
               </div>
 
               {/* Spacer */}

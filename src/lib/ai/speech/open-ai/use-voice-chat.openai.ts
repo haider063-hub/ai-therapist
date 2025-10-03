@@ -147,6 +147,7 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
             agentId: props?.agentId,
             mentions: props?.toolMentions,
             currentThreadId: props?.currentThreadId,
+            therapist: props?.selectedTherapist,
           }),
         },
       );

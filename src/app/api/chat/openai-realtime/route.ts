@@ -48,10 +48,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { voice, currentThreadId } = (await request.json()) as {
+    const { voice, currentThreadId, therapist } = (await request.json()) as {
       model: string;
       voice: string;
       currentThreadId?: string;
+      therapist?: {
+        name: string;
+        language: string;
+        languageCode: string;
+        specialization: string;
+        focus: string[];
+        description: string;
+      };
     };
 
     // Generate greeting based on user history
@@ -83,9 +91,32 @@ export async function POST(request: NextRequest) {
       // Use fallback greeting on error
     }
 
+    // Build therapist-specific system prompt
+    let therapistContext = "";
+    if (therapist) {
+      therapistContext = `
+
+THERAPIST IDENTITY:
+You are ${therapist.name}, an AI therapist specializing in ${therapist.specialization}.
+You speak fluently in ${therapist.language} and communicate EXCLUSIVELY in this language throughout the entire conversation.
+Your personality: ${therapist.description}
+
+SPECIALIZATION AREAS:
+${therapist.focus.map((f, i) => `${i + 1}. ${f}`).join("\n")}
+
+IMPORTANT INSTRUCTIONS:
+1. ALWAYS respond in ${therapist.language} language
+2. Use ${therapist.language} cultural context and expressions
+3. Focus your therapeutic approach on ${therapist.specialization}
+4. Embody the personality described: ${therapist.description}
+5. Reference your specialization areas when relevant
+6. Maintain a warm, professional therapeutic presence`;
+    }
+
     const systemPrompt = mergeSystemPrompt(
       buildSpeechSystemPrompt(session.user),
       historyContext, // Add history context to voice chat system prompt
+      therapistContext, // Add therapist-specific context
     );
 
     const bindingTools = [...DEFAULT_VOICE_TOOLS];

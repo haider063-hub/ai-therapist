@@ -4,6 +4,7 @@ import { ChatMention, ChatModel, ChatThread } from "app-types/chat";
 import { OPENAI_VOICE } from "lib/ai/speech/open-ai/use-voice-chat.openai";
 import { AppDefaultToolkit } from "lib/ai/tools";
 import { ArchiveWithItemCount } from "app-types/archive";
+import { Therapist } from "@/lib/constants/therapists";
 
 export interface AppState {
   threadList: ChatThread[];
@@ -29,6 +30,7 @@ export interface AppState {
   voiceChat: {
     isOpen: boolean;
     agentId?: string;
+    selectedTherapist?: Therapist;
     options: {
       provider: string;
       providerOptions?: Record<string, any>;
@@ -96,6 +98,7 @@ export const appStore = create<AppState & AppDispatch>()(
           ...initialState.voiceChat,
           ...state.voiceChat,
           isOpen: false,
+          selectedTherapist: state.voiceChat.selectedTherapist,
         },
       }),
     },
