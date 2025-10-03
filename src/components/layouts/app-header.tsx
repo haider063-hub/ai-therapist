@@ -116,16 +116,11 @@ export function AppHeader() {
                   }
                 }}
               >
-                <div className="flex flex-col items-start">
-                  <span className="text-sm font-semibold">Voice Chat</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Speak to Therapist
-                  </span>
-                </div>
+                <span className="text-sm font-medium">Voice Chat</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">
-              <div className="text-xs">Start a voice therapy session</div>
+              <div className="text-xs">Speak to Therapist</div>
             </TooltipContent>
           </Tooltip>
         </div>
