@@ -68,18 +68,6 @@ const PurePreviewMessage = ({
               );
             }
 
-            if (part.type === "image") {
-              return (
-                <div key={key} className="my-2 max-w-md">
-                  <img
-                    src={(part as any).image}
-                    alt="User uploaded image"
-                    className="rounded-lg border border-border max-w-full h-auto"
-                  />
-                </div>
-              );
-            }
-
             if (isUserMessage && part.type === "text" && part.text) {
               return (
                 <UserMessagePart

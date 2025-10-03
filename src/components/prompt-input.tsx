@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  Mic,
-  CornerRightUp,
-  PlusIcon,
-  Square,
-  XIcon,
-  ImageIcon,
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Mic, CornerRightUp, PlusIcon, Square, XIcon } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Button } from "ui/button";
+import { notImplementedToast } from "ui/shared-toast";
 import { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
@@ -19,7 +13,6 @@ import { useTranslations } from "next-intl";
 import equal from "lib/equal";
 import { DefaultToolName } from "lib/ai/tools";
 import { DefaultToolIcon } from "./default-tool-icon";
-import { toast } from "sonner";
 
 interface PromptInputProps {
   placeholder?: string;
@@ -55,9 +48,6 @@ export default function PromptInput({
     useShallow((state) => [state.threadMentions, state.mutate]),
   );
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-
   const mentions = useMemo<ChatMention[]>(() => {
     if (!threadId) return [];
     return threadMentions[threadId!] ?? [];
@@ -84,33 +74,16 @@ export default function PromptInput({
   const submit = () => {
     if (isLoading) return;
     const userMessage = input?.trim() || "";
-    if (userMessage.length === 0 && !selectedImage) return;
-
-    const parts: any[] = [];
-
-    // Add text first if present
-    if (userMessage.length > 0) {
-      parts.push({
-        type: "text",
-        text: userMessage,
-      });
-    }
-
-    // Add image if selected (AI SDK format)
-    if (selectedImage) {
-      parts.push({
-        type: "image",
-        image: selectedImage, // base64 data URL
-      });
-    }
-
+    if (userMessage.length === 0) return;
     setInput("");
-    setSelectedImage(null);
-    setImagePreview(null);
-
     sendMessage({
       role: "user",
-      parts,
+      parts: [
+        {
+          type: "text",
+          text: userMessage,
+        },
+      ],
     });
   };
 
@@ -142,31 +115,6 @@ export default function PromptInput({
     <div className="max-w-3xl mx-auto fade-in animate-in">
       <div className="z-10 mx-auto w-full max-w-3xl relative">
         <fieldset className="flex w-full min-w-0 max-w-full flex-col px-4">
-          {/* Image Preview */}
-          {imagePreview && (
-            <div className="mb-2 px-4">
-              <div className="relative inline-block">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="max-h-32 rounded-lg border border-border"
-                />
-                <Button
-                  variant={"ghost"}
-                  size={"icon"}
-                  className="absolute -top-2 -right-2 rounded-full h-6 w-6 p-0 bg-destructive hover:bg-destructive/80 text-destructive-foreground"
-                  onClick={() => {
-                    setSelectedImage(null);
-                    setImagePreview(null);
-                    toast.info("Image removed");
-                  }}
-                >
-                  <XIcon className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
           <div className="shadow-lg overflow-hidden rounded-4xl backdrop-blur-sm transition-all duration-200 bg-muted/60 relative flex w-full flex-col cursor-text z-10 items-stretch focus-within:bg-muted hover:bg-muted focus-within:ring-muted hover:ring-muted">
             {mentions.length > 0 && (
               <div className="bg-input rounded-b-sm rounded-t-3xl p-3 flex flex-col gap-4 mx-2 my-2">
@@ -219,84 +167,14 @@ export default function PromptInput({
                 />
               </div>
               <div className="flex w-full items-center z-30">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  id={`image-upload-${threadId}`}
-                  onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      // Check file size (max 5MB)
-                      if (file.size > 5 * 1024 * 1024) {
-                        toast.error("Image size must be less than 5MB");
-                        return;
-                      }
-
-                      // Convert to base64
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        const base64 = reader.result as string;
-                        setSelectedImage(base64);
-                        setImagePreview(base64);
-                        toast.success(
-                          "Image attached! You can now send your message.",
-                        );
-                      };
-                      reader.onerror = () => {
-                        toast.error("Failed to load image");
-                      };
-                      reader.readAsDataURL(file);
-                    }
-                    // Reset input
-                    e.target.value = "";
-                  }}
-                />
-
-                {selectedImage ? (
-                  <div className="relative group">
-                    <Button
-                      variant={"ghost"}
-                      size={"sm"}
-                      className="rounded-full hover:bg-input! p-2! relative"
-                    >
-                      <ImageIcon className="text-primary" />
-                      <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
-                        1
-                      </div>
-                    </Button>
-                    <Button
-                      variant={"ghost"}
-                      size={"icon"}
-                      className="absolute -top-2 -right-2 rounded-full h-5 w-5 p-0 bg-destructive hover:bg-destructive/80 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => {
-                        setSelectedImage(null);
-                        setImagePreview(null);
-                        toast.info("Image removed");
-                      }}
-                    >
-                      <XIcon className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={"ghost"}
-                        size={"sm"}
-                        className="rounded-full hover:bg-input! p-2!"
-                        onClick={() =>
-                          document
-                            .getElementById(`image-upload-${threadId}`)
-                            ?.click()
-                        }
-                      >
-                        <PlusIcon />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Add image</TooltipContent>
-                  </Tooltip>
-                )}
+                <Button
+                  variant={"ghost"}
+                  size={"sm"}
+                  className="rounded-full hover:bg-input! p-2!"
+                  onClick={notImplementedToast}
+                >
+                  <PlusIcon />
+                </Button>
 
                 <div className="flex-1" />
                 {!isLoading && !input.length ? (

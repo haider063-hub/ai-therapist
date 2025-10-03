@@ -12,7 +12,6 @@ import {
   Trash2,
   TriangleAlert,
   HammerIcon,
-  EllipsisIcon,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { Button } from "ui/button";
@@ -29,7 +28,7 @@ import { deleteMessageAction } from "@/app/api/chat/actions";
 
 import { toast } from "sonner";
 import { safe } from "ts-safe";
-import { ChatMetadata, ManualToolConfirmTag } from "app-types/chat";
+import { ManualToolConfirmTag } from "app-types/chat";
 
 import { useTranslations } from "next-intl";
 import { Separator } from "ui/separator";
@@ -40,7 +39,6 @@ import { DefaultToolName } from "lib/ai/tools";
 
 import dynamic from "next/dynamic";
 import { notify } from "lib/notify";
-import { ModelProviderIcon } from "ui/model-provider-icon";
 
 type MessagePart = UIMessage["parts"][number];
 type TextMessagePart = Extract<MessagePart, { type: "text" }>;
@@ -257,7 +255,6 @@ export const AssistMessagePart = memo(function AssistMessagePart({
   const { copied, copy } = useCopy();
   const [isDeleting, setIsDeleting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-  const metadata = message.metadata as ChatMetadata | undefined;
 
   const deleteMessage = useCallback(async () => {
     const ok = await notify.confirm({
@@ -309,55 +306,6 @@ export const AssistMessagePart = memo(function AssistMessagePart({
               Delete Message
             </TooltipContent>
           </Tooltip>
-          {metadata && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="size-3! p-4! opacity-0 group-hover/message:opacity-100 transition-opacity duration-300"
-                >
-                  <EllipsisIcon />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="p-4 w-72 bg-card border shadow-lg">
-                <div className="space-y-4">
-                  {metadata.chatModel && (
-                    <>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-foreground">
-                          Model
-                        </h4>
-                        <div className="flex gap-3 items-center">
-                          <ModelProviderIcon
-                            provider={metadata.chatModel.provider}
-                            className="size-5 flex-shrink-0"
-                          />
-                          <div className="space-y-0.5 flex-1">
-                            <div className="text-sm font-medium text-foreground">
-                              {metadata.chatModel.provider}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {metadata.chatModel.model}
-                              {metadata.toolCount !== undefined &&
-                                metadata.toolCount > 0 && (
-                                  <span className="ml-2">
-                                    • {metadata.toolCount} tools
-                                  </span>
-                                )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="border-t border-border/50" />
-                    </>
-                  )}
-
-                  {/* Token usage display removed for cleaner UI */}
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          )}
         </div>
       )}
       <div ref={ref} className="min-w-0" />
