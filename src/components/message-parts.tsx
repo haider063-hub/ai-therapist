@@ -353,59 +353,7 @@ export const AssistMessagePart = memo(function AssistMessagePart({
                     </>
                   )}
 
-                  {metadata.usage && (
-                    <>
-                      <div className="flex flex-col gap-2">
-                        <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
-                          Token Usage
-                          <span className="text-xs text-muted-foreground font-normal">
-                            {
-                              message.parts.filter(
-                                (v) => v.type != "step-start",
-                              ).length
-                            }{" "}
-                            Steps
-                          </span>
-                        </h4>
-                        <p className="px-2 mb-2 text-xs text-muted-foreground">
-                          High input token usage may occur when many tools are
-                          available.
-                        </p>
-                        <div className="space-y-2">
-                          {metadata.usage.inputTokens !== undefined && (
-                            <div className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/30">
-                              <span className="text-xs text-muted-foreground">
-                                Input
-                              </span>
-                              <span className="text-xs font-mono font-medium">
-                                {metadata.usage.inputTokens.toLocaleString()}
-                              </span>
-                            </div>
-                          )}
-                          {metadata.usage.outputTokens !== undefined && (
-                            <div className="flex items-center justify-between py-1 px-2 rounded-md bg-muted/30">
-                              <span className="text-xs text-muted-foreground">
-                                Output
-                              </span>
-                              <span className="text-xs font-mono font-medium">
-                                {metadata.usage.outputTokens.toLocaleString()}
-                              </span>
-                            </div>
-                          )}
-                          {metadata.usage.totalTokens !== undefined && (
-                            <div className="flex items-center justify-between py-1.5 px-2 rounded-md bg-primary/10 border border-primary/20">
-                              <span className="text-xs font-medium text-primary">
-                                Total
-                              </span>
-                              <span className="text-xs font-mono font-bold text-primary">
-                                {metadata.usage.totalTokens.toLocaleString()}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </>
-                  )}
+                  {/* Token usage display removed for cleaner UI */}
                 </div>
               </TooltipContent>
             </Tooltip>
