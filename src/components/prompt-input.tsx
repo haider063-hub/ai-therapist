@@ -88,19 +88,19 @@ export default function PromptInput({
 
     const parts: any[] = [];
 
-    // Add image if selected
-    if (selectedImage) {
-      parts.push({
-        type: "image",
-        image: selectedImage,
-      });
-    }
-
-    // Add text if present
+    // Add text first if present
     if (userMessage.length > 0) {
       parts.push({
         type: "text",
         text: userMessage,
+      });
+    }
+
+    // Add image if selected (AI SDK format)
+    if (selectedImage) {
+      parts.push({
+        type: "image",
+        image: selectedImage, // base64 data URL
       });
     }
 
