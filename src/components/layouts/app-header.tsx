@@ -19,7 +19,7 @@ import CreditDisplay from "@/components/credits/credit-display";
 
 export function AppHeader() {
   const t = useTranslations();
-  const [_appStoreMutate] = appStore(useShallow((state) => [state.mutate]));
+  const [appStoreMutate] = appStore(useShallow((state) => [state.mutate]));
   const { toggleSidebar, open } = useSidebar();
   const currentPaths = usePathname();
   const searchParams = useSearchParams();
@@ -101,7 +101,20 @@ export function AppHeader() {
                 variant={"ghost"}
                 className="bg-secondary/40"
                 onClick={() => {
-                  window.location.href = "/select-therapist";
+                  const voiceChat = appStore.getState().voiceChat;
+
+                  // If therapist already selected, open voice chat directly
+                  if (voiceChat.selectedTherapist) {
+                    appStoreMutate((state) => ({
+                      voiceChat: {
+                        ...state.voiceChat,
+                        isOpen: true,
+                      },
+                    }));
+                  } else {
+                    // No therapist selected, go to selection page
+                    window.location.href = "/select-therapist";
+                  }
                 }}
               >
                 <Mic className="size-4" />
@@ -109,7 +122,7 @@ export function AppHeader() {
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">
               <div className="text-xs flex items-center gap-2">
-                Select AI Therapist
+                {t("KeyboardShortcuts.toggleVoiceChat")}
               </div>
             </TooltipContent>
           </Tooltip>

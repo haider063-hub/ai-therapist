@@ -2,11 +2,7 @@ import { NextRequest } from "next/server";
 import { getSession } from "auth/server";
 import { mergeSystemPrompt } from "../shared.chat";
 import { buildSpeechSystemPrompt } from "lib/ai/prompts";
-import {
-  checkUserHistoryAction,
-  generateNewUserHeaderGreetingAction,
-  generateReturningUserHeaderGreetingAction,
-} from "../actions";
+import { checkUserHistoryAction } from "../actions";
 
 import { DEFAULT_VOICE_TOOLS } from "lib/ai/speech";
 import logger from "logger";
@@ -62,10 +58,25 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    // Generate greeting based on user history
+    // Generate greeting based on user history and therapist language
     let greeting =
       "Hello, I'm Econest, your AI therapist. How are you feeling today?";
     let historyContext = "";
+
+    // Generate greeting in therapist's language
+    if (therapist) {
+      const greetingsByLanguage: Record<string, string> = {
+        es: `Hola, soy ${therapist.name}. ¿Cómo te sientes hoy?`,
+        ja: `こんにちは、${therapist.name}です。今日の気分はどうですか？`,
+        ar: `مرحباً، أنا ${therapist.name}. كيف تشعر اليوم؟`,
+        fr: `Bonjour, je suis ${therapist.name}. Comment vous sentez-vous aujourd'hui?`,
+        en: `Hello, I'm ${therapist.name}. How are you feeling today?`,
+        de: `Guten Tag, ich bin ${therapist.name}. Wie fühlen Sie sich heute?`,
+        hi: `नमस्ते, मैं ${therapist.name} हूँ। आज आप कैसा महसूस कर रहे हैं?`,
+        ru: `Здравствуйте, я ${therapist.name}. Как вы себя чувствуете сегодня?`,
+      };
+      greeting = greetingsByLanguage[therapist.languageCode] || greeting;
+    }
 
     try {
       const historyResult = await checkUserHistoryAction(currentThreadId);
@@ -76,15 +87,12 @@ export async function POST(request: NextRequest) {
         historyResult.lastMessages &&
         historyResult.lastMessages.length > 0
       ) {
-        // Returning user - generate personalized greeting
-        greeting = await generateReturningUserHeaderGreetingAction(
-          historyResult.lastMessages,
-        );
+        // For returning users, keep greeting in therapist's language (already set above)
+        // The system prompt will enforce the language throughout the conversation
         // Add history context to system prompt for voice chat
         historyContext = `\n\nPREVIOUS CONVERSATION CONTEXT: The user previously discussed: ${historyResult.lastMessages.join(", ")}. Reference this context when appropriate to maintain conversation continuity.`;
       } else {
-        // New user - generate first-time greeting
-        greeting = await generateNewUserHeaderGreetingAction();
+        // New user greeting already set above based on therapist language
       }
     } catch (error) {
       logger.error(`Voice session greeting error:`, error);

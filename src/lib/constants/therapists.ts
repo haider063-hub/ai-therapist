@@ -7,7 +7,15 @@ export interface Therapist {
   specialization: string;
   focus: string[];
   description: string;
-  voiceType: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
+  voiceType:
+    | "alloy"
+    | "ash"
+    | "ballad"
+    | "coral"
+    | "echo"
+    | "sage"
+    | "shimmer"
+    | "verse";
   avatar?: string;
 }
 
@@ -21,7 +29,7 @@ export const THERAPISTS: Therapist[] = [
     specialization: "Trauma Recovery",
     focus: ["Trauma Recovery", "Anxiety Disorders", "PTSD"],
     description: "Warm, compassionate, and deeply empathetic",
-    voiceType: "nova", // Female voice
+    voiceType: "shimmer", // Female voice
   },
   {
     id: "yuki-tanaka",
@@ -43,7 +51,7 @@ export const THERAPISTS: Therapist[] = [
     specialization: "Depression",
     focus: ["Depression", "Couples Therapy", "Family Counseling"],
     description: "Patient, wise, and culturally sensitive",
-    voiceType: "onyx", // Male voice
+    voiceType: "echo", // Male voice
   },
   {
     id: "marcel-dubois",
@@ -65,7 +73,7 @@ export const THERAPISTS: Therapist[] = [
     specialization: "CBT",
     focus: ["Cognitive Behavioral Therapy", "Habit Change", "Goal Setting"],
     description: "Practical, supportive, and action-oriented",
-    voiceType: "nova", // Female voice
+    voiceType: "shimmer", // Female voice
   },
   {
     id: "hans-mueller",
@@ -98,7 +106,7 @@ export const THERAPISTS: Therapist[] = [
     specialization: "Jungian Analysis",
     focus: ["Jungian Analysis", "Dream Work", "Shadow Work"],
     description: "Insightful, deep, and psychologically perceptive",
-    voiceType: "alloy", // Female voice
+    voiceType: "coral", // Female voice
   },
 ];
 

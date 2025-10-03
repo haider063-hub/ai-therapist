@@ -21,15 +21,18 @@ import { Button } from "ui/button";
 import { Drawer, DrawerContent, DrawerPortal, DrawerTitle } from "ui/drawer";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
+import { Avatar, AvatarFallback } from "ui/avatar";
 
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import useSWR from "swr";
 import { fetcher } from "lib/utils";
 
 export function ChatBotVoice() {
   const t = useTranslations("Chat");
+  const router = useRouter();
   const [appStoreMutate, voiceChat, currentThreadId] = appStore(
     useShallow((state) => [
       state.mutate,
@@ -227,15 +230,23 @@ export function ChatBotVoice() {
               }}
             >
               {/* Left side: Voice Session Header with Therapist Info */}
-              <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="flex items-center gap-2 flex-shrink-0 flex-1">
                 {selectedTherapist ? (
-                  <div className="flex flex-col">
-                    <div className="text-xs sm:text-sm font-semibold">
-                      {selectedTherapist.name}
-                    </div>
-                    <div className="text-[10px] sm:text-xs text-muted-foreground">
-                      {selectedTherapist.specialization} •{" "}
-                      {selectedTherapist.language}
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8 rounded-full bg-white">
+                      <AvatarFallback className="bg-white text-black text-sm font-bold uppercase">
+                        {selectedTherapist.name.split(" ")[1]?.charAt(0) ||
+                          selectedTherapist.name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <div className="text-xs sm:text-sm font-semibold">
+                        {selectedTherapist.name}
+                      </div>
+                      <div className="text-[10px] sm:text-xs text-muted-foreground">
+                        {selectedTherapist.specialization} •{" "}
+                        {selectedTherapist.language}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -245,8 +256,29 @@ export function ChatBotVoice() {
                 )}
               </div>
 
-              {/* Spacer */}
-              <div className="flex-1" />
+              {/* Setup Button */}
+              {!isActive && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex-shrink-0 text-xs h-8"
+                  onClick={() => {
+                    // Close voice chat drawer first
+                    appStoreMutate({
+                      voiceChat: {
+                        ...voiceChat,
+                        isOpen: false,
+                      },
+                    });
+                    // Then navigate to selection page
+                    setTimeout(() => {
+                      router.push("/select-therapist");
+                    }, 100);
+                  }}
+                >
+                  {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
+                </Button>
+              )}
 
               {/* Right side: Credits with Dropdown */}
               <Popover>

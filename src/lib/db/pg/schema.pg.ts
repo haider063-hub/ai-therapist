@@ -71,6 +71,9 @@ export const UserSchema = pgTable("user", {
   // Session Tracking
   totalChatSessions: integer("total_chat_sessions").default(0).notNull(), // Count of chat threads
   totalVoiceSessions: integer("total_voice_sessions").default(0).notNull(), // Count of completed voice sessions
+
+  // Selected AI Therapist for Voice
+  selectedTherapistId: text("selected_therapist_id"), // ID of selected therapist (e.g., "yuki-tanaka")
 });
 
 // Session table

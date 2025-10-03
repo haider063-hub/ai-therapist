@@ -15,6 +15,7 @@ import { useState } from "react";
 import { appStore } from "@/app/store";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback } from "ui/avatar";
+import { toast } from "sonner";
 
 export function TherapistSelection() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -37,35 +38,83 @@ export function TherapistSelection() {
     return matchesSearch && matchesLanguage;
   });
 
-  const handleSelectTherapist = (therapist: Therapist) => {
-    // Store selected therapist in app store
-    appStore.setState((state) => ({
-      voiceChat: {
-        ...state.voiceChat,
-        selectedTherapist: therapist,
-        isOpen: true,
-        options: {
-          ...state.voiceChat.options,
-          providerOptions: {
-            ...state.voiceChat.options.providerOptions,
-            voice: therapist.voiceType,
+  const handleSelectTherapist = async (therapist: Therapist) => {
+    // Save to database
+    try {
+      const response = await fetch("/api/user/select-therapist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ therapistId: therapist.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save therapist");
+      }
+
+      // Store selected therapist in app store
+      appStore.setState((state) => ({
+        voiceChat: {
+          ...state.voiceChat,
+          selectedTherapist: therapist,
+          isOpen: true,
+          options: {
+            ...state.voiceChat.options,
+            providerOptions: {
+              ...state.voiceChat.options.providerOptions,
+              voice: therapist.voiceType,
+            },
           },
         },
-      },
-    }));
+      }));
 
-    // Navigate to home where voice chat will open
-    router.push("/");
+      toast.success(`Selected ${therapist.name}`);
+
+      // Navigate to home where voice chat will open
+      router.push("/");
+    } catch (error) {
+      console.error("Error selecting therapist:", error);
+      toast.error("Failed to select therapist");
+    }
   };
 
   const handlePreview = async (therapist: Therapist) => {
-    // Optional: Implement voice preview
-    console.log("Preview voice for:", therapist.name);
-    // You can add a small audio sample or TTS preview here
+    try {
+      toast.info(`Playing ${therapist.name}'s voice preview...`);
+
+      // Generate a preview message in therapist's language
+      const previewMessages: Record<string, string> = {
+        es: "Hola, soy la Dra. Sofia Martinez. Estoy aquí para ayudarte con trauma y ansiedad.",
+        ja: "こんにちは、田中由紀です。マインドフルネスとストレス管理をお手伝いします。",
+        ar: "مرحباً، أنا الدكتور أحمد الراشد. أنا هنا لمساعدتك في الاكتئاب والعلاقات.",
+        fr: "Bonjour, je suis le Dr. Marcel Dubois. Je me spécialise en thérapie existentielle.",
+        en: "Hello, I'm Dr. Emma Johnson. I specialize in Cognitive Behavioral Therapy.",
+        de: "Guten Tag, ich bin Dr. Hans Mueller. Ich bin spezialisiert auf kognitive Verhaltenstherapie.",
+        hi: "नमस्ते, मैं डॉ. प्रिया शर्मा हूँ। मैं समग्र और आध्यात्मिक कल्याण में विशेषज्ञ हूँ।",
+        ru: "Здравствуйте, я доктор Елена Волкова. Я специализируюсь на глубинной психологии.",
+      };
+
+      const previewText =
+        previewMessages[therapist.languageCode] ||
+        "Hello, this is a voice preview.";
+
+      // Use browser's Speech Synthesis API for preview
+      const utterance = new SpeechSynthesisUtterance(previewText);
+      utterance.lang = therapist.languageCode;
+      utterance.rate = 0.9;
+      // Female voices: shimmer, coral, ballad, sage
+      // Male voices: echo, ash, verse, alloy
+      const femaleVoices = ["shimmer", "coral", "ballad", "sage"];
+      utterance.pitch = femaleVoices.includes(therapist.voiceType) ? 1.2 : 0.85;
+
+      window.speechSynthesis.speak(utterance);
+    } catch (error) {
+      console.error("Preview error:", error);
+      toast.error("Voice preview not available");
+    }
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 md:p-8">
+    <div className="flex-1 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
