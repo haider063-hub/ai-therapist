@@ -1,9 +1,8 @@
 "use client";
 
-import { Mic, CornerRightUp, PlusIcon, Square, XIcon } from "lucide-react";
+import { Mic, CornerRightUp, Square, XIcon } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Button } from "ui/button";
-import { notImplementedToast } from "ui/shared-toast";
 import { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
@@ -167,15 +166,6 @@ export default function PromptInput({
                 />
               </div>
               <div className="flex w-full items-center z-30">
-                <Button
-                  variant={"ghost"}
-                  size={"sm"}
-                  className="rounded-full hover:bg-input! p-2!"
-                  onClick={notImplementedToast}
-                >
-                  <PlusIcon />
-                </Button>
-
                 <div className="flex-1" />
                 {!isLoading && !input.length ? (
                   <Tooltip>
