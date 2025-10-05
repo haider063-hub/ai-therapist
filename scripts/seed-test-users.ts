@@ -1,12 +1,3 @@
-#!/usr/bin/env tsx
-/**
- * Script to seed test users using Better Auth's APIs
- * Creates 21 users with proper password hashing via Better Auth
- *
- * Usage:
- *   pnpm test:e2e:seed
- */
-
 import { config } from "dotenv";
 
 import { TEST_USERS } from "../tests/constants/test-users";
