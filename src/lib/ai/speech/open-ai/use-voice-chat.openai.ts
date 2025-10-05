@@ -78,6 +78,9 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
   const { model = "gpt-4o-realtime-preview", voice = OPENAI_VOICE.Ash } =
     props || {};
 
+  // Make selectedLanguage reactive to props changes
+  const selectedLanguage = props?.selectedLanguage || "en";
+
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [isAssistantSpeaking, setIsAssistantSpeaking] = useState(false);
   const [isActive, setIsActive] = useState(false);
@@ -134,6 +137,16 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
 
   const createSession =
     useCallback(async (): Promise<OpenAIRealtimeSession> => {
+      const requestBody = {
+        model,
+        voice,
+        agentId: props?.agentId,
+        mentions: props?.toolMentions,
+        currentThreadId: props?.currentThreadId,
+        therapist: props?.selectedTherapist,
+        selectedLanguage: selectedLanguage,
+      };
+
       const response = await fetch(
         `/api/chat/openai-realtime?model=${model}&voice=${voice}`,
         {
@@ -141,14 +154,7 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            model,
-            voice,
-            agentId: props?.agentId,
-            mentions: props?.toolMentions,
-            currentThreadId: props?.currentThreadId,
-            therapist: props?.selectedTherapist,
-          }),
+          body: JSON.stringify(requestBody),
         },
       );
       if (response.status !== 200) {
@@ -176,6 +182,8 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
       props?.toolMentions,
       props?.agentId,
       props?.currentThreadId,
+      props?.selectedTherapist,
+      selectedLanguage,
     ]);
 
   const updateUIMessage = useCallback(

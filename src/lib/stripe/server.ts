@@ -38,78 +38,83 @@ export const STRIPE_PRICE_IDS = {
 export const SUBSCRIPTION_PLANS = {
   CHAT_ONLY: {
     name: "chat_only",
-    displayName: "Chat Only Plan",
+    displayName: "Chat Only",
     price: 19.0,
     stripePriceId: STRIPE_PRICE_IDS.CHAT_ONLY,
     chatCreditsPerMessage: 5,
-    voiceCreditsPerInteraction: 10,
+    voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
     dailyVoiceCredits: 0, // No voice access
     monthlyVoiceCredits: 0, // No voice access
     unlimitedChat: true,
     unlimitedVoice: false,
+    isOneTimePayment: false, // Monthly subscription
     features: [
-      "Unlimited chat sessions",
+      "Unlimited chat credits",
       "Basic mood tracking",
       "Progress insights",
       "24/7 availability",
-      "Voice is disabled",
+      "Crisis-mode support",
     ],
   },
   VOICE_ONLY: {
     name: "voice_only",
-    displayName: "Voice Only Plan",
+    displayName: "Voice Only",
     price: 49.0,
     stripePriceId: STRIPE_PRICE_IDS.VOICE_ONLY,
     chatCreditsPerMessage: 5,
-    voiceCreditsPerInteraction: 10,
-    dailyVoiceCredits: 300, // 300 credits per day
-    monthlyVoiceCredits: 9000, // ~9000 credits per month
+    voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
+    dailyVoiceCredits: 1000, // 1000 credits (≈ 100 minutes)
+    monthlyVoiceCredits: 1000, // 1000 credits per month
     unlimitedChat: false,
     unlimitedVoice: false,
+    isOneTimePayment: false, // Monthly subscription
     features: [
-      "300 voice credits daily (~9000/month)",
-      "Natural conversation",
+      "1,000 voice credits",
+      "Human-like conversation",
       "Advanced mood tracking",
       "Personalized insights",
       "Priority support",
-      "Chat is disabled",
     ],
   },
-  PREMIUM: {
-    name: "premium",
-    displayName: "Premium Plan",
-    price: 99.0,
+  VOICE_CHAT: {
+    name: "voice_chat",
+    displayName: "Voice + Chat",
+    price: 69.0,
     stripePriceId: STRIPE_PRICE_IDS.PREMIUM,
     chatCreditsPerMessage: 5,
-    voiceCreditsPerInteraction: 10,
-    dailyVoiceCredits: 300, // Daily limit for tracking
-    monthlyVoiceCredits: 9000, // Monthly limit for tracking
+    voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
+    dailyVoiceCredits: 1400, // 1400 credits (≈ 140 minutes)
+    monthlyVoiceCredits: 1400, // 1400 credits per month
     unlimitedChat: true,
-    unlimitedVoice: true,
+    unlimitedVoice: false,
+    isOneTimePayment: false, // Monthly subscription
     features: [
-      "300 voice credits daily (~9000/month)",
-      "Unlimited chat sessions",
-      "Switch between modes",
-      "Premium insights",
-      "Crisis support access",
+      "Everything in Voice Only",
+      "1,400 voice credits",
+      "Unlimited chat conversations",
+      "Advanced mood tracking",
+      "Crisis-mode support",
     ],
   },
   VOICE_TOPUP: {
     name: "voice_topup",
     displayName: "Voice Top-Up",
-    price: 15.0,
+    price: 19.0,
     stripePriceId: STRIPE_PRICE_IDS.VOICE_TOPUPS,
     chatCreditsPerMessage: 0,
-    voiceCreditsPerInteraction: 10,
+    voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
     dailyVoiceCredits: 0,
     monthlyVoiceCredits: 0,
     unlimitedChat: false,
     unlimitedVoice: false,
-    creditsAdded: 1000, // 1000 voice credits
+    creditsAdded: 300, // 300 voice credits (≈ 30 minutes)
+    isOneTimePayment: true, // This is a one-time purchase, not monthly
     features: [
-      "1000 voice credits",
-      "Pay-as-you-go (no subscription required)",
+      "300 voice credits",
       "Instant availability",
+      "No subscription required",
+      "Works with any plan",
+      "Purchase as many as you want",
     ],
   },
 } as const;
@@ -117,10 +122,10 @@ export const SUBSCRIPTION_PLANS = {
 // Credit costs for free trial users
 export const CREDIT_COSTS = {
   CHAT_MESSAGE: 5,
-  VOICE_INTERACTION: 10,
+  VOICE_PER_MINUTE: 10, // 10 credits per minute (user + bot duration)
 } as const;
 
-// Free trial starting credits (split into 250 chat + 250 voice)
-export const FREE_TRIAL_CREDITS = 500;
-export const FREE_TRIAL_CHAT_CREDITS = 250;
-export const FREE_TRIAL_VOICE_CREDITS = 250;
+// Free trial starting credits (split into 200 chat + 200 voice)
+export const FREE_TRIAL_CREDITS = 400;
+export const FREE_TRIAL_CHAT_CREDITS = 200;
+export const FREE_TRIAL_VOICE_CREDITS = 200;

@@ -70,7 +70,7 @@ export class CreditService {
       const creditsToDeduct =
         featureType === "chat"
           ? CREDIT_COSTS.CHAT_MESSAGE
-          : CREDIT_COSTS.VOICE_INTERACTION;
+          : CREDIT_COSTS.VOICE_PER_MINUTE;
 
       // Check if user can use the feature first
       const canUse = await this.canUseFeature(userId, featureType);
@@ -116,6 +116,84 @@ export class CreditService {
       return {
         success: false,
         reason: "Failed to process credit deduction",
+      };
+    }
+  }
+
+  /**
+   * Deduct credits for voice usage based on actual audio duration
+   * @param userId - User ID
+   * @param userAudioDuration - User audio duration in seconds
+   * @param botAudioDuration - Bot audio duration in seconds
+   * @param threadId - Thread ID for logging
+   */
+  async deductVoiceCreditsByDuration(
+    userId: string,
+    userAudioDuration: number,
+    botAudioDuration: number,
+    threadId?: string,
+  ): Promise<{
+    success: boolean;
+    reason?: string;
+    creditsUsed?: number;
+    remainingCredits?: number;
+    minutesUsed?: number;
+  }> {
+    try {
+      // Calculate total duration and minutes used
+      const totalSeconds = userAudioDuration + botAudioDuration;
+      const minutesUsed = Math.ceil(totalSeconds / 60); // Round up to nearest minute
+      const creditsToDeduct = minutesUsed * CREDIT_COSTS.VOICE_PER_MINUTE;
+
+      // Check if user can use voice feature
+      const canUse = await this.canUseFeature(userId, "voice");
+      if (!canUse.canUse) {
+        return {
+          success: false,
+          reason: canUse.reason,
+        };
+      }
+
+      // Deduct credits
+      const updatedUser = await subscriptionRepository.deductCredits(
+        userId,
+        creditsToDeduct,
+        "voice",
+      );
+      if (!updatedUser) {
+        return {
+          success: false,
+          reason: "Failed to deduct credits",
+        };
+      }
+
+      // Log the usage
+      await subscriptionRepository.createUsageLog({
+        userId,
+        type: "voice",
+        creditsUsed: creditsToDeduct,
+        threadId: threadId || null,
+        metadata: {
+          timestamp: new Date().toISOString(),
+          userAudioDuration,
+          botAudioDuration,
+          totalSeconds,
+          minutesUsed,
+          featureType: "voice",
+        },
+      });
+
+      return {
+        success: true,
+        creditsUsed: creditsToDeduct,
+        remainingCredits: updatedUser.credits,
+        minutesUsed,
+      };
+    } catch (error) {
+      logger.error("Error deducting voice credits by duration:", error);
+      return {
+        success: false,
+        reason: "Failed to process voice credit deduction",
       };
     }
   }

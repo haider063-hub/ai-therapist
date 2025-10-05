@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "auth/server";
 import { pgChatRepository } from "lib/db/pg/repositories/chat-repository.pg";
-import { subscriptionRepository } from "lib/db/pg/repositories/subscription-repository.pg";
 import { moodTrackingService } from "lib/services/mood-tracking-service";
+import { creditService } from "lib/services/credit-service";
 import logger from "logger";
-
-const VOICE_SESSION_COST = 50; // 50 credits per session
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,24 +12,42 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { threadId, messages } = await request.json().catch(() => ({
-      threadId: null,
-      messages: null,
-    }));
+    const { threadId, messages, userAudioDuration, botAudioDuration } =
+      await request.json().catch(() => ({
+        threadId: null,
+        messages: null,
+        userAudioDuration: 0,
+        botAudioDuration: 0,
+      }));
 
-    // Deduct 50 credits for the voice session
-    try {
-      await subscriptionRepository.deductCredits(
-        session.user.id,
-        VOICE_SESSION_COST,
-        "voice",
-      );
-    } catch (creditError) {
-      logger.error("Failed to deduct voice session credits:", creditError);
-      return NextResponse.json(
-        { error: "Insufficient credits" },
-        { status: 402 },
-      );
+    // Deduct credits based on actual audio duration if provided
+    if (userAudioDuration > 0 || botAudioDuration > 0) {
+      try {
+        const result = await creditService.deductVoiceCreditsByDuration(
+          session.user.id,
+          userAudioDuration || 0,
+          botAudioDuration || 0,
+          threadId,
+        );
+
+        if (!result.success) {
+          logger.error(
+            "Failed to deduct voice session credits:",
+            result.reason,
+          );
+          return NextResponse.json({ error: result.reason }, { status: 402 });
+        }
+
+        logger.info(
+          `Voice session credits deducted: ${result.creditsUsed} credits for ${result.minutesUsed} minutes`,
+        );
+      } catch (creditError) {
+        logger.error("Failed to deduct voice session credits:", creditError);
+        return NextResponse.json(
+          { error: "Insufficient credits" },
+          { status: 402 },
+        );
+      }
     }
 
     // Increment voice session count

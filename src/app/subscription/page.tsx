@@ -383,6 +383,11 @@ export default function SubscriptionPage() {
                   <Badge variant="secondary">Current Plan</Badge>
                 </div>
               )}
+              {plan.id === "voice_chat" && (
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                  <Badge variant="secondary">Most Popular</Badge>
+                </div>
+              )}
               <CardHeader className="text-center">
                 <div className="flex justify-center mb-2">
                   {getPlanIcon(plan.id)}
@@ -422,8 +427,14 @@ export default function SubscriptionPage() {
                         plan.id !== "voice_topup"
                       ? "Current Plan"
                       : plan.id === "voice_topup"
-                        ? "Buy Credits"
-                        : "Upgrade"}
+                        ? "Buy Voice Credits"
+                        : plan.id === "chat_only"
+                          ? "Start Chat Plan"
+                          : plan.id === "voice_only"
+                            ? "Start Voice Plan"
+                            : plan.id === "voice_chat"
+                              ? "Start Premium Plan"
+                              : "Upgrade"}
                 </Button>
               </CardContent>
             </Card>

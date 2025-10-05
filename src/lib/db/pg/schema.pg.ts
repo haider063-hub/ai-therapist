@@ -28,16 +28,19 @@ export const UserSchema = pgTable("user", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 
   // Subscription and Credit System Fields
-  credits: integer("credits").default(500).notNull(), // Legacy field - kept for backward compatibility
-  subscriptionType: text("subscription_type").default("free_trial").notNull(), // free_trial, chat_only, voice_only, premium
+  credits: integer("credits").default(400).notNull(), // Legacy field - kept for backward compatibility
+  subscriptionType: text("subscription_type").default("free_trial").notNull(), // free_trial, chat_only, voice_only, voice_chat
   subscriptionStatus: text("subscription_status").default("active").notNull(), // active, canceled, past_due, incomplete
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+
+  // User Preferences
+  preferredLanguage: text("preferred_language").default("en").notNull(), // Language code: en, es, ja, ar, fr, de, hi, ru
   subscriptionEndDate: timestamp("subscription_end_date"),
 
   // Separate Chat & Voice Credits System
-  chatCredits: integer("chat_credits").default(250).notNull(), // Chat credits from free trial
-  voiceCredits: integer("voice_credits").default(250).notNull(), // Voice credits from free trial
+  chatCredits: integer("chat_credits").default(200).notNull(), // Chat credits from free trial
+  voiceCredits: integer("voice_credits").default(200).notNull(), // Voice credits from free trial
   chatCreditsFromTopup: integer("chat_credits_from_topup").default(0).notNull(), // Chat credits from purchases
   voiceCreditsFromTopup: integer("voice_credits_from_topup")
     .default(0)
@@ -237,13 +240,14 @@ export const SubscriptionPlanSchema = pgTable("subscription_plan", {
   chatCreditsPerMessage: integer("chat_credits_per_message")
     .default(5)
     .notNull(),
-  voiceCreditsPerInteraction: integer("voice_credits_per_interaction")
+  voiceCreditsPerMinute: integer("voice_credits_per_minute")
     .default(10)
     .notNull(),
   dailyVoiceCredits: integer("daily_voice_credits").default(300).notNull(),
   monthlyVoiceCredits: integer("monthly_voice_credits").default(9000).notNull(),
   unlimitedChat: boolean("unlimited_chat").default(false).notNull(),
   unlimitedVoice: boolean("unlimited_voice").default(false).notNull(),
+  isOneTimePayment: boolean("is_one_time_payment").default(false).notNull(), // For top-ups and one-time purchases
   features: json("features").$type<string[]>(), // Array of feature descriptions
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

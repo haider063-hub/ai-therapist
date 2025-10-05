@@ -11,6 +11,8 @@ import {
   ChevronDown,
   TriangleAlertIcon,
   ArrowLeft,
+  Languages,
+  User,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { safe } from "ts-safe";
@@ -19,6 +21,13 @@ import { Button } from "ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { Popover, PopoverContent, PopoverTrigger } from "ui/popover";
 import { Avatar, AvatarFallback, AvatarImage } from "ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "ui/select";
 
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
@@ -37,7 +46,105 @@ export default function VoiceChatPage() {
   const selectedTherapist = voiceChat.selectedTherapist;
 
   const [isClosing, setIsClosing] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+  const [userHasSelectedLanguage, setUserHasSelectedLanguage] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
+
+  // Load user's preferred language on component mount
+  useEffect(() => {
+    const loadPreferredLanguage = async () => {
+      try {
+        const response = await fetch("/api/user/preferred-language");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.language) {
+            console.log(
+              "✅ Loaded preferred language from database:",
+              data.language,
+            );
+            setSelectedLanguage(data.language);
+            setUserHasSelectedLanguage(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading preferred language:", error);
+      }
+    };
+
+    loadPreferredLanguage();
+  }, []);
+
+  // Parse therapist languages
+  const getAvailableLanguages = useCallback(() => {
+    if (!selectedTherapist) return [];
+
+    const languages = selectedTherapist.language.split(" • ");
+    const uniqueLanguages: { label: string; value: string }[] = [];
+    const seenCodes = new Set<string>();
+
+    languages.forEach((lang, _index) => {
+      const trimmedLang = lang.trim();
+      // Map language names to language codes
+      const langCode = trimmedLang.toLowerCase().includes("english")
+        ? "en"
+        : trimmedLang.toLowerCase().includes("spanish")
+          ? "es"
+          : trimmedLang.toLowerCase().includes("japanese")
+            ? "ja"
+            : trimmedLang.toLowerCase().includes("arabic")
+              ? "ar"
+              : trimmedLang.toLowerCase().includes("french")
+                ? "fr"
+                : trimmedLang.toLowerCase().includes("german")
+                  ? "de"
+                  : trimmedLang.toLowerCase().includes("hindi")
+                    ? "hi"
+                    : trimmedLang.toLowerCase().includes("russian")
+                      ? "ru"
+                      : "en"; // default to English for unknown languages
+
+      // Only add if we haven't seen this language code before
+      if (!seenCodes.has(langCode)) {
+        seenCodes.add(langCode);
+        uniqueLanguages.push({
+          label: trimmedLang,
+          value: langCode,
+        });
+      }
+    });
+
+    console.log("🔍 Debug - getAvailableLanguages result:", uniqueLanguages);
+    return uniqueLanguages;
+  }, [selectedTherapist]);
+
+  // Memoize available languages to prevent unnecessary recalculations
+  const availableLanguages = useMemo(
+    () => getAvailableLanguages(),
+    [selectedTherapist],
+  );
+
+  // Debug logging (can be removed in production)
+  // console.log("🔍 Debug - availableLanguages:", availableLanguages);
+  // console.log("🔍 Debug - selectedLanguage:", selectedLanguage);
+  // console.log("🔍 Debug - selectedTherapist:", selectedTherapist?.name);
+  // console.log("🔍 Debug - userHasSelectedLanguage:", userHasSelectedLanguage);
+
+  // Set default language when therapist changes (only if user hasn't selected manually)
+  useEffect(() => {
+    if (
+      selectedTherapist &&
+      availableLanguages.length > 0 &&
+      !userHasSelectedLanguage
+    ) {
+      // console.log("🔍 Debug - Setting default language to:", availableLanguages[0]);
+      setSelectedLanguage(availableLanguages[0].value);
+    }
+  }, [selectedTherapist, availableLanguages, userHasSelectedLanguage]);
+
+  // Debug when selectedLanguage changes (can be removed in production)
+  // useEffect(() => {
+  //   console.log("🔍 Debug - selectedLanguage changed to:", selectedLanguage);
+  // }, [selectedLanguage]);
 
   // Fetch credit status
   const { data: creditStatus, mutate: mutateCredits } = useSWR(
@@ -82,6 +189,7 @@ export default function VoiceChatPage() {
     toolMentions,
     currentThreadId: currentThreadId || undefined,
     selectedTherapist,
+    selectedLanguage, // Pass selected language for initial greeting
     ...voiceChat.options.providerOptions,
   });
 
@@ -266,16 +374,65 @@ export default function VoiceChatPage() {
             )}
           </div>
 
-          {/* Setup Button */}
+          {/* Action Buttons */}
           {!isActive && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-shrink-0 text-xs h-8"
-              onClick={() => router.push("/therapists")}
-            >
-              {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
-            </Button>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {/* Language Selector */}
+              {selectedTherapist && availableLanguages.length > 1 && (
+                <Select
+                  key={`desktop-${selectedLanguage}`}
+                  value={selectedLanguage}
+                  onValueChange={async (value) => {
+                    setUserHasSelectedLanguage(true);
+                    setSelectedLanguage(value);
+
+                    // Save to database
+                    try {
+                      const response = await fetch(
+                        "/api/user/preferred-language",
+                        {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ language: value }),
+                        },
+                      );
+                      if (response.ok) {
+                        console.log(
+                          "✅ Saved preferred language to database:",
+                          value,
+                        );
+                      }
+                    } catch (error) {
+                      console.error("Error saving preferred language:", error);
+                    }
+                  }}
+                  disabled={false}
+                >
+                  <SelectTrigger className="h-8 px-3 py-2 text-xs border border-input bg-background whitespace-nowrap min-w-[120px] min-h-[36px]">
+                    <Languages className="h-3.5 w-3.5 mr-1" />
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableLanguages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {/* Change Therapist Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 px-3 py-2 text-xs whitespace-nowrap min-w-[120px] min-h-[36px]"
+                onClick={() => router.push("/therapists")}
+              >
+                <User className="h-3.5 w-3.5 mr-1" />
+                {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
+              </Button>
+            </div>
           )}
 
           {/* Credits */}
@@ -356,7 +513,7 @@ export default function VoiceChatPage() {
                   size="icon"
                   className="flex-shrink-0 h-8 w-8"
                   onClick={handleBackButton}
-                  disabled={isActive}
+                  disabled={false}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
@@ -449,16 +606,65 @@ export default function VoiceChatPage() {
             </Popover>
           </div>
 
-          {/* Bottom Row: Change Therapist Button - Only if not active */}
+          {/* Bottom Row: Action Buttons - Only if not active */}
           {!isActive && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full text-xs h-8"
-              onClick={() => router.push("/therapists")}
-            >
-              {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
-            </Button>
+            <div className="flex gap-2 w-full">
+              {/* Language Selector */}
+              {selectedTherapist && availableLanguages.length > 1 && (
+                <Select
+                  key={`mobile-${selectedLanguage}`}
+                  value={selectedLanguage}
+                  onValueChange={async (value) => {
+                    setUserHasSelectedLanguage(true);
+                    setSelectedLanguage(value);
+
+                    // Save to database
+                    try {
+                      const response = await fetch(
+                        "/api/user/preferred-language",
+                        {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ language: value }),
+                        },
+                      );
+                      if (response.ok) {
+                        console.log(
+                          "✅ Saved preferred language to database:",
+                          value,
+                        );
+                      }
+                    } catch (error) {
+                      console.error("Error saving preferred language:", error);
+                    }
+                  }}
+                  disabled={false}
+                >
+                  <SelectTrigger className="flex-1 h-8 px-3 py-2 text-xs border border-input bg-background whitespace-nowrap min-h-[36px]">
+                    <Languages className="h-3.5 w-3.5 mr-1" />
+                    <SelectValue placeholder="Language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availableLanguages.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {/* Change Therapist Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                className={`h-8 px-3 py-2 text-xs whitespace-nowrap min-h-[36px] ${selectedTherapist && availableLanguages.length > 1 ? "flex-1" : "w-full"}`}
+                onClick={() => router.push("/therapists")}
+              >
+                <User className="h-3.5 w-3.5 mr-1" />
+                {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
+              </Button>
+            </div>
           )}
         </div>
       </div>
@@ -594,7 +800,7 @@ export default function VoiceChatPage() {
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>End session and deduct 50 credits</p>
+              <p>End session</p>
             </TooltipContent>
           </Tooltip>
         )}

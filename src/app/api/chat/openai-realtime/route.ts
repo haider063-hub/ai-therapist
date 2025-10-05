@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
         JSON.stringify({ error: "OPENAI_API_KEY is not set" }),
         {
           status: 500,
+          headers: { "Content-Type": "application/json" },
         },
       );
     }
@@ -22,7 +23,10 @@ export async function POST(request: NextRequest) {
     const session = await getSession();
 
     if (!session?.user.id) {
-      return new Response("Unauthorized", { status: 401 });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     // Check if user can use voice feature
@@ -44,34 +48,83 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { voice, currentThreadId, therapist } = (await request.json()) as {
-      model: string;
-      voice: string;
-      currentThreadId?: string;
-      therapist?: {
-        name: string;
-        language: string;
-        languageCode: string;
-        specialization: string;
-        focus: string[];
-        description: string;
+    const { voice, currentThreadId, therapist, selectedLanguage } =
+      (await request.json()) as {
+        model: string;
+        voice: string;
+        currentThreadId?: string;
+        selectedLanguage?: string;
+        therapist?: {
+          name: string;
+          language: string;
+          languageCode: string;
+          specialization: string;
+          focus: string[];
+          description: string;
+        };
       };
-    };
 
     // Generate AI-powered dynamic greeting
     let greeting = "Hello! How are you feeling today?";
     let historyContext = "";
+    let languageToUse = "English"; // default
 
     try {
       const historyResult = await checkUserHistoryAction(currentThreadId);
 
       // Generate dynamic AI greeting using GPT
       if (therapist) {
+        // Determine the language to use based on selectedLanguage
+
+        if (selectedLanguage === "en") {
+          languageToUse = "English";
+        } else if (selectedLanguage === "es") {
+          languageToUse = "Spanish";
+        } else if (selectedLanguage === "ja") {
+          languageToUse = "Japanese";
+        } else if (selectedLanguage === "ar") {
+          languageToUse = "Arabic";
+        } else if (selectedLanguage === "fr") {
+          languageToUse = "French";
+        } else if (selectedLanguage === "de") {
+          languageToUse = "German";
+        } else if (selectedLanguage === "hi") {
+          languageToUse = "Hindi";
+        } else if (selectedLanguage === "ru") {
+          languageToUse = "Russian";
+        } else {
+          // Fallback: try to find the language in therapist's language string
+          const languages = therapist.language.split(" • ");
+          const selectedLangObj = languages.find(
+            (lang) =>
+              (selectedLanguage === "es" &&
+                lang.toLowerCase().includes("spanish")) ||
+              (selectedLanguage === "ja" &&
+                lang.toLowerCase().includes("japanese")) ||
+              (selectedLanguage === "ar" &&
+                lang.toLowerCase().includes("arabic")) ||
+              (selectedLanguage === "fr" &&
+                lang.toLowerCase().includes("french")) ||
+              (selectedLanguage === "de" &&
+                lang.toLowerCase().includes("german")) ||
+              (selectedLanguage === "hi" &&
+                lang.toLowerCase().includes("hindi")) ||
+              (selectedLanguage === "ru" &&
+                lang.toLowerCase().includes("russian")),
+          );
+          languageToUse = selectedLangObj || "English";
+        }
+
+        // Debug logging
+        logger.info(
+          `Language selection: selectedLanguage=${selectedLanguage}, languageToUse=${languageToUse}`,
+        );
+
         const greetingPrompt = `You are ${therapist.name}, an AI therapist from EcoNest specializing in ${therapist.specialization}.
 Generate a warm, natural, and personalized greeting for a therapy session.
 
 IMPORTANT INSTRUCTIONS:
-- Speak EXCLUSIVELY in ${therapist.language} language
+- Speak EXCLUSIVELY in ${languageToUse} language
 - Include your name: "${therapist.name}"
 - Mention you're from "EcoNest"
 - Make it feel natural and conversational, not robotic
@@ -154,15 +207,15 @@ Generate ONLY the greeting message, nothing else.`;
 
 THERAPIST IDENTITY:
 You are ${therapist.name}, an AI therapist specializing in ${therapist.specialization}.
-You speak fluently in ${therapist.language} and communicate EXCLUSIVELY in this language throughout the entire conversation.
+You speak fluently in ${languageToUse} and communicate EXCLUSIVELY in this language throughout the entire conversation.
 Your personality: ${therapist.description}
 
 SPECIALIZATION AREAS:
 ${therapist.focus.map((f, i) => `${i + 1}. ${f}`).join("\n")}
 
 IMPORTANT INSTRUCTIONS:
-1. ALWAYS respond in ${therapist.language} language
-2. Use ${therapist.language} cultural context and expressions
+1. ALWAYS respond in ${languageToUse} language
+2. Use ${languageToUse} cultural context and expressions
 3. Focus your therapeutic approach on ${therapist.specialization}
 4. Embody the personality described: ${therapist.description}
 5. Reference your specialization areas when relevant
@@ -195,6 +248,12 @@ IMPORTANT INSTRUCTIONS:
       }),
     });
 
+    if (!r.ok) {
+      const errorText = await r.text();
+      logger.error("OpenAI API error:", { status: r.status, error: errorText });
+      throw new Error(`OpenAI API error: ${r.status} - ${errorText}`);
+    }
+
     const sessionData = await r.json();
 
     // Credits will be deducted per message exchange (not per session)
@@ -217,6 +276,7 @@ IMPORTANT INSTRUCTIONS:
     console.error("Error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
 }

@@ -231,7 +231,7 @@ export default function PromptInput({
                 })}
               </div>
             )}
-            <div className="flex flex-col gap-3.5 px-5 pt-2 pb-4">
+            <div className="flex flex-col gap-0.5 px-5 pt-4 pb-4">
               <div className="relative min-h-[2rem]">
                 <SimpleChatInput
                   input={input}

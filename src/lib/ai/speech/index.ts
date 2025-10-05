@@ -23,6 +23,7 @@ export type VoiceChatOptions = {
   model?: string;
   voice?: string;
   currentThreadId?: string;
+  selectedLanguage?: string; // Language code for initial greeting
   selectedTherapist?: {
     name: string;
     language: string;

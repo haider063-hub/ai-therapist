@@ -57,7 +57,12 @@ export const subscriptionRepository = {
       return user;
     }
 
-    // Voice only plan has unlimited voice (with daily/monthly limits)
+    // Voice + Chat plan has unlimited chat
+    if (user.subscriptionType === "voice_chat" && type === "chat") {
+      return user;
+    }
+
+    // Voice only plan has voice credits (with daily/monthly limits)
     if (user.subscriptionType === "voice_only" && type === "voice") {
       // Check voice plan daily/monthly limits
       const now = new Date();
@@ -109,6 +114,64 @@ export const subscriptionRepository = {
           voiceCreditsUsedThisMonth:
             updatedUser.voiceCreditsUsedThisMonth + amount,
           updatedAt: new Date(),
+        })
+        .where(eq(UserSchema.id, userId))
+        .returning();
+
+      return result[0];
+    }
+
+    // Voice + Chat plan has voice credits (with daily/monthly limits)
+    if (user.subscriptionType === "voice_chat" && type === "voice") {
+      // Check voice plan daily/monthly limits
+      const now = new Date();
+      const lastDailyReset = user.lastDailyReset || user.createdAt;
+      const lastMonthlyReset = user.lastMonthlyReset || user.createdAt;
+
+      // Check if we need to reset daily credits
+      if (
+        now.getDate() !== lastDailyReset.getDate() ||
+        now.getMonth() !== lastDailyReset.getMonth() ||
+        now.getFullYear() !== lastDailyReset.getFullYear()
+      ) {
+        await this.resetDailyVoiceCredits(userId);
+      }
+
+      // Check if we need to reset monthly credits
+      if (
+        now.getMonth() !== lastMonthlyReset.getMonth() ||
+        now.getFullYear() !== lastMonthlyReset.getFullYear()
+      ) {
+        await this.resetMonthlyVoiceCredits(userId);
+      }
+
+      // Get updated user after potential resets
+      const updatedUser = await this.getUserById(userId);
+      if (!updatedUser) return null;
+
+      // Check daily limit
+      if (
+        updatedUser.voiceCreditsUsedToday + amount >
+        updatedUser.dailyVoiceCredits
+      ) {
+        throw new Error("Daily voice credit limit exceeded");
+      }
+
+      // Check monthly limit
+      if (
+        updatedUser.voiceCreditsUsedThisMonth + amount >
+        updatedUser.monthlyVoiceCredits
+      ) {
+        throw new Error("Monthly voice credit limit exceeded");
+      }
+
+      // Update voice usage counters
+      const result = await pgDb
+        .update(UserSchema)
+        .set({
+          voiceCreditsUsedToday: updatedUser.voiceCreditsUsedToday + amount,
+          voiceCreditsUsedThisMonth:
+            updatedUser.voiceCreditsUsedThisMonth + amount,
         })
         .where(eq(UserSchema.id, userId))
         .returning();

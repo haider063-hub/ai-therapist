@@ -8,21 +8,22 @@ async function initSubscriptionPlans() {
     // Initialize Chat Only Plan
     await subscriptionRepository.createSubscriptionPlan({
       name: "chat_only",
-      displayName: "Chat Only Plan",
+      displayName: "Chat Only",
       price: "19.00",
       stripePriceId: process.env.STRIPE_CHAT_ONLY_PRICE_ID || "",
       chatCreditsPerMessage: 5,
-      voiceCreditsPerInteraction: 10,
+      voiceCreditsPerMinute: 10,
       dailyVoiceCredits: 0,
       monthlyVoiceCredits: 0,
       unlimitedChat: true,
       unlimitedVoice: false,
+      isOneTimePayment: false, // Monthly subscription
       features: [
-        "Unlimited chat sessions",
+        "Unlimited chat credits",
         "Basic mood tracking",
         "Progress insights",
         "24/7 availability",
-        "Voice is disabled",
+        "Crisis-mode support",
       ],
       isActive: true,
     });
@@ -30,44 +31,68 @@ async function initSubscriptionPlans() {
     // Initialize Voice Only Plan
     await subscriptionRepository.createSubscriptionPlan({
       name: "voice_only",
-      displayName: "Voice Only Plan",
+      displayName: "Voice Only",
       price: "49.00",
       stripePriceId: process.env.STRIPE_VOICE_ONLY_PRICE_ID || "",
       chatCreditsPerMessage: 5,
-      voiceCreditsPerInteraction: 10,
-      dailyVoiceCredits: 300,
-      monthlyVoiceCredits: 9000,
+      voiceCreditsPerMinute: 10,
+      dailyVoiceCredits: 1000,
+      monthlyVoiceCredits: 1000,
       unlimitedChat: false,
       unlimitedVoice: false,
+      isOneTimePayment: false, // Monthly subscription
       features: [
-        "30 minutes of daily voice (~900 mins/month)",
-        "Natural conversation",
+        "1,000 voice credits",
+        "Human-like conversation",
         "Advanced mood tracking",
         "Personalized insights",
         "Priority support",
-        "Chat is disabled",
       ],
       isActive: true,
     });
 
-    // Initialize Premium Plan
+    // Initialize Voice + Chat Plan
     await subscriptionRepository.createSubscriptionPlan({
-      name: "premium",
-      displayName: "Premium Plan",
-      price: "99.00",
+      name: "voice_chat",
+      displayName: "Voice + Chat",
+      price: "69.00",
       stripePriceId: process.env.STRIPE_PREMIUM_PRICE_ID || "",
       chatCreditsPerMessage: 5,
-      voiceCreditsPerInteraction: 10,
-      dailyVoiceCredits: 300,
-      monthlyVoiceCredits: 9000,
+      voiceCreditsPerMinute: 10,
+      dailyVoiceCredits: 1400,
+      monthlyVoiceCredits: 1400,
       unlimitedChat: true,
-      unlimitedVoice: true,
+      unlimitedVoice: false,
+      isOneTimePayment: false, // Monthly subscription
       features: [
         "Everything in Voice Only",
-        "Unlimited chat sessions",
-        "Switch between modes",
-        "Premium insights",
-        "Crisis support access",
+        "1,400 voice credits",
+        "Unlimited chat conversations",
+        "Advanced mood tracking",
+        "Crisis-mode support",
+      ],
+      isActive: true,
+    });
+
+    // Initialize Voice Top-Up Plan
+    await subscriptionRepository.createSubscriptionPlan({
+      name: "voice_topup",
+      displayName: "Voice Top-Up",
+      price: "19.00",
+      stripePriceId: process.env.STRIPE_VOICE_TOPUPS_PRICE_ID || "",
+      chatCreditsPerMessage: 0,
+      voiceCreditsPerMinute: 10,
+      dailyVoiceCredits: 0,
+      monthlyVoiceCredits: 0,
+      unlimitedChat: false,
+      unlimitedVoice: false,
+      isOneTimePayment: true,
+      features: [
+        "300 voice credits",
+        "Instant availability",
+        "No subscription required",
+        "Works with any plan",
+        "Purchase as many as you want",
       ],
       isActive: true,
     });
