@@ -97,7 +97,8 @@ export const appStore = create<AppState & AppDispatch>()(
           ...initialState.voiceChat,
           ...state.voiceChat,
           isOpen: false,
-          selectedTherapist: state.voiceChat.selectedTherapist,
+          // Don't persist selectedTherapist - it's loaded from database via TherapistLoader
+          // This prevents stale data from localStorage when switching users/accounts
         },
       }),
     },
