@@ -166,6 +166,9 @@ export default function VoiceChatPage() {
   // Listen for credit updates
   useEffect(() => {
     const handleCreditsUpdate = () => {
+      console.log(
+        "🔄 Credits updated event received, refreshing credit display...",
+      );
       mutateCredits();
     };
     window.addEventListener("credits-updated", handleCreditsUpdate);
@@ -206,16 +209,24 @@ export default function VoiceChatPage() {
       sessionStartTime.current = Date.now();
       lastCreditDeductionTime.current = Date.now();
 
-      // Start periodic credit deduction (every 30 seconds)
+      // Start periodic credit deduction (every 15 seconds)
+      console.log("⏱️ Starting credit deduction interval...");
       creditDeductionInterval.current = setInterval(() => {
+        console.log(
+          "🔍 Interval tick - checking if credit deduction needed...",
+        );
         if (sessionStartTime.current && lastCreditDeductionTime.current) {
           const now = Date.now();
           const timeSinceLastDeduction = Math.floor(
             (now - lastCreditDeductionTime.current) / 1000,
           );
+          console.log(
+            `⏰ Time since last deduction: ${timeSinceLastDeduction} seconds`,
+          );
 
           // Deduct credits every 60 seconds (1 minute) for real-time updates
           if (timeSinceLastDeduction >= 60) {
+            console.log("💰 60 seconds elapsed, deducting credits now...");
             // Deduct credits in real-time
             fetch("/api/chat/voice-credit-deduct-duration", {
               method: "POST",
@@ -230,15 +241,20 @@ export default function VoiceChatPage() {
               .then((data) => {
                 if (data.success) {
                   console.log(
-                    `✅ Deducted ${data.creditsUsed} credits for ${data.minutesUsed} minute(s)`,
+                    `💰 Real-time deduction: ${data.creditsUsed} credits for ${data.minutesUsed} minute(s). Remaining: ${data.remainingCredits}`,
                   );
                   // Trigger UI update
                   window.dispatchEvent(new Event("credits-updated"));
+                  console.log("📢 Dispatched credits-updated event");
                   // Update last deduction time
                   lastCreditDeductionTime.current = now;
+                } else {
+                  console.error("❌ Credit deduction failed:", data);
                 }
               })
-              .catch((err) => console.error("Failed to deduct credits:", err));
+              .catch((err) => {
+                console.error("❌ Failed to deduct credits:", err);
+              });
           }
         }
       }, 15000); // Check every 15 seconds (but only deduct if >= 60 seconds elapsed)
