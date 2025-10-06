@@ -32,7 +32,7 @@ export function UserWeeklyMoodCard({
     return Math.round((sum / daysWithData.length) * 10) / 10;
   }, [weeklyMoodData]);
 
-  const getMoodLabel = (score: number) => {
+  const _getMoodLabel = (score: number) => {
     if (score >= 8) return "Great";
     if (score >= 6) return "Good";
     if (score >= 4) return "Okay";
@@ -43,8 +43,8 @@ export function UserWeeklyMoodCard({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex gap-6 items-center justify-between">
+          <div className="space-y-1.5">
             <CardTitle className="flex items-center gap-2">
               Weekly Mood Tracking
             </CardTitle>
@@ -54,7 +54,7 @@ export function UserWeeklyMoodCard({
           </div>
           {avgMood > 0 && (
             <div className="text-center">
-              <div className="text-2xl font-bold">{avgMood}/10</div>
+              <div className="text-2xl">{avgMood}/10</div>
               <div className="text-xs text-muted-foreground">Average</div>
             </div>
           )}
@@ -69,53 +69,39 @@ export function UserWeeklyMoodCard({
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {/* Weekly Bar Chart */}
-            <div className="flex items-end justify-between gap-3 h-40">
+          <div className="space-y-6">
+            {/* Weekly Bar Chart - Professional Style */}
+            <div className="space-y-5 sm:space-y-3">
               {weeklyMoodData.map((day) => (
-                <div
-                  key={day.date}
-                  className="flex-1 flex flex-col items-center gap-2"
-                >
-                  <div className="flex-1 flex items-end w-full relative">
-                    {/* Background bar (full 10 scale) - Always visible */}
-                    <div className="absolute bottom-0 left-0 right-0 h-full bg-muted/30 rounded-md border border-muted" />
+                <div key={day.date} className="space-y-2 sm:space-y-1">
+                  {/* Day label and score */}
+                  <div className="flex items-center justify-between text-sm sm:text-sm">
+                    <span className="font-medium min-w-[3rem]">{day.day}</span>
+                    <span className="text-muted-foreground font-mono text-xs">
+                      {day.score > 0 ? `${day.score}/10` : "-"}
+                    </span>
+                  </div>
 
+                  {/* Bar container */}
+                  <div className="relative h-1 sm:h-1 w-full bg-muted/30 rounded-full overflow-hidden">
                     {/* Foreground bar (actual score) */}
                     {day.score > 0 ? (
-                      <div className="relative w-full flex items-end">
-                        <div
-                          className="w-full rounded-md transition-all hover:opacity-90 relative group shadow-md"
-                          style={{
-                            height: `${Math.max((day.score / 10) * 100, 10)}%`,
-                            backgroundColor: "rgb(234 179 8)", // Yellow for all scores
-                          }}
-                        >
-                          {/* Score text overlay */}
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-sm font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                              {day.score}
-                            </span>
-                          </div>
-
-                          {/* Tooltip on hover */}
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                            {getMoodLabel(day.score)}: {day.score}/10
-                          </div>
-                        </div>
-                      </div>
+                      <div
+                        className="absolute left-0 top-0 h-full rounded-full transition-all duration-500 ease-out"
+                        style={{
+                          width: `${(day.score / 10) * 100}%`,
+                          backgroundColor:
+                            day.score >= 7
+                              ? "rgb(34 197 94)" // Green
+                              : day.score >= 4
+                                ? "rgb(234 179 8)" // Yellow
+                                : "rgb(239 68 68)", // Red
+                        }}
+                      />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center relative group">
-                        {/* Tooltip for no data */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                          No data
-                        </div>
-                      </div>
+                      <div className="absolute left-0 top-0 h-full w-full rounded-full bg-border/20" />
                     )}
                   </div>
-                  <span className="text-xs font-medium text-muted-foreground">
-                    {day.day}
-                  </span>
                 </div>
               ))}
             </div>
