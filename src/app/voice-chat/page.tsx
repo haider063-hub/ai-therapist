@@ -50,6 +50,14 @@ export default function VoiceChatPage() {
   const [userHasSelectedLanguage, setUserHasSelectedLanguage] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
 
+  // Redirect to therapist selection if no therapist is selected
+  useEffect(() => {
+    if (!selectedTherapist) {
+      console.log("No therapist selected, redirecting to /therapists");
+      router.push("/therapists");
+    }
+  }, [selectedTherapist, router]);
+
   // Load user's preferred language on component mount
   useEffect(() => {
     const loadPreferredLanguage = async () => {
