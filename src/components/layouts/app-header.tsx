@@ -99,14 +99,21 @@ export function AppHeader() {
                 variant={"ghost"}
                 className="bg-secondary/40 px-3 py-2 h-auto"
                 onClick={async () => {
-                  // Check if user has already selected a therapist (loaded from database)
-                  const voiceChat = appStore.getState().voiceChat;
+                  // Check database directly to see if user has selected a therapist
+                  try {
+                    const response = await fetch("/api/user/select-therapist");
+                    const data = await response.json();
 
-                  if (voiceChat.selectedTherapist) {
-                    // Returning user with therapist selected -> go directly to voice chat
-                    window.location.href = "/voice-chat";
-                  } else {
-                    // New user or no therapist selected -> go to selection page
+                    if (data.selectedTherapistId) {
+                      // User has therapist in database -> go directly to voice chat
+                      window.location.href = "/voice-chat";
+                    } else {
+                      // No therapist selected -> go to selection page
+                      window.location.href = "/therapists";
+                    }
+                  } catch (error) {
+                    // If error, default to therapist selection page
+                    console.error("Error checking therapist:", error);
                     window.location.href = "/therapists";
                   }
                 }}

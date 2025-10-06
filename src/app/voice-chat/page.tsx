@@ -249,7 +249,7 @@ export default function VoiceChatPage() {
 
   const handleBackButton = useCallback(() => {
     if (!isActive) {
-      router.back();
+      router.push("/");
     }
   }, [isActive, router]);
 
