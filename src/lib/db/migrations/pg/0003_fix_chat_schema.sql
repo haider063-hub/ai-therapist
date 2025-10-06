@@ -1,51 +1,64 @@
 -- Migration: Fix Chat Schema to Match BetterChatBot
 -- This migration converts EchoNestTherapy's chat schema to match BetterChatBot's working schema
 -- Changes: text IDs -> UUID IDs, single JSON parts -> JSON array parts, remove content field
+-- NOTE: This migration is SKIPPED on fresh installs (when tables don't exist or are already in new format)
 
 -- Enable UUID extension if not already enabled
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Check if migration is needed (only run if old schema exists)
+-- Complete check: determine if migration should run
 DO $$ 
 DECLARE
-  needs_migration BOOLEAN;
   thread_id_type TEXT;
+  needs_migration BOOLEAN := FALSE;
 BEGIN
-  -- Check if chat_thread.id is text type (old schema)
+  -- Check if chat_thread table exists and get its id column type
   SELECT data_type INTO thread_id_type
   FROM information_schema.columns
-  WHERE table_name = 'chat_thread' AND column_name = 'id';
+  WHERE table_schema = 'public' 
+    AND table_name = 'chat_thread' 
+    AND column_name = 'id';
   
-  needs_migration := (thread_id_type = 'text');
-  
-  IF NOT needs_migration THEN
-    RAISE NOTICE 'Schema already migrated or tables do not exist. Skipping migration 0003.';
-    RETURN;
+  -- Only migrate if table exists AND has text type ID (old schema)
+  IF thread_id_type IS NOT NULL AND thread_id_type = 'text' THEN
+    needs_migration := TRUE;
+    RAISE NOTICE '🔄 Old schema detected (text IDs). Starting migration...';
+  ELSIF thread_id_type IS NOT NULL AND thread_id_type = 'uuid' THEN
+    RAISE NOTICE '✅ Schema already uses UUID IDs. Skipping migration 0003.';
+  ELSE
+    RAISE NOTICE '✅ Tables will be created with new schema. Skipping migration 0003.';
   END IF;
   
-  RAISE NOTICE 'Starting chat schema migration...';
+  -- Store result in a temporary table for other blocks to check
+  CREATE TEMP TABLE IF NOT EXISTS migration_0003_status (should_migrate BOOLEAN);
+  INSERT INTO migration_0003_status VALUES (needs_migration);
 END $$;
 
--- Step 1: Add new UUID columns (only if tables exist with old schema)
+-- Step 1: Add new UUID columns (only if migration is needed)
 DO $$
+DECLARE
+  should_migrate BOOLEAN;
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'chat_thread' AND column_name = 'id' AND data_type = 'text'
-  ) THEN
+  SELECT should_migrate INTO should_migrate FROM migration_0003_status LIMIT 1;
+  
+  IF should_migrate THEN
+    RAISE NOTICE 'Step 1: Adding UUID columns...';
     ALTER TABLE chat_thread ADD COLUMN IF NOT EXISTS id_uuid UUID DEFAULT gen_random_uuid();
     ALTER TABLE chat_message ADD COLUMN IF NOT EXISTS thread_id_uuid UUID;
     ALTER TABLE chat_message ADD COLUMN IF NOT EXISTS parts_array JSONB[];
   END IF;
 END $$;
 
--- Step 2: Create mapping table and convert data (only if needed)
+-- Step 2: Create mapping table and convert data (only if migration is needed)
 DO $$
+DECLARE
+  should_migrate BOOLEAN;
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'chat_thread' AND column_name = 'id_uuid'
-  ) THEN
+  SELECT should_migrate INTO should_migrate FROM migration_0003_status LIMIT 1;
+  
+  IF should_migrate THEN
+    RAISE NOTICE 'Step 2: Converting data...';
+    
     -- Create mapping table for old -> new ID conversion
     CREATE TABLE IF NOT EXISTS id_mapping (
       old_id TEXT PRIMARY KEY,
@@ -80,13 +93,16 @@ BEGIN
   END IF;
 END $$;
 
--- Step 3: Rename columns and update constraints (only if needed)
+-- Step 3: Rename columns and update constraints (only if migration is needed)
 DO $$
+DECLARE
+  should_migrate BOOLEAN;
 BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns 
-    WHERE table_name = 'chat_thread' AND column_name = 'id_uuid'
-  ) THEN
+  SELECT should_migrate INTO should_migrate FROM migration_0003_status LIMIT 1;
+  
+  IF should_migrate THEN
+    RAISE NOTICE 'Step 3: Renaming columns and updating constraints...';
+    
     -- Drop foreign key constraints temporarily
     ALTER TABLE chat_message DROP CONSTRAINT IF EXISTS chat_message_thread_id_chat_thread_id_fk;
     ALTER TABLE archive_item DROP CONSTRAINT IF EXISTS archive_item_thread_id_chat_thread_id_fk;
@@ -120,10 +136,15 @@ BEGIN
     ALTER TABLE chat_message DROP COLUMN IF EXISTS parts_old;
     ALTER TABLE chat_message DROP COLUMN IF EXISTS content;
     DROP TABLE IF EXISTS id_mapping;
+    
+    RAISE NOTICE '✅ Migration 0003 completed successfully!';
   END IF;
 END $$;
 
--- Step 11: Add indexes for performance
+-- Step 4: Add indexes for performance (always safe to run)
 CREATE INDEX IF NOT EXISTS idx_chat_message_thread_id ON chat_message(thread_id);
 CREATE INDEX IF NOT EXISTS idx_chat_message_created_at ON chat_message(created_at);
 CREATE INDEX IF NOT EXISTS idx_chat_thread_user_id ON chat_thread(user_id);
+
+-- Cleanup: Drop temporary table
+DROP TABLE IF EXISTS migration_0003_status;
