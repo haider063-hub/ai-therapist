@@ -71,33 +71,41 @@ export function UserWeeklyMoodCard({
         ) : (
           <div className="space-y-4">
             {/* Weekly Bar Chart */}
-            <div className="flex items-end justify-between gap-2 h-32">
+            <div className="flex items-end justify-between gap-3 h-40">
               {weeklyMoodData.map((day) => (
                 <div
                   key={day.date}
-                  className="flex-1 flex flex-col items-center gap-1"
+                  className="flex-1 flex flex-col items-center gap-2"
                 >
-                  <div className="flex-1 flex items-end w-full">
+                  <div className="flex-1 flex items-end w-full relative">
+                    {/* Background bar (full 10 scale) - Always visible */}
+                    <div className="absolute bottom-0 left-0 right-0 h-full bg-muted/30 rounded-md border border-muted" />
+
+                    {/* Foreground bar (actual score) */}
                     {day.score > 0 ? (
-                      <div
-                        className="w-full bg-primary rounded-t-md transition-all hover:bg-primary/80 relative group min-h-[8px]"
-                        style={{
-                          height: `${Math.max((day.score / 10) * 100, 8)}%`,
-                          backgroundColor:
-                            day.score >= 7
-                              ? "rgb(34 197 94)"
-                              : day.score >= 4
-                                ? "rgb(234 179 8)"
-                                : "rgb(239 68 68)",
-                        }}
-                      >
-                        {/* Tooltip on hover */}
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                          {getMoodLabel(day.score)}: {day.score}/10
+                      <div className="relative w-full flex items-end">
+                        <div
+                          className="w-full rounded-md transition-all hover:opacity-90 relative group shadow-md"
+                          style={{
+                            height: `${Math.max((day.score / 10) * 100, 10)}%`,
+                            backgroundColor: "rgb(234 179 8)", // Yellow for all scores
+                          }}
+                        >
+                          {/* Score text overlay */}
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-sm font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                              {day.score}
+                            </span>
+                          </div>
+
+                          {/* Tooltip on hover */}
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                            {getMoodLabel(day.score)}: {day.score}/10
+                          </div>
                         </div>
                       </div>
                     ) : (
-                      <div className="w-full h-1 bg-muted rounded-md relative group">
+                      <div className="w-full h-full flex items-center justify-center relative group">
                         {/* Tooltip for no data */}
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover border rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
                           No data
@@ -105,7 +113,7 @@ export function UserWeeklyMoodCard({
                       </div>
                     )}
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs font-medium text-muted-foreground">
                     {day.day}
                   </span>
                 </div>
