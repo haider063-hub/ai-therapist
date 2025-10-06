@@ -79,7 +79,7 @@ export const appStore = create<AppState & AppDispatch>()(
       mutate: set,
     }),
     {
-      name: "mc-app-store-v2.0.1",
+      name: "mc-app-store-v2.1.0", // Bumped version to clear old cached therapist data
       partialize: (state) => ({
         chatModel: state.chatModel || initialState.chatModel,
         toolChoice: state.toolChoice || initialState.toolChoice,
