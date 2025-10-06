@@ -22,11 +22,6 @@ export function TherapistSelection() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
   const router = useRouter();
 
-  // Get current selected therapist from store
-  const currentTherapist = appStore(
-    (state) => state.voiceChat.selectedTherapist,
-  );
-
   // Extract individual languages from all therapists
   const languages = [
     "All",
@@ -133,44 +128,6 @@ export function TherapistSelection() {
   return (
     <div className="flex-1 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Current Therapist Banner - Show if therapist is already selected */}
-        {currentTherapist && (
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-12 w-12 rounded-full bg-white">
-                    <AvatarImage
-                      src={currentTherapist.avatar}
-                      alt={currentTherapist.name}
-                      className="object-cover"
-                    />
-                    <AvatarFallback className="bg-white text-black text-sm font-bold uppercase">
-                      {currentTherapist.name.split(" ")[1]?.charAt(0) ||
-                        currentTherapist.name.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="text-sm text-muted-foreground">
-                      Currently Selected Therapist
-                    </p>
-                    <p className="font-semibold">{currentTherapist.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {currentTherapist.specialization}
-                    </p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => router.push("/voice-chat")}
-                  className="whitespace-nowrap"
-                >
-                  Continue to Voice Chat →
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
         {/* Header */}
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
@@ -180,9 +137,7 @@ export function TherapistSelection() {
             </h1>
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold">
-            {currentTherapist
-              ? "Change Your AI Therapist"
-              : "Choose Your AI Therapist"}
+            Choose Your AI Therapist
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Connect with an AI therapist who speaks your language and

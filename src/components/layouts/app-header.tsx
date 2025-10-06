@@ -99,9 +99,16 @@ export function AppHeader() {
                 variant={"ghost"}
                 className="bg-secondary/40 px-3 py-2 h-auto"
                 onClick={async () => {
-                  // Always go to therapist selection page first
-                  // The voice-chat page will handle navigation if therapist is already selected
-                  window.location.href = "/therapists";
+                  // Check if user has already selected a therapist (loaded from database)
+                  const voiceChat = appStore.getState().voiceChat;
+
+                  if (voiceChat.selectedTherapist) {
+                    // Returning user with therapist selected -> go directly to voice chat
+                    window.location.href = "/voice-chat";
+                  } else {
+                    // New user or no therapist selected -> go to selection page
+                    window.location.href = "/therapists";
+                  }
                 }}
               >
                 <span className="text-sm font-medium">Voice Chat</span>
