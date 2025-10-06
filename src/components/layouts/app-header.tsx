@@ -101,43 +101,28 @@ export function AppHeader() {
                 onClick={async () => {
                   // First check store (TherapistLoader may have already loaded it)
                   const voiceChat = appStore.getState().voiceChat;
-                  console.log(
-                    "🔍 Voice Chat button clicked - checking therapist...",
-                  );
-                  console.log("Store therapist:", voiceChat.selectedTherapist);
 
                   if (voiceChat.selectedTherapist) {
                     // Therapist already in store -> go directly to voice chat
-                    console.log(
-                      "✅ Therapist found in store, going to voice chat",
-                    );
                     window.location.href = "/voice-chat";
                     return;
                   }
 
                   // Store is empty, check database directly
-                  console.log("⏳ Store empty, checking database...");
                   try {
                     const response = await fetch("/api/user/select-therapist");
                     const data = await response.json();
-                    console.log("Database response:", data);
 
                     if (data.selectedTherapistId) {
                       // User has therapist in database -> go directly to voice chat
-                      console.log(
-                        "✅ Therapist found in database, going to voice chat",
-                      );
                       window.location.href = "/voice-chat";
                     } else {
                       // No therapist selected -> go to selection page
-                      console.log(
-                        "❌ No therapist found, going to selection page",
-                      );
                       window.location.href = "/therapists";
                     }
                   } catch (error) {
                     // If error, default to therapist selection page
-                    console.error("❌ Error checking therapist:", error);
+                    console.error("Error checking therapist:", error);
                     window.location.href = "/therapists";
                   }
                 }}

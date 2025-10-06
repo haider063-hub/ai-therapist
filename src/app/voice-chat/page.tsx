@@ -47,40 +47,7 @@ export default function VoiceChatPage() {
 
   const [isClosing, setIsClosing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  const [userHasSelectedLanguage, setUserHasSelectedLanguage] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
-
-  // Redirect to therapist selection if no therapist is selected
-  useEffect(() => {
-    if (!selectedTherapist) {
-      console.log("No therapist selected, redirecting to /therapists");
-      router.push("/therapists");
-    }
-  }, [selectedTherapist, router]);
-
-  // Load user's preferred language on component mount
-  useEffect(() => {
-    const loadPreferredLanguage = async () => {
-      try {
-        const response = await fetch("/api/user/preferred-language");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.language) {
-            console.log(
-              "✅ Loaded preferred language from database:",
-              data.language,
-            );
-            setSelectedLanguage(data.language);
-            setUserHasSelectedLanguage(true);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading preferred language:", error);
-      }
-    };
-
-    loadPreferredLanguage();
-  }, []);
 
   // Parse therapist languages
   const getAvailableLanguages = useCallback(() => {
@@ -121,33 +88,58 @@ export default function VoiceChatPage() {
       }
     });
 
-    console.log("🔍 Debug - getAvailableLanguages result:", uniqueLanguages);
     return uniqueLanguages;
   }, [selectedTherapist]);
 
   // Memoize available languages to prevent unnecessary recalculations
   const availableLanguages = useMemo(
     () => getAvailableLanguages(),
-    [selectedTherapist],
+    [getAvailableLanguages],
   );
 
-  // Debug logging (can be removed in production)
-  // console.log("🔍 Debug - availableLanguages:", availableLanguages);
-  // console.log("🔍 Debug - selectedLanguage:", selectedLanguage);
-  // console.log("🔍 Debug - selectedTherapist:", selectedTherapist?.name);
-  // console.log("🔍 Debug - userHasSelectedLanguage:", userHasSelectedLanguage);
-
-  // Set default language when therapist changes (only if user hasn't selected manually)
+  // Check if therapist is selected - wait for TherapistLoader to finish first
   useEffect(() => {
-    if (
-      selectedTherapist &&
-      availableLanguages.length > 0 &&
-      !userHasSelectedLanguage
-    ) {
-      // console.log("🔍 Debug - Setting default language to:", availableLanguages[0]);
-      setSelectedLanguage(availableLanguages[0].value);
+    const checkTherapist = async () => {
+      // Wait a moment for TherapistLoader to load therapist into store
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      // Check store first
+      const currentVoiceChat = appStore.getState().voiceChat;
+      if (currentVoiceChat.selectedTherapist) {
+        return;
+      }
+
+      // If not in store, check database directly
+      try {
+        const response = await fetch("/api/user/select-therapist");
+        const data = await response.json();
+
+        if (!data.selectedTherapistId) {
+          router.push("/therapists");
+        }
+      } catch (error) {
+        console.error("Error checking therapist:", error);
+        router.push("/therapists");
+      }
+    };
+
+    checkTherapist();
+  }, [router]);
+
+  // Set default language when therapist loads or changes
+  useEffect(() => {
+    if (selectedTherapist && availableLanguages.length > 0) {
+      // Always ensure selectedLanguage is valid for current therapist
+      const currentLangAvailable = availableLanguages.some(
+        (lang) => lang.value === selectedLanguage,
+      );
+
+      if (!currentLangAvailable) {
+        // Current language not available for this therapist, use first available
+        setSelectedLanguage(availableLanguages[0].value);
+      }
     }
-  }, [selectedTherapist, availableLanguages, userHasSelectedLanguage]);
+  }, [selectedTherapist, availableLanguages, selectedLanguage]);
 
   // Debug when selectedLanguage changes (can be removed in production)
   // useEffect(() => {
@@ -391,7 +383,6 @@ export default function VoiceChatPage() {
                   key={`desktop-${selectedLanguage}`}
                   value={selectedLanguage}
                   onValueChange={async (value) => {
-                    setUserHasSelectedLanguage(true);
                     setSelectedLanguage(value);
 
                     // Save to database
@@ -623,7 +614,6 @@ export default function VoiceChatPage() {
                   key={`mobile-${selectedLanguage}`}
                   value={selectedLanguage}
                   onValueChange={async (value) => {
-                    setUserHasSelectedLanguage(true);
                     setSelectedLanguage(value);
 
                     // Save to database
