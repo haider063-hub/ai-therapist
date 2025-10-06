@@ -8,11 +8,16 @@ export function TherapistLoader() {
   useEffect(() => {
     const loadSavedTherapist = async () => {
       try {
+        console.log(
+          "🔄 TherapistLoader: Loading saved therapist from database...",
+        );
         const response = await fetch("/api/user/select-therapist");
         const data = await response.json();
+        console.log("📥 TherapistLoader: Database response:", data);
 
         if (data.selectedTherapistId) {
           const therapist = getTherapistById(data.selectedTherapistId);
+          console.log("🎯 TherapistLoader: Found therapist:", therapist?.name);
 
           if (therapist) {
             appStore.setState((state) => ({
@@ -28,10 +33,18 @@ export function TherapistLoader() {
                 },
               },
             }));
+            console.log(
+              "✅ TherapistLoader: Therapist loaded into store successfully",
+            );
           }
+        } else {
+          console.log("ℹ️ TherapistLoader: No therapist selected in database");
         }
       } catch (error) {
-        console.error("Error loading saved therapist:", error);
+        console.error(
+          "❌ TherapistLoader: Error loading saved therapist:",
+          error,
+        );
       }
     };
 

@@ -13,11 +13,15 @@ export function TherapistSelectionHeader() {
       <div className="flex items-center px-4 py-3">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/")}
+            >
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Go Back</TooltipContent>
+          <TooltipContent side="bottom">Back to Home</TooltipContent>
         </Tooltip>
       </div>
     </header>
