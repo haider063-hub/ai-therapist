@@ -48,6 +48,9 @@ export default function VoiceChatPage() {
   const [isClosing, setIsClosing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const startAudio = useRef<HTMLAudioElement>(null);
+  const sessionStartTime = useRef<number | null>(null);
+  const lastCreditDeductionTime = useRef<number | null>(null);
+  const creditDeductionInterval = useRef<NodeJS.Timeout | null>(null);
 
   // Parse therapist languages
   const getAvailableLanguages = useCallback(() => {
@@ -199,12 +202,84 @@ export default function VoiceChatPage() {
     }
     start().then(() => {
       startAudio.current?.play().catch(() => {});
+      // Start tracking session time
+      sessionStartTime.current = Date.now();
+      lastCreditDeductionTime.current = Date.now();
+
+      // Start periodic credit deduction (every 30 seconds)
+      creditDeductionInterval.current = setInterval(() => {
+        if (sessionStartTime.current && lastCreditDeductionTime.current) {
+          const now = Date.now();
+          const timeSinceLastDeduction = Math.floor(
+            (now - lastCreditDeductionTime.current) / 1000,
+          );
+
+          // Deduct credits every 30 seconds (0.5 minutes = 5 credits)
+          if (timeSinceLastDeduction >= 30) {
+            const _minutesElapsed = timeSinceLastDeduction / 60; // Convert to minutes (can be 0.5, 1, 1.5, etc.)
+
+            // Deduct credits in real-time
+            fetch("/api/chat/voice-credit-deduct-duration", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                threadId: currentThreadId,
+                userAudioDuration: timeSinceLastDeduction / 2,
+                botAudioDuration: timeSinceLastDeduction / 2,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.success) {
+                  console.log(
+                    `✅ Deducted ${data.creditsUsed} credits for ${data.minutesUsed} minute(s)`,
+                  );
+                  // Trigger UI update
+                  window.dispatchEvent(new Event("credits-updated"));
+                  // Update last deduction time
+                  lastCreditDeductionTime.current = now;
+                }
+              })
+              .catch((err) => console.error("Failed to deduct credits:", err));
+          }
+        }
+      }, 30000); // Check every 30 seconds
     });
-  }, [start]);
+  }, [start, currentThreadId]);
 
   const endVoiceChat = useCallback(async () => {
     setIsClosing(true);
+
+    // Clear periodic credit deduction interval
+    if (creditDeductionInterval.current) {
+      clearInterval(creditDeductionInterval.current);
+      creditDeductionInterval.current = null;
+    }
+
     await safe(() => stop());
+
+    // Calculate remaining time since last deduction
+    const now = Date.now();
+    const remainingSeconds = lastCreditDeductionTime.current
+      ? Math.floor((now - lastCreditDeductionTime.current) / 1000)
+      : 0;
+
+    // Deduct credits for remaining time (even if less than 30 seconds)
+    if (remainingSeconds > 0) {
+      try {
+        await fetch("/api/chat/voice-credit-deduct-duration", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            threadId: currentThreadId,
+            userAudioDuration: remainingSeconds / 2,
+            botAudioDuration: remainingSeconds / 2,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to deduct final credits:", error);
+      }
+    }
 
     // Track voice session end if there were any messages
     if (messages.length > 0) {
@@ -220,7 +295,8 @@ export default function VoiceChatPage() {
           })
           .filter((m) => m.content.trim().length > 0);
 
-        await fetch("/api/chat/voice-session-end", {
+        // Send session end for mood tracking (credits already deducted in real-time)
+        const response = await fetch("/api/chat/voice-session-end", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -228,12 +304,25 @@ export default function VoiceChatPage() {
           body: JSON.stringify({
             threadId: currentThreadId,
             messages: conversationMessages,
+            userAudioDuration: 0, // Credits already deducted in real-time
+            botAudioDuration: 0, // Credits already deducted in real-time
           }),
         });
+
+        // Trigger final credit display refresh
+        if (response.ok) {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("credits-updated"));
+          }
+        }
       } catch (error) {
         console.error("Failed to track voice session:", error);
       }
     }
+
+    // Reset tracking
+    sessionStartTime.current = null;
+    lastCreditDeductionTime.current = null;
 
     setIsClosing(false);
     router.push("/");
@@ -289,11 +378,24 @@ export default function VoiceChatPage() {
     t,
   ]);
 
+  // Cleanup interval when session ends
+  useEffect(() => {
+    if (!isActive && creditDeductionInterval.current) {
+      clearInterval(creditDeductionInterval.current);
+      creditDeductionInterval.current = null;
+    }
+  }, [isActive]);
+
   // Handle session cleanup when user closes window/tab or navigates away
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
       if (isActive && messages.length > 0) {
         e.preventDefault();
+
+        // Calculate remaining time since last deduction
+        const remainingSeconds = lastCreditDeductionTime.current
+          ? Math.floor((Date.now() - lastCreditDeductionTime.current) / 1000)
+          : 0;
 
         const conversationMessages = messages
           .map((m) => {
@@ -305,9 +407,12 @@ export default function VoiceChatPage() {
           })
           .filter((m) => m.content.trim().length > 0);
 
+        // Send remaining time for final credit deduction
         const data = JSON.stringify({
           threadId: currentThreadId,
           messages: conversationMessages,
+          userAudioDuration: remainingSeconds / 2,
+          botAudioDuration: remainingSeconds / 2,
         });
 
         navigator.sendBeacon("/api/chat/voice-session-end", data);
@@ -315,7 +420,13 @@ export default function VoiceChatPage() {
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      // Clean up interval on unmount
+      if (creditDeductionInterval.current) {
+        clearInterval(creditDeductionInterval.current);
+      }
+    };
   }, [isActive, messages, currentThreadId]);
 
   return (

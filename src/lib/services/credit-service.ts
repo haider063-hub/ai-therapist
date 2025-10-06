@@ -140,10 +140,13 @@ export class CreditService {
     minutesUsed?: number;
   }> {
     try {
-      // Calculate total duration and minutes used
+      // Calculate total duration and exact minutes (with decimals)
       const totalSeconds = userAudioDuration + botAudioDuration;
-      const minutesUsed = Math.ceil(totalSeconds / 60); // Round up to nearest minute
-      const creditsToDeduct = minutesUsed * CREDIT_COSTS.VOICE_PER_MINUTE;
+      const exactMinutes = totalSeconds / 60; // Keep decimals: 150s = 2.5 minutes
+      const creditsToDeduct = Math.round(
+        exactMinutes * CREDIT_COSTS.VOICE_PER_MINUTE,
+      ); // 2.5 × 10 = 25 credits
+      const minutesUsed = Math.round(exactMinutes * 10) / 10; // Round to 1 decimal place for display
 
       // Check if user can use voice feature
       const canUse = await this.canUseFeature(userId, "voice");
