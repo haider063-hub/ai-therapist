@@ -47,6 +47,11 @@ export default function VoiceChatPage() {
 
   const [isClosing, setIsClosing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
+  const [creditUpdateAnimation, setCreditUpdateAnimation] = useState(false);
+  const [_lastCreditDeduction, setLastCreditDeduction] = useState<{
+    amount: number;
+    timestamp: number;
+  } | null>(null);
   const startAudio = useRef<HTMLAudioElement>(null);
   const sessionStartTime = useRef<number | null>(null);
   const lastCreditDeductionTime = useRef<number | null>(null);
@@ -170,6 +175,9 @@ export default function VoiceChatPage() {
         "🔄 Credits updated event received, refreshing credit display...",
       );
       mutateCredits();
+      // Trigger visual animation
+      setCreditUpdateAnimation(true);
+      setTimeout(() => setCreditUpdateAnimation(false), 2000);
     };
     window.addEventListener("credits-updated", handleCreditsUpdate);
     return () =>
@@ -250,6 +258,13 @@ export default function VoiceChatPage() {
                   console.log(
                     `💰 Real-time deduction: ${data.creditsUsed} credits for ${data.minutesUsed} minute(s). Remaining: ${data.remainingCredits}`,
                   );
+                  // Show visual feedback
+                  setLastCreditDeduction({
+                    amount: data.creditsUsed,
+                    timestamp: now,
+                  });
+                  // Clear notification after 3 seconds
+                  setTimeout(() => setLastCreditDeduction(null), 3000);
                   // Trigger UI update
                   window.dispatchEvent(new Event("credits-updated"));
                   console.log("📢 Dispatched credits-updated event");
@@ -580,7 +595,7 @@ export default function VoiceChatPage() {
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className="flex items-center gap-2 h-auto px-2 py-1"
+                className={`flex items-center gap-2 h-auto px-2 py-1 transition-all ${creditUpdateAnimation ? "ring-2 ring-green-500 ring-offset-2 scale-105" : ""}`}
               >
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-semibold">
