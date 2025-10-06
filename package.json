@@ -33,6 +33,7 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "tsx scripts/db-migrate.ts",
+    "db:init": "tsx scripts/init-database.ts",
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:delete-users": "tsx scripts/delete-all-users.ts",
