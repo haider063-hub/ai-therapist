@@ -32,14 +32,6 @@ export function UserWeeklyMoodCard({
     return Math.round((sum / daysWithData.length) * 10) / 10;
   }, [weeklyMoodData]);
 
-  const _getMoodLabel = (score: number) => {
-    if (score >= 8) return "Great";
-    if (score >= 6) return "Good";
-    if (score >= 4) return "Okay";
-    if (score >= 2) return "Low";
-    return "Very Low";
-  };
-
   return (
     <Card>
       <CardHeader>
