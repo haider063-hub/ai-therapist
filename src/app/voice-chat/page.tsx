@@ -243,7 +243,7 @@ export default function VoiceChatPage() {
               .catch((err) => console.error("Failed to deduct credits:", err));
           }
         }
-      }, 30000); // Check every 30 seconds
+      }, 15000); // Check every 15 seconds (but only deduct if >= 60 seconds elapsed)
     });
   }, [start, currentThreadId]);
 
