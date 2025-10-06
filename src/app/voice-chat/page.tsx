@@ -214,10 +214,8 @@ export default function VoiceChatPage() {
             (now - lastCreditDeductionTime.current) / 1000,
           );
 
-          // Deduct credits every 30 seconds (0.5 minutes = 5 credits)
-          if (timeSinceLastDeduction >= 30) {
-            const _minutesElapsed = timeSinceLastDeduction / 60; // Convert to minutes (can be 0.5, 1, 1.5, etc.)
-
+          // Deduct credits every 60 seconds (1 minute) for real-time updates
+          if (timeSinceLastDeduction >= 60) {
             // Deduct credits in real-time
             fetch("/api/chat/voice-credit-deduct-duration", {
               method: "POST",
