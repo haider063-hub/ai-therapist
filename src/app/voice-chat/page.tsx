@@ -205,6 +205,13 @@ export default function VoiceChatPage() {
     }
     start().then(() => {
       startAudio.current?.play().catch(() => {});
+    });
+  }, [start]);
+
+  // Track session start and setup credit deduction when session becomes active
+  useEffect(() => {
+    if (isActive && !sessionStartTime.current) {
+      console.log("✅ Voice session active, starting credit tracking...");
       // Start tracking session time
       sessionStartTime.current = Date.now();
       lastCreditDeductionTime.current = Date.now();
@@ -258,8 +265,17 @@ export default function VoiceChatPage() {
           }
         }
       }, 15000); // Check every 15 seconds (but only deduct if >= 60 seconds elapsed)
-    });
-  }, [start, currentThreadId]);
+    }
+
+    // Cleanup when session ends
+    if (!isActive && creditDeductionInterval.current) {
+      console.log("🛑 Session ended, stopping credit deduction interval");
+      clearInterval(creditDeductionInterval.current);
+      creditDeductionInterval.current = null;
+      sessionStartTime.current = null;
+      lastCreditDeductionTime.current = null;
+    }
+  }, [isActive, currentThreadId]);
 
   const endVoiceChat = useCallback(async () => {
     setIsClosing(true);
