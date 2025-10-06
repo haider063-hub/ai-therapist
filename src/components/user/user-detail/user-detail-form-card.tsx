@@ -9,7 +9,6 @@ import {
   CardTitle,
   CardDescription,
 } from "ui/card";
-import { Avatar, AvatarImage, AvatarFallback } from "ui/avatar";
 import { Label } from "ui/label";
 import { Input } from "ui/input";
 
@@ -21,7 +20,6 @@ import Form from "next/form";
 import { updateUserDetailsAction } from "@/app/api/user/actions";
 import { UpdateUserActionState } from "@/app/api/user/validations";
 import { BasicUserWithLastLogin } from "app-types/user";
-import { getUserAvatar } from "lib/user/utils";
 import { SubmitButton } from "./user-submit-button";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
 
@@ -80,16 +78,6 @@ export function UserDetailFormCard({
           className="space-y-6 h-full flex flex-col"
         >
           <input type="hidden" name="userId" value={user.id} />
-
-          {/* Avatar and Name Section */}
-          <div className="flex items-center gap-4">
-            <Avatar className="size-26 rounded-full mx-auto my-4 ring ring-border bg-white">
-              <AvatarImage src={getUserAvatar(user)} />
-              <AvatarFallback className="bg-white text-black text-4xl font-bold uppercase">
-                {user.name?.charAt(0) || "U"}
-              </AvatarFallback>
-            </Avatar>
-          </div>
 
           {/* Form Fields */}
           <div className="space-y-4">

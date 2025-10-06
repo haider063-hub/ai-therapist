@@ -125,27 +125,27 @@ export const VerificationSchema = pgTable("verification", {
 // Chat Thread table
 export const ChatThreadSchema = pgTable("chat_thread", {
   id: text("id").primaryKey().notNull(),
-  userId: text("userId")
+  userId: text("user_id")
     .notNull()
     .references(() => UserSchema.id, { onDelete: "cascade" }),
   title: text("title").notNull().default(""),
   model: text("model"),
   archived: boolean("archived").default(false).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Chat Message table
 export const ChatMessageSchema = pgTable("chat_message", {
   id: text("id").primaryKey(),
-  threadId: text("threadId")
+  threadId: text("thread_id")
     .notNull()
     .references(() => ChatThreadSchema.id, { onDelete: "cascade" }),
   role: text("role").notNull().$type<UIMessage["role"]>(),
   parts: jsonb("parts").notNull().$type<UIMessage["parts"]>(),
   metadata: jsonb("metadata").$type<ChatMetadata>(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 // Archive table
