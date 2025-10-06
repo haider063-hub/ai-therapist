@@ -1,38 +1,59 @@
 import { pgDb } from "../src/lib/db/pg/db.pg";
-import {
-  UserSchema,
-  SessionSchema,
-  AccountSchema,
-  VerificationSchema,
-} from "../src/lib/db/pg/schema.pg";
+import { sql } from "drizzle-orm";
+import logger from "../src/lib/logger";
 
 async function deleteAllUsers() {
-  console.log("🗑️ Starting to delete all users and related data...");
+  console.log("\n⚠️  USER DATA DELETION WARNING ⚠️");
+  console.log("═══════════════════════════════════════════════════════");
+  console.log("This will DELETE all users and their associated data:");
+  console.log("  - All user accounts");
+  console.log("  - All chat threads and messages");
+  console.log("  - All subscriptions and transactions");
+  console.log("  - All mood tracking data");
+  console.log("  - All sessions and authentication data");
+  console.log("═══════════════════════════════════════════════════════\n");
+
+  console.log("Starting deletion in 3 seconds...");
+  console.log("Press Ctrl+C to cancel...\n");
+
+  await new Promise((resolve) => setTimeout(resolve, 3000));
 
   try {
-    // Delete in the correct order to respect foreign key constraints
-    console.log("1. Deleting sessions...");
-    await pgDb.delete(SessionSchema);
-    console.log("✅ Sessions deleted");
+    logger.info("🗑️ Starting to delete all users and related data...");
 
-    console.log("2. Deleting accounts...");
-    await pgDb.delete(AccountSchema);
-    console.log("✅ Accounts deleted");
+    // Delete all user-related data using CASCADE
+    // This is faster and respects all foreign key relationships
+    console.log("Deleting all user data (this may take a moment)...");
 
-    console.log("3. Deleting verifications...");
-    await pgDb.delete(VerificationSchema);
-    console.log("✅ Verifications deleted");
+    await pgDb.execute(sql`DELETE FROM "user"`);
 
-    console.log("4. Deleting users...");
-    await pgDb.delete(UserSchema);
-    console.log("✅ Users deleted");
+    logger.info("✅ All user data deleted successfully");
 
-    console.log(
-      "🎉 All users and related data have been successfully deleted!",
-    );
-    console.log("You can now create a new admin account by signing up.");
+    console.log("\n═══════════════════════════════════════════════════════");
+    console.log("✅ USER DATA DELETION COMPLETE!");
+    console.log("═══════════════════════════════════════════════════════");
+    console.log("All users and associated data have been removed:");
+    console.log("  ✓ Users deleted");
+    console.log("  ✓ Chat threads deleted (CASCADE)");
+    console.log("  ✓ Chat messages deleted (CASCADE)");
+    console.log("  ✓ Transactions deleted (CASCADE)");
+    console.log("  ✓ Usage logs deleted (CASCADE)");
+    console.log("  ✓ Mood tracking deleted (CASCADE)");
+    console.log("  ✓ Sessions deleted (CASCADE)");
+    console.log("  ✓ Accounts deleted (CASCADE)");
+    console.log("═══════════════════════════════════════════════════════\n");
+
+    console.log("Next steps:");
+    console.log("  1. Create a new account by signing up");
+    console.log("  2. New users will get 200 credits for chat and voice");
+    console.log("  3. Test the voice chat therapist selection flow\n");
   } catch (error) {
-    console.error("❌ Error deleting users:", error);
+    logger.error("❌ Error deleting users:", error);
+    console.error("\nError details:", error);
+    console.error("\nTroubleshooting:");
+    console.error("  1. Check your database connection in .env");
+    console.error("  2. Ensure PostgreSQL is running");
+    console.error("  3. Verify CASCADE constraints are set up properly");
     throw error;
   }
 }
