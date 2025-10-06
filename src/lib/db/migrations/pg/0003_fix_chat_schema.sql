@@ -37,11 +37,11 @@ END $$;
 -- Step 1: Add new UUID columns (only if migration is needed)
 DO $$
 DECLARE
-  should_migrate BOOLEAN;
+  v_should_migrate BOOLEAN;
 BEGIN
-  SELECT should_migrate INTO should_migrate FROM migration_0003_status LIMIT 1;
+  SELECT migration_0003_status.should_migrate INTO v_should_migrate FROM migration_0003_status LIMIT 1;
   
-  IF should_migrate THEN
+  IF v_should_migrate THEN
     RAISE NOTICE 'Step 1: Adding UUID columns...';
     ALTER TABLE chat_thread ADD COLUMN IF NOT EXISTS id_uuid UUID DEFAULT gen_random_uuid();
     ALTER TABLE chat_message ADD COLUMN IF NOT EXISTS thread_id_uuid UUID;
@@ -52,11 +52,11 @@ END $$;
 -- Step 2: Create mapping table and convert data (only if migration is needed)
 DO $$
 DECLARE
-  should_migrate BOOLEAN;
+  v_should_migrate BOOLEAN;
 BEGIN
-  SELECT should_migrate INTO should_migrate FROM migration_0003_status LIMIT 1;
+  SELECT migration_0003_status.should_migrate INTO v_should_migrate FROM migration_0003_status LIMIT 1;
   
-  IF should_migrate THEN
+  IF v_should_migrate THEN
     RAISE NOTICE 'Step 2: Converting data...';
     
     -- Create mapping table for old -> new ID conversion
@@ -96,11 +96,11 @@ END $$;
 -- Step 3: Rename columns and update constraints (only if migration is needed)
 DO $$
 DECLARE
-  should_migrate BOOLEAN;
+  v_should_migrate BOOLEAN;
 BEGIN
-  SELECT should_migrate INTO should_migrate FROM migration_0003_status LIMIT 1;
+  SELECT migration_0003_status.should_migrate INTO v_should_migrate FROM migration_0003_status LIMIT 1;
   
-  IF should_migrate THEN
+  IF v_should_migrate THEN
     RAISE NOTICE 'Step 3: Renaming columns and updating constraints...';
     
     -- Drop foreign key constraints temporarily
