@@ -54,47 +54,49 @@ export function UserAccessCard({
         </CardHeader>
 
         <CardContent className="space-y-6">
-          {/* Roles Section */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <UserCheck className="h-4 w-4" />
-                {t("roles")}
-              </Label>
-              {user.id !== currentUserId && view === "admin" && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowRoleDialog(true)}
-                  disabled={disabled}
-                  className="h-8 text-xs"
-                  data-testid="edit-roles-button"
-                >
-                  {tCommon("editRoles")}
-                </Button>
-              )}
-            </div>
+          {/* Roles Section - Only show for admin users */}
+          {user.role?.includes("admin") && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <UserCheck className="h-4 w-4" />
+                  {t("roles")}
+                </Label>
+                {user.id !== currentUserId && view === "admin" && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowRoleDialog(true)}
+                    disabled={disabled}
+                    className="h-8 text-xs"
+                    data-testid="edit-roles-button"
+                  >
+                    {tCommon("editRoles")}
+                  </Button>
+                )}
+              </div>
 
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <UserRoleBadges
-                user={user}
-                showBanned={false}
-                view={view}
-                onRoleClick={
-                  user.id !== currentUserId && view === "admin"
-                    ? () => setShowRoleDialog(true)
-                    : undefined
-                }
-                disabled={user.id === currentUserId || disabled}
-                className="mt-0"
-              />
-              {user.id === currentUserId && (
-                <p className="text-xs text-muted-foreground mt-2">
-                  {t("cannotModifyOwnRole")}
-                </p>
-              )}
+              <div className="rounded-lg border bg-muted/30 p-3">
+                <UserRoleBadges
+                  user={user}
+                  showBanned={false}
+                  view={view}
+                  onRoleClick={
+                    user.id !== currentUserId && view === "admin"
+                      ? () => setShowRoleDialog(true)
+                      : undefined
+                  }
+                  disabled={user.id === currentUserId || disabled}
+                  className="mt-0"
+                />
+                {user.id === currentUserId && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {t("cannotModifyOwnRole")}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Account Status Section */}
           <div className="space-y-3">
