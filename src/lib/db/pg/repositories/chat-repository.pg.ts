@@ -243,9 +243,9 @@ export const pgChatRepository = {
       : "null";
 
     const result = await pgDb.execute(sql`
-      INSERT INTO chat_message (id, "threadId", role, parts, metadata, "createdAt", "updatedAt")
+      INSERT INTO chat_message (id, thread_id, role, parts, metadata, created_at, updated_at)
       VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
-      RETURNING id, "threadId", role, parts, metadata, "createdAt", "updatedAt"
+      RETURNING id, thread_id as "threadId", role, parts, metadata, created_at as "createdAt", updated_at as "updatedAt"
     `);
 
     return result.rows[0] as ChatMessage;
@@ -276,13 +276,13 @@ export const pgChatRepository = {
       : "null";
 
     const result = await pgDb.execute(sql`
-      INSERT INTO chat_message (id, "threadId", role, parts, metadata, "createdAt", "updatedAt")
+      INSERT INTO chat_message (id, thread_id, role, parts, metadata, created_at, updated_at)
       VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
       ON CONFLICT (id) DO UPDATE SET
         parts = ${partsJson}::jsonb,
         metadata = ${metadataJson}::jsonb,
-        "updatedAt" = ${new Date()}
-      RETURNING id, "threadId", role, parts, metadata, "createdAt", "updatedAt"
+        updated_at = ${new Date()}
+      RETURNING id, thread_id as "threadId", role, parts, metadata, created_at as "createdAt", updated_at as "updatedAt"
     `);
 
     return result.rows[0] as ChatMessage;
