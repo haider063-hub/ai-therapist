@@ -109,7 +109,7 @@ const options = {
       await resend.emails.send({
         from: "EchoNest AI Therapy <noreply@echonest.co.uk>",
         to: user.email,
-        subject: "Reset Your Password - EchoNest AI Therapy",
+        subject: "EchoNest AI Therapy - Password Reset Request",
         html: `
           <!DOCTYPE html>
           <html>

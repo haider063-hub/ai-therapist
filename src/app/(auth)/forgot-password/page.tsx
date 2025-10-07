@@ -56,6 +56,10 @@ export default function ForgotPasswordPage() {
             <CardTitle className="text-2xl">{t("checkYourEmail")}</CardTitle>
             <CardDescription className="text-muted-foreground">
               {t("resetLinkSent", { email })}
+              <br />
+              <br />
+              <strong>Please check your spam folder</strong> if you don't see
+              the email in your inbox.
             </CardDescription>
           </CardHeader>
           <CardContent>
