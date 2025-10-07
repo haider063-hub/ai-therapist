@@ -207,305 +207,315 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
-      <div className="mb-8">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/")}
-              className="mb-4 text-white hover:text-white/80"
-            >
-              <ArrowLeft className="h-4 w-4 text-white" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">Go Back</TooltipContent>
-        </Tooltip>
-        <h1 className="text-3xl font-bold mb-2 text-white">
-          Subscription Management
-        </h1>
-        <p className="text-white/80">
-          Manage your EchoNest AI Therapy subscription and credits
-        </p>
-      </div>
+    <div className="min-h-screen relative">
+      {/* Background */}
+      <div className="echonest-gradient-bg"></div>
+      <div className="container mx-auto p-6 relative z-10">
+        <div className="mb-8">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push("/")}
+                className="mb-4 text-white hover:text-white/80"
+              >
+                <ArrowLeft className="h-4 w-4 text-white" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom">Go Back</TooltipContent>
+          </Tooltip>
+          <h1 className="text-3xl font-bold mb-2 text-white text-center">
+            Subscription Management
+          </h1>
+          <p className="text-white/80 text-center">
+            Manage your EchoNest AI Therapy subscription and credits
+          </p>
+        </div>
 
-      {/* Current Status */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black">
-              <CreditCard className="h-5 w-5 text-black" />
-              Current Plan
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-black">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Plan:</span>
-                <span className="capitalize">
-                  {data.user.subscriptionType.replace("_", " ")}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="font-medium">Status:</span>
-                {getStatusBadge(data.user.subscriptionStatus)}
-              </div>
-              {data.user.subscriptionEndDate && (
+        {/* Current Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card className="bg-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-black">
+                <CreditCard className="h-5 w-5 text-black" />
+                Current Plan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-black">
+              <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">Next Billing:</span>
-                  <span>
-                    {new Date(
-                      data.user.subscriptionEndDate,
-                    ).toLocaleDateString()}
+                  <span className="font-medium">Plan:</span>
+                  <span className="capitalize">
+                    {data.user.subscriptionType.replace("_", " ")}
                   </span>
                 </div>
-              )}
-              {data.user.subscriptionStatus === "active" &&
-                data.user.subscriptionType !== "free_trial" && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={handleManageSubscription}
-                    disabled={processing === "portal"}
-                    className="w-full mt-4"
-                  >
-                    {processing === "portal" ? "Loading..." : "Manage Billing"}
-                  </Button>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-black">
-              <CreditCard className="h-5 w-5 text-black" />
-              Credits & Usage
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="text-black">
-            <div className="space-y-3">
-              {/* Free Trial: Show total credits */}
-              {data.user.subscriptionType === "free_trial" && (
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">Available Credits:</span>
-                  <span className="font-bold">{data.credits.current}</span>
+                  <span className="font-medium">Status:</span>
+                  {getStatusBadge(data.user.subscriptionStatus)}
                 </div>
-              )}
-
-              {/* Chat Only: Show unlimited chat */}
-              {data.user.subscriptionType === "chat_only" && (
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Chat Access:</span>
-                  <span className="font-bold">Unlimited</span>
-                </div>
-              )}
-
-              {/* Voice Only & Premium: Show voice credits */}
-              {(data.user.subscriptionType === "voice_only" ||
-                data.user.subscriptionType === "premium") && (
-                <>
+                {data.user.subscriptionEndDate && (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Daily Voice Credits:</span>
+                    <span className="font-medium">Next Billing:</span>
                     <span>
-                      {data.credits.dailyVoiceUsed} /{" "}
-                      {data.credits.dailyVoiceLimit}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Monthly Voice Credits:</span>
-                    <span>
-                      {data.credits.monthlyVoiceUsed} /{" "}
-                      {data.credits.monthlyVoiceLimit}
-                    </span>
-                  </div>
-                </>
-              )}
-
-              {/* Premium: Also show unlimited chat */}
-              {data.user.subscriptionType === "premium" && (
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Chat Access:</span>
-                  <span className="font-bold">Unlimited</span>
-                </div>
-              )}
-
-              {/* Show voice credits breakdown for Chat Only users */}
-              {data.user.subscriptionType === "chat_only" &&
-                (data.credits.voiceCredits > 0 ||
-                  data.credits.voiceCreditsFromTopup > 0) && (
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Voice Credits:</span>
-                    <span className="font-bold">
-                      {data.credits.voiceCredits +
-                        data.credits.voiceCreditsFromTopup}
-                      {data.credits.voiceCreditsFromTopup > 0
-                        ? ` (${data.credits.voiceCredits} free trial + ${data.credits.voiceCreditsFromTopup} top-ups)`
-                        : data.credits.voiceCredits > 0
-                          ? " (free trial)"
-                          : ""}
+                      {new Date(
+                        data.user.subscriptionEndDate,
+                      ).toLocaleDateString()}
                     </span>
                   </div>
                 )}
-
-              {/* Show chat credits breakdown for Voice Only users */}
-              {data.user.subscriptionType === "voice_only" &&
-                (data.credits.chatCredits > 0 ||
-                  data.credits.chatCreditsFromTopup > 0) && (
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Chat Credits:</span>
-                    <span className="font-bold">
-                      {data.credits.chatCredits +
-                        data.credits.chatCreditsFromTopup}
-                      {data.credits.chatCreditsFromTopup > 0
-                        ? ` (${data.credits.chatCredits} free trial + ${data.credits.chatCreditsFromTopup} top-ups)`
-                        : data.credits.chatCredits > 0
-                          ? " (free trial)"
-                          : ""}
-                    </span>
-                  </div>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Available Plans */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-6 text-white">Available Plans</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.plans.map((plan) => (
-            <Card
-              key={plan.id}
-              className={`relative bg-white ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
-            >
-              {plan.id === data.user.subscriptionType && (
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <Badge variant="secondary">Current Plan</Badge>
-                </div>
-              )}
-              {plan.id === "voice_chat" && (
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <Badge variant="secondary">Most Popular</Badge>
-                </div>
-              )}
-              <CardHeader className="text-center">
-                <div className="flex justify-center mb-2">
-                  {getPlanIcon(plan.id)}
-                </div>
-                <CardTitle className="text-xl text-black">
-                  {plan.name}
-                </CardTitle>
-                <CardDescription className="text-black">
-                  <span className="text-3xl font-bold">${plan.price}</span>
-                  <span className="text-gray-500">/month</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-black">
-                <ul className="space-y-2 mb-6">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start gap-2">
-                      <Check className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <span className="text-sm">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Button
-                  className="w-full"
-                  variant={
-                    plan.id === data.user.subscriptionType
-                      ? "outline"
-                      : "default"
-                  }
-                  disabled={
-                    (plan.id === data.user.subscriptionType &&
-                      plan.id !== "voice_topup") ||
-                    processing === plan.id
-                  }
-                  onClick={() => handleCheckout(plan.id.toUpperCase())}
-                >
-                  {processing === plan.id
-                    ? "Processing..."
-                    : plan.id === data.user.subscriptionType &&
-                        plan.id !== "voice_topup"
-                      ? "Current Plan"
-                      : plan.id === "voice_topup"
-                        ? "Buy Voice Credits"
-                        : plan.id === "chat_only"
-                          ? "Start Chat Plan"
-                          : plan.id === "voice_only"
-                            ? "Start Voice Plan"
-                            : plan.id === "voice_chat"
-                              ? "Start Premium Plan"
-                              : "Upgrade"}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Transactions */}
-      <div>
-        <h2 className="text-2xl font-bold mb-6 text-white">
-          Recent Transactions
-        </h2>
-        <Card className="bg-white">
-          <CardContent className="p-4 text-black">
-            {data.recentTransactions.length === 0 ? (
-              <p className="text-gray-500 text-center py-4">
-                No transactions yet
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {data.recentTransactions.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex items-center justify-between py-2 border-b last:border-b-0"
-                  >
-                    <div>
-                      <div className="font-medium capitalize">
-                        {transaction.type === "subscription"
-                          ? transaction.metadata?.planType
-                            ? `${transaction.metadata.planType.replace(/_/g, " ")} Plan`
-                            : "Subscription"
-                          : "Voice Top-Up"}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(transaction.createdAt).toLocaleDateString()}{" "}
-                        {new Date(transaction.createdAt).toLocaleTimeString(
-                          [],
-                          {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          },
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-medium">${transaction.amount}</div>
-                      {transaction.creditsAdded > 0 && (
-                        <div className="text-sm text-muted-foreground">
-                          +{transaction.creditsAdded} credits
-                        </div>
-                      )}
-                      <Badge
-                        variant={
-                          transaction.status === "succeeded"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {transaction.status}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
+                {data.user.subscriptionStatus === "active" &&
+                  data.user.subscriptionType !== "free_trial" && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleManageSubscription}
+                      disabled={processing === "portal"}
+                      className="w-full mt-4"
+                    >
+                      {processing === "portal"
+                        ? "Loading..."
+                        : "Manage Billing"}
+                    </Button>
+                  )}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-white">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-black">
+                <CreditCard className="h-5 w-5 text-black" />
+                Credits & Usage
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-black">
+              <div className="space-y-3">
+                {/* Free Trial: Show total credits */}
+                {data.user.subscriptionType === "free_trial" && (
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Available Credits:</span>
+                    <span className="font-bold">{data.credits.current}</span>
+                  </div>
+                )}
+
+                {/* Chat Only: Show unlimited chat */}
+                {data.user.subscriptionType === "chat_only" && (
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Chat Access:</span>
+                    <span className="font-bold">Unlimited</span>
+                  </div>
+                )}
+
+                {/* Voice Only & Premium: Show voice credits */}
+                {(data.user.subscriptionType === "voice_only" ||
+                  data.user.subscriptionType === "premium") && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Daily Voice Credits:</span>
+                      <span>
+                        {data.credits.dailyVoiceUsed} /{" "}
+                        {data.credits.dailyVoiceLimit}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">
+                        Monthly Voice Credits:
+                      </span>
+                      <span>
+                        {data.credits.monthlyVoiceUsed} /{" "}
+                        {data.credits.monthlyVoiceLimit}
+                      </span>
+                    </div>
+                  </>
+                )}
+
+                {/* Premium: Also show unlimited chat */}
+                {data.user.subscriptionType === "premium" && (
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">Chat Access:</span>
+                    <span className="font-bold">Unlimited</span>
+                  </div>
+                )}
+
+                {/* Show voice credits breakdown for Chat Only users */}
+                {data.user.subscriptionType === "chat_only" &&
+                  (data.credits.voiceCredits > 0 ||
+                    data.credits.voiceCreditsFromTopup > 0) && (
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Voice Credits:</span>
+                      <span className="font-bold">
+                        {data.credits.voiceCredits +
+                          data.credits.voiceCreditsFromTopup}
+                        {data.credits.voiceCreditsFromTopup > 0
+                          ? ` (${data.credits.voiceCredits} free trial + ${data.credits.voiceCreditsFromTopup} top-ups)`
+                          : data.credits.voiceCredits > 0
+                            ? " (free trial)"
+                            : ""}
+                      </span>
+                    </div>
+                  )}
+
+                {/* Show chat credits breakdown for Voice Only users */}
+                {data.user.subscriptionType === "voice_only" &&
+                  (data.credits.chatCredits > 0 ||
+                    data.credits.chatCreditsFromTopup > 0) && (
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">Chat Credits:</span>
+                      <span className="font-bold">
+                        {data.credits.chatCredits +
+                          data.credits.chatCreditsFromTopup}
+                        {data.credits.chatCreditsFromTopup > 0
+                          ? ` (${data.credits.chatCredits} free trial + ${data.credits.chatCreditsFromTopup} top-ups)`
+                          : data.credits.chatCredits > 0
+                            ? " (free trial)"
+                            : ""}
+                      </span>
+                    </div>
+                  )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Available Plans */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-6 text-white text-center">
+            Available Plans
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {data.plans.map((plan) => (
+              <Card
+                key={plan.id}
+                className={`relative bg-white ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
+              >
+                {plan.id === data.user.subscriptionType && (
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                    <Badge variant="secondary">Current Plan</Badge>
+                  </div>
+                )}
+                {plan.id === "voice_chat" && (
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-black text-white">Most Popular</Badge>
+                  </div>
+                )}
+                <CardHeader className="text-center">
+                  <div className="flex justify-center mb-2">
+                    {getPlanIcon(plan.id)}
+                  </div>
+                  <CardTitle className="text-xl text-black">
+                    {plan.name}
+                  </CardTitle>
+                  <CardDescription className="text-black">
+                    <span className="text-3xl font-bold">${plan.price}</span>
+                    <span className="text-gray-500">/month</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="text-black">
+                  <ul className="space-y-2 mb-6">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    className="w-full"
+                    variant={
+                      plan.id === data.user.subscriptionType
+                        ? "outline"
+                        : "default"
+                    }
+                    disabled={
+                      (plan.id === data.user.subscriptionType &&
+                        plan.id !== "voice_topup") ||
+                      processing === plan.id
+                    }
+                    onClick={() => handleCheckout(plan.id.toUpperCase())}
+                  >
+                    {processing === plan.id
+                      ? "Processing..."
+                      : plan.id === data.user.subscriptionType &&
+                          plan.id !== "voice_topup"
+                        ? "Current Plan"
+                        : plan.id === "voice_topup"
+                          ? "Buy Voice Credits"
+                          : plan.id === "chat_only"
+                            ? "Start Chat Plan"
+                            : plan.id === "voice_only"
+                              ? "Start Voice Plan"
+                              : plan.id === "voice_chat"
+                                ? "Start Premium Plan"
+                                : "Upgrade"}
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Transactions */}
+        <div>
+          <h2 className="text-2xl font-bold mb-6 text-white text-center">
+            Recent Transactions
+          </h2>
+          <Card className="bg-white">
+            <CardContent className="p-4 text-black">
+              {data.recentTransactions.length === 0 ? (
+                <p className="text-gray-500 text-center py-4">
+                  No transactions yet
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {data.recentTransactions.map((transaction) => (
+                    <div
+                      key={transaction.id}
+                      className="flex items-center justify-between py-2 border-b last:border-b-0"
+                    >
+                      <div>
+                        <div className="font-medium capitalize">
+                          {transaction.type === "subscription"
+                            ? transaction.metadata?.planType
+                              ? `${transaction.metadata.planType.replace(/_/g, " ")} Plan`
+                              : "Subscription"
+                            : "Voice Top-Up"}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(transaction.createdAt).toLocaleDateString()}{" "}
+                          {new Date(transaction.createdAt).toLocaleTimeString(
+                            [],
+                            {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            },
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-medium">${transaction.amount}</div>
+                        {transaction.creditsAdded > 0 && (
+                          <div className="text-sm text-muted-foreground">
+                            +{transaction.creditsAdded} credits
+                          </div>
+                        )}
+                        <Badge
+                          variant={
+                            transaction.status === "succeeded"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {transaction.status}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

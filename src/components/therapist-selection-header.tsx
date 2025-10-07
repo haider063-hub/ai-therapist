@@ -22,7 +22,7 @@ export function TherapistSelectionHeader() {
               <ArrowLeft className="h-4 w-4 text-white" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Back to Home</TooltipContent>
+          <TooltipContent side="bottom">Go Back</TooltipContent>
         </Tooltip>
       </div>
     </header>
