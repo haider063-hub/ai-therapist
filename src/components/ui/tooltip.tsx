@@ -25,16 +25,10 @@ function Tooltip({
 }: React.ComponentProps<typeof TooltipPrimitive.Root> & {
   disabled?: boolean;
 }) {
-  const isMobile = useIsMobile();
-
-  // Always render the TooltipPrimitive.Root, but disable functionality on mobile
+  // Always render the TooltipPrimitive.Root
   return (
     <TooltipProvider>
-      <TooltipPrimitive.Root
-        data-slot="tooltip"
-        disabled={disabled || isMobile}
-        {...props}
-      />
+      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
     </TooltipProvider>
   );
 }

@@ -109,7 +109,7 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col px-4 sm:p-4 justify-center">
+    <div className="min-h-screen flex flex-col p-4 sm:p-4 justify-center">
       {/* EchoNest AI Therapy Branding */}
       <div className="text-center mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -259,7 +259,10 @@ export default function ProfileSetupPage() {
               <Label className="text-black">
                 What brings you here?{" "}
                 <span className="text-sm text-black">
-                  (Required - Select all that apply)
+                  <span className="sm:hidden">(Required)</span>
+                  <span className="hidden sm:inline">
+                    (Required - Select all that apply)
+                  </span>
                 </span>
               </Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
