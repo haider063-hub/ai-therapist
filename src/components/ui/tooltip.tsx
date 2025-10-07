@@ -2,7 +2,6 @@
 
 import type * as React from "react";
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 import { cn } from "lib/utils";
 
