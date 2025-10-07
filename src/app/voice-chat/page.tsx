@@ -805,13 +805,13 @@ export default function VoiceChatPage() {
                 <div className="max-w-2xl mx-auto">
                   <div className="animate-pulse">
                     <div className="flex items-center justify-center space-x-2 mb-4">
-                      <div className="w-3 h-3 bg-primary rounded-full animate-bounce"></div>
+                      <div className="w-3 h-3 bg-white rounded-full animate-bounce"></div>
                       <div
-                        className="w-3 h-3 bg-primary rounded-full animate-bounce"
+                        className="w-3 h-3 bg-white rounded-full animate-bounce"
                         style={{ animationDelay: "0.1s" }}
                       ></div>
                       <div
-                        className="w-3 h-3 bg-primary rounded-full animate-bounce"
+                        className="w-3 h-3 bg-white rounded-full animate-bounce"
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
@@ -829,7 +829,12 @@ export default function VoiceChatPage() {
           </div>
         )}
       </div>
-      <div className="relative w-full p-6 flex items-center justify-center gap-4 z-10">
+      <div className="relative w-full p-6 flex flex-col items-center justify-center gap-4 z-10">
+        {/* Text above the button */}
+        {!isActive && (
+          <p className="text-white text-lg mb-2">Start voice chat?</p>
+        )}
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
@@ -846,7 +851,7 @@ export default function VoiceChatPage() {
                 }
               }}
               className={cn(
-                "rounded-full px-4 py-3 transition-colors duration-300 text-lg font-semibold",
+                "rounded-full px-6 py-6 transition-colors duration-300 text-lg font-semibold",
 
                 isLoading
                   ? "bg-gray-200 text-gray-600 animate-pulse"
@@ -862,7 +867,7 @@ export default function VoiceChatPage() {
               {isLoading || isClosing ? (
                 <Loader className="size-6 animate-spin mr-2" />
               ) : !isActive ? (
-                "Let's start voice chat"
+                <PhoneIcon className="size-6 fill-green-600 stroke-green-600 stroke-1" />
               ) : isListening ? (
                 <>
                   <MicIcon

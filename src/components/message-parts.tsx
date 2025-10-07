@@ -157,7 +157,9 @@ export const UserMessagePart = memo(
           {isLongText && !expanded && (
             <div className="absolute pointer-events-none bg-gradient-to-t from-accent to-transparent w-full h-40 bottom-0 left-0" />
           )}
-          <p className={cn("whitespace-pre-wrap text-sm break-words")}>
+          <p
+            className={cn("whitespace-pre-wrap text-sm break-words text-black")}
+          >
             {displayText}
           </p>
           {isLongText && (
@@ -165,14 +167,14 @@ export const UserMessagePart = memo(
               variant="ghost"
               size="sm"
               onClick={() => setExpanded(!expanded)}
-              className="h-auto p-1 text-xs z-10 text-muted-foreground hover:text-foreground self-start"
+              className="h-auto p-1 text-xs z-10 text-white hover:text-white/80 self-start"
             >
               <span className="flex items-center gap-1">
                 {t(expanded ? "Common.showLess" : "Common.showMore")}
                 {expanded ? (
-                  <ChevronUp className="size-3" />
+                  <ChevronUp className="size-3 text-white" />
                 ) : (
-                  <ChevronDownIcon className="size-3" />
+                  <ChevronDownIcon className="size-3 text-white" />
                 )}
               </span>
             </Button>
@@ -186,10 +188,14 @@ export const UserMessagePart = memo(
                   data-testid="message-edit-button"
                   variant="ghost"
                   size="icon"
-                  className={cn("size-3! p-4!")}
+                  className={cn("size-3! p-4! text-white hover:text-white/80")}
                   onClick={() => copy(part.text)}
                 >
-                  {copied ? <Check /> : <Copy />}
+                  {copied ? (
+                    <Check className="text-white" />
+                  ) : (
+                    <Copy className="text-white" />
+                  )}
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">Copy</TooltipContent>
@@ -200,10 +206,10 @@ export const UserMessagePart = memo(
                   data-testid="message-edit-button"
                   variant="ghost"
                   size="icon"
-                  className="size-3! p-4!"
+                  className="size-3! p-4! text-white hover:text-white/80"
                   onClick={() => setMode("edit")}
                 >
-                  <Pencil />
+                  <Pencil className="text-white" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">Edit</TooltipContent>
@@ -216,12 +222,12 @@ export const UserMessagePart = memo(
                   onClick={deleteMessage}
                   variant="ghost"
                   size="icon"
-                  className="size-3! p-4! hover:text-destructive"
+                  className="size-3! p-4! text-white hover:text-white/80"
                 >
                   {isDeleting ? (
-                    <Loader className="animate-spin" />
+                    <Loader className="animate-spin text-white" />
                   ) : (
-                    <Trash2 />
+                    <Trash2 className="text-white" />
                   )}
                 </Button>
               </TooltipTrigger>
