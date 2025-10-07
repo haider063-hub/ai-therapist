@@ -109,8 +109,16 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-0 sm:p-4">
-      <Card className="w-full max-w-3xl bg-white shadow-lg">
+    <div className="min-h-screen flex flex-col px-4 sm:p-4 justify-center">
+      {/* EchoNest AI Therapy Branding */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          EchoNest AI Therapy
+        </h1>
+        <p className="text-white/80 text-sm">Your compassionate AI therapist</p>
+      </div>
+
+      <Card className="w-full max-w-3xl bg-white shadow-lg mx-auto">
         <CardHeader>
           <CardTitle className="text-2xl text-black">
             Complete Your Profile
