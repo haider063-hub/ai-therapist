@@ -1444,6 +1444,45 @@
     @apply bg-background text-foreground overflow-x-hidden;
   }
 
+  /* Force light theme - override any dark theme */
+  html,
+  body,
+  #root {
+    color-scheme: light !important;
+  }
+
+  html.dark,
+  body.dark,
+  #root.dark {
+    color-scheme: light !important;
+  }
+
+  /* Ensure light theme variables are always used */
+  :root,
+  html,
+  body,
+  #root {
+    --background: hsl(0 0% 100%) !important;
+    --foreground: hsl(222.2 84% 4.9%) !important;
+    --card: hsl(0 0% 100%) !important;
+    --card-foreground: hsl(222.2 84% 4.9%) !important;
+    --popover: hsl(0 0% 100%) !important;
+    --popover-foreground: hsl(222.2 84% 4.9%) !important;
+    --primary: hsl(222.2 47.4% 11.2%) !important;
+    --primary-foreground: hsl(210 40% 98%) !important;
+    --secondary: hsl(210 40% 96%) !important;
+    --secondary-foreground: hsl(222.2 47.4% 11.2%) !important;
+    --muted: hsl(210 40% 96%) !important;
+    --muted-foreground: hsl(215.4 16.3% 46.9%) !important;
+    --accent: hsl(210 40% 96%) !important;
+    --accent-foreground: hsl(222.2 47.4% 11.2%) !important;
+    --destructive: hsl(0 84.2% 60.2%) !important;
+    --destructive-foreground: hsl(210 40% 98%) !important;
+    --border: hsl(214.3 31.8% 91.4%) !important;
+    --input: hsl(214.3 31.8% 91.4%) !important;
+    --ring: hsl(222.2 84% 4.9%) !important;
+  }
+
   button {
     @apply cursor-pointer;
   }

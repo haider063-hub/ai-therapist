@@ -10,14 +10,12 @@ import {
 } from "ui/dropdown-menu";
 import { AvatarFallback, AvatarImage, Avatar } from "ui/avatar";
 import { SidebarMenuButton, SidebarMenuItem, SidebarMenu } from "ui/sidebar";
-import { ChevronsUpDown, LogOutIcon, Sun, MoonStar } from "lucide-react";
-import { useTheme } from "next-themes";
+import { ChevronsUpDown, LogOutIcon } from "lucide-react";
 import { fetcher } from "lib/utils";
 import { authClient } from "auth/client";
 import { useTranslations } from "next-intl";
 import useSWR from "swr";
 import { Suspense } from "react";
-import { useThemeStyle } from "@/hooks/use-theme-style";
 import { BasicUser } from "app-types/user";
 import { getUserAvatar } from "lib/user/utils";
 import { Skeleton } from "ui/skeleton";
@@ -96,8 +94,6 @@ export function AppSidebarUserInner(props: {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <ThemeToggle />
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} className="cursor-pointer">
               <LogOutIcon className="size-4 text-foreground" />
               <span>{t("signOut")}</span>
@@ -106,31 +102,6 @@ export function AppSidebarUserInner(props: {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  );
-}
-
-function ThemeToggle() {
-  const { theme = "light", setTheme } = useTheme();
-  const { setThemeStyle } = useThemeStyle();
-
-  const handleThemeToggle = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    setThemeStyle("default"); // Always use default style
-  };
-
-  return (
-    <DropdownMenuItem onClick={handleThemeToggle} className="cursor-pointer">
-      {theme === "dark" ? (
-        <Sun className="mr-2 size-4" />
-      ) : (
-        <MoonStar className="mr-2 size-4" />
-      )}
-      <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
-      <span className="ml-auto text-xs text-muted-foreground">
-        {theme === "light" ? "Light" : "Dark"} Theme
-      </span>
-    </DropdownMenuItem>
   );
 }
 
