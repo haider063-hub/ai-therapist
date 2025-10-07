@@ -368,50 +368,6 @@ export default function VoiceChatPage() {
     }
   }, [isActive, router]);
 
-  const _statusMessage = useMemo(() => {
-    if (isLoading) {
-      return (
-        <p className="fade-in animate-in duration-3000" key="start">
-          {t("VoiceChat.preparing")}
-        </p>
-      );
-    }
-    if (!isActive)
-      return (
-        <p className="fade-in animate-in duration-3000" key="start">
-          {t("VoiceChat.startVoiceChat")}
-        </p>
-      );
-    if (!isListening)
-      return (
-        <p className="fade-in animate-in duration-3000" key="stop">
-          {t("VoiceChat.yourMicIsOff")}
-        </p>
-      );
-    if (!isAssistantSpeaking && messages.length === 0) {
-      return (
-        <p className="fade-in animate-in duration-3000" key="ready">
-          {t("VoiceChat.readyWhenYouAreJustStartTalking")}
-        </p>
-      );
-    }
-    if (!isAssistantSpeaking && !isUserSpeaking) {
-      return (
-        <p className="delayed-fade-in" key="ready">
-          {t("VoiceChat.readyWhenYouAreJustStartTalking")}
-        </p>
-      );
-    }
-  }, [
-    isAssistantSpeaking,
-    isUserSpeaking,
-    isActive,
-    isLoading,
-    isListening,
-    messages.length,
-    t,
-  ]);
-
   // Cleanup interval when session ends
   useEffect(() => {
     if (!isActive && creditDeductionInterval.current) {
