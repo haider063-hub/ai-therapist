@@ -185,7 +185,6 @@ export default function VoiceChatPage() {
 
   const {
     isListening,
-    isAssistantSpeaking,
     isLoading,
     isActive,
     isUserSpeaking,
