@@ -32,7 +32,7 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Chat Sessions */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-gray-200">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-background">
               <MessageSquare className="h-5 w-5" />
@@ -44,13 +44,16 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
               </p>
             </div>
           </div>
-          <Badge variant="secondary" className="text-lg px-4 py-1">
+          <Badge
+            variant="secondary"
+            className="text-lg px-4 py-1 border border-gray-200"
+          >
             {stats.totalChatSessions}
           </Badge>
         </div>
 
         {/* Voice Sessions */}
-        <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
+        <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-gray-200">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-background">
               <Mic className="h-5 w-5" />
@@ -60,14 +63,17 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
               <p className="text-xs text-muted-foreground">Total voice chats</p>
             </div>
           </div>
-          <Badge variant="secondary" className="text-lg px-4 py-1">
+          <Badge
+            variant="secondary"
+            className="text-lg px-4 py-1 border border-gray-200"
+          >
             {stats.totalVoiceSessions}
           </Badge>
         </div>
 
         {/* Weekly Mood Score (if available) */}
         {stats.weeklyMoodScore !== undefined && (
-          <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30">
+          <div className="flex items-center justify-between p-4 rounded-lg bg-secondary/30 border border-gray-200">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-background">
                 <TrendingUp className="h-5 w-5" />
@@ -79,7 +85,10 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
                 </p>
               </div>
             </div>
-            <Badge variant="secondary" className="text-lg px-4 py-1">
+            <Badge
+              variant="secondary"
+              className="text-lg px-4 py-1 border border-gray-200"
+            >
               {stats.weeklyMoodScore}/10
             </Badge>
           </div>
