@@ -27,14 +27,14 @@ function Tooltip({
 }) {
   const isMobile = useIsMobile();
 
-  // If disabled or on mobile, render children without tooltip functionality
-  if (disabled || isMobile) {
-    return <>{props.children}</>;
-  }
-
+  // Always render the TooltipPrimitive.Root, but disable functionality on mobile
   return (
     <TooltipProvider>
-      <TooltipPrimitive.Root data-slot="tooltip" {...props} />
+      <TooltipPrimitive.Root
+        data-slot="tooltip"
+        disabled={disabled || isMobile}
+        {...props}
+      />
     </TooltipProvider>
   );
 }

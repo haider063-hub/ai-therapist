@@ -19,7 +19,13 @@ export default async function SignUpLayout({
       <div className="w-full flex justify-end absolute top-0 right-0">
         {signUpEnabled && (
           <Link href="/sign-in">
-            <Button variant="ghost">{t("Auth.SignUp.signIn")}</Button>
+            <Button
+              variant="ghost"
+              className="bg-black hover:bg-gray-800 text-white"
+              style={{ backgroundColor: "black", color: "white" }}
+            >
+              {t("Auth.SignUp.signIn")}
+            </Button>
           </Link>
         )}
       </div>

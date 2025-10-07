@@ -67,6 +67,7 @@ export default function SignUpPage({
                 buttonVariants({ variant: "default" }),
                 "w-full bg-black hover:bg-gray-800 text-white px-4 sm:px-0",
               )}
+              style={{ backgroundColor: "black", color: "white" }}
             >
               <Mail className="size-4" />
               {t("Auth.SignUp.email")}

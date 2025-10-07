@@ -221,6 +221,7 @@ export default function EmailSignUp({
                 tabIndex={0}
                 disabled={isLoading}
                 className="w-1/2 bg-black hover:bg-gray-800 text-white"
+                style={{ backgroundColor: "black", color: "white" }}
                 onClick={() => {
                   if (step === 1) successEmailStep();
                   if (step === 2) successNameStep();

@@ -75,7 +75,7 @@ export default function SignIn({
     });
   };
   return (
-    <div className="w-full h-full flex flex-col p-0 sm:p-4 md:p-8 justify-center">
+    <div className="w-full h-full flex flex-col px-4 sm:p-4 md:p-8 justify-center">
       {/* EchoNest AI Therapy Branding */}
       <div className="text-center mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
@@ -141,6 +141,7 @@ export default function SignIn({
                 onClick={emailAndPasswordSignIn}
                 disabled={loading}
                 data-testid="signin-submit-button"
+                style={{ backgroundColor: "black", color: "white" }}
               >
                 {loading ? (
                   <Loader className="size-4 animate-spin ml-1" />

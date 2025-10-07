@@ -336,6 +336,7 @@ export default function ProfileSetupPage() {
               <Button
                 type="submit"
                 className="w-full bg-black hover:bg-gray-800 text-white"
+                style={{ backgroundColor: "black", color: "white" }}
                 disabled={loading}
               >
                 {loading ? (
