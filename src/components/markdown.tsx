@@ -79,7 +79,7 @@ const components: Partial<Components> = {
   },
   p: ({ children }) => {
     return (
-      <p className="leading-6 my-4 break-words">
+      <p className="leading-6 my-4 break-words text-white">
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </p>
     );
@@ -100,7 +100,7 @@ const components: Partial<Components> = {
   },
   li: ({ node, children, ...props }) => {
     return (
-      <li className="py-2 break-words" {...props}>
+      <li className="py-2 break-words text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </li>
     );
@@ -114,7 +114,7 @@ const components: Partial<Components> = {
   },
   strong: ({ node, children, ...props }) => {
     return (
-      <span className="font-semibold" {...props}>
+      <span className="font-semibold text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </span>
     );
@@ -134,42 +134,42 @@ const components: Partial<Components> = {
   },
   h1: ({ node, children, ...props }) => {
     return (
-      <h1 className="text-3xl font-semibold mt-6 mb-2" {...props}>
+      <h1 className="text-3xl font-semibold mt-6 mb-2 text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </h1>
     );
   },
   h2: ({ node, children, ...props }) => {
     return (
-      <h2 className="text-2xl font-semibold mt-6 mb-2" {...props}>
+      <h2 className="text-2xl font-semibold mt-6 mb-2 text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </h2>
     );
   },
   h3: ({ node, children, ...props }) => {
     return (
-      <h3 className="text-xl font-semibold mt-6 mb-2" {...props}>
+      <h3 className="text-xl font-semibold mt-6 mb-2 text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </h3>
     );
   },
   h4: ({ node, children, ...props }) => {
     return (
-      <h4 className="text-lg font-semibold mt-6 mb-2" {...props}>
+      <h4 className="text-lg font-semibold mt-6 mb-2 text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </h4>
     );
   },
   h5: ({ node, children, ...props }) => {
     return (
-      <h5 className="text-base font-semibold mt-6 mb-2" {...props}>
+      <h5 className="text-base font-semibold mt-6 mb-2 text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </h5>
     );
   },
   h6: ({ node, children, ...props }) => {
     return (
-      <h6 className="text-sm font-semibold mt-6 mb-2" {...props}>
+      <h6 className="text-sm font-semibold mt-6 mb-2 text-white" {...props}>
         <WordByWordFadeIn>{children}</WordByWordFadeIn>
       </h6>
     );

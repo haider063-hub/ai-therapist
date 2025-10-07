@@ -271,7 +271,10 @@ export const AssistMessagePart = memo(function AssistMessagePart({
 
   return (
     <div className="flex flex-col gap-2 group/message">
-      <div data-testid="message-content" className="flex flex-col gap-4 px-2">
+      <div
+        data-testid="message-content"
+        className="flex flex-col gap-4 px-2 text-white"
+      >
         <Markdown>{part.text}</Markdown>
       </div>
       {showActions && (
@@ -282,10 +285,14 @@ export const AssistMessagePart = memo(function AssistMessagePart({
                 data-testid="message-edit-button"
                 variant="ghost"
                 size="icon"
-                className="size-3! p-4!"
+                className="size-3! p-4! text-white hover:text-white/80"
                 onClick={() => copy(part.text)}
               >
-                {copied ? <Check /> : <Copy />}
+                {copied ? (
+                  <Check className="text-white" />
+                ) : (
+                  <Copy className="text-white" />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent>Copy</TooltipContent>
@@ -297,9 +304,13 @@ export const AssistMessagePart = memo(function AssistMessagePart({
                 size="icon"
                 disabled={isDeleting}
                 onClick={deleteMessage}
-                className="size-3! p-4! hover:text-destructive"
+                className="size-3! p-4! text-white hover:text-white/80"
               >
-                {isDeleting ? <Loader className="animate-spin" /> : <Trash2 />}
+                {isDeleting ? (
+                  <Loader className="animate-spin text-white" />
+                ) : (
+                  <Trash2 className="text-white" />
+                )}
               </Button>
             </TooltipTrigger>
             <TooltipContent className="text-destructive">
