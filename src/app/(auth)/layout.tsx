@@ -6,6 +6,14 @@ export default async function AuthLayout({
       {/* Background */}
       <div className="echonest-gradient-bg"></div>
       <div className="flex-1 relative z-10">
+        {/* Mobile-only header */}
+        <div className="lg:hidden bg-blue-600 text-center py-8 px-4">
+          <h1 className="text-2xl font-bold text-white mb-2">
+            EchoNest AI Therapy
+          </h1>
+          <p className="text-white text-sm">Your compassionate AI therapist</p>
+        </div>
+
         <div className="flex min-h-screen w-full">
           <div className="hidden lg:flex lg:w-1/2 bg-muted border-r flex-col p-18 relative">
             {/* Welcome Section - Matching the provided image */}
