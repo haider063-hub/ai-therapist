@@ -104,22 +104,22 @@ export default function EmailSignUp({
   };
 
   return (
-    <Card className="w-full md:max-w-md bg-background border-none mx-auto gap-0 shadow-none animate-in fade-in duration-1000">
+    <Card className="w-full md:max-w-md bg-white border-none mx-auto gap-0 shadow-lg animate-in fade-in duration-1000">
       <CardHeader>
-        <CardTitle className="text-2xl text-center ">
+        <CardTitle className="text-2xl text-center text-black">
           {isFirstUser ? t("Auth.SignUp.titleAdmin") : t("Auth.SignUp.title")}
         </CardTitle>
         <CardDescription className="py-12">
           <div className="flex flex-col gap-2">
-            <p className="text-xs text-muted-foreground text-right">
+            <p className="text-xs text-black text-right">
               Step {step} of {steps.length}
             </p>
-            <div className="h-2 w-full relative bg-input">
+            <div className="h-2 w-full relative bg-gray-200">
               <div
                 style={{
                   width: `${(step / 3) * 100}%`,
                 }}
-                className="h-full bg-primary transition-all duration-300"
+                className="h-full bg-black transition-all duration-300"
               ></div>
             </div>
           </div>
@@ -129,7 +129,9 @@ export default function EmailSignUp({
         <div className="flex flex-col gap-2">
           {step === 1 && (
             <div className={cn("flex flex-col gap-2")}>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-black">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -147,12 +149,15 @@ export default function EmailSignUp({
                 }}
                 onChange={(e) => setFormData({ email: e.target.value })}
                 required
+                className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
               />
             </div>
           )}
           {step === 2 && (
             <div className={cn("flex flex-col gap-2")}>
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name" className="text-black">
+                Full Name
+              </Label>
               <Input
                 id="name"
                 type="text"
@@ -170,13 +175,16 @@ export default function EmailSignUp({
                 }}
                 onChange={(e) => setFormData({ name: e.target.value })}
                 required
+                className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
               />
             </div>
           )}
           {step === 3 && (
             <div className={cn("flex flex-col gap-2")}>
               <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password" className="text-black">
+                  Password
+                </Label>
               </div>
               <PasswordInput
                 id="password"
@@ -194,17 +202,16 @@ export default function EmailSignUp({
                 }}
                 onChange={(e) => setFormData({ password: e.target.value })}
                 required
+                className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
               />
             </div>
           )}
-          <p className="text-muted-foreground text-xs mb-6">
-            {steps[step - 1]}
-          </p>
+          <p className="text-black text-xs mb-6">{steps[step - 1]}</p>
           <div className="flex flex-row-reverse gap-2">
             <Button
               tabIndex={0}
               disabled={isLoading}
-              className="w-1/2"
+              className="w-1/2 bg-black hover:bg-gray-800 text-white"
               onClick={() => {
                 if (step === 1) successEmailStep();
                 if (step === 2) successNameStep();

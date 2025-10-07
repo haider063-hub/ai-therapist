@@ -126,9 +126,9 @@ function ThemeToggle() {
       ) : (
         <MoonStar className="mr-2 size-4" />
       )}
-      <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+      <span>{theme === "light" ? "Dark Mode" : "Light Mode"}</span>
       <span className="ml-auto text-xs text-muted-foreground">
-        Default {theme === "dark" ? "Dark" : "Light"}
+        {theme === "light" ? "Light" : "Dark"} Theme
       </span>
     </DropdownMenuItem>
   );

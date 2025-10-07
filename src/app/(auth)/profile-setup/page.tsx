@@ -109,19 +109,21 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-3xl">
+    <div className="min-h-screen flex items-center justify-center p-0 sm:p-4">
+      <Card className="w-full max-w-3xl bg-white shadow-lg">
         <CardHeader>
-          <CardTitle className="text-2xl">Complete Your Profile</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl text-black">
+            Complete Your Profile
+          </CardTitle>
+          <CardDescription className="text-black">
             Help us personalize your therapy experience. This information helps
             our AI provide better support tailored to your needs.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Alert className="mb-6">
-            <Shield className="h-4 w-4" />
-            <AlertDescription>
+          <Alert className="mb-6 bg-white border border-black">
+            <Shield className="h-4 w-4 text-black" />
+            <AlertDescription className="text-black">
               Your information is encrypted and used only to personalize your AI
               therapy sessions. You can edit or delete this data anytime from
               your profile settings.
@@ -131,11 +133,9 @@ export default function ProfileSetupPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Date of Birth */}
             <div className="space-y-2 w-full">
-              <Label htmlFor="dateOfBirth">
+              <Label htmlFor="dateOfBirth" className="text-black">
                 Date of Birth{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Required)
-                </span>
+                <span className="text-sm text-black">(Required)</span>
               </Label>
               <Input
                 id="dateOfBirth"
@@ -145,8 +145,9 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, dateOfBirth: e.target.value })
                 }
                 max={new Date().toISOString().split("T")[0]}
+                className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
               />
-              <p className="text-xs text-muted-foreground flex items-start gap-1">
+              <p className="text-xs text-black flex items-start gap-1">
                 <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                 Helps us provide age-appropriate therapy guidance
               </p>
@@ -154,11 +155,8 @@ export default function ProfileSetupPage() {
 
             {/* Gender */}
             <div className="space-y-2 w-full">
-              <Label htmlFor="gender">
-                Gender{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Required)
-                </span>
+              <Label htmlFor="gender" className="text-black">
+                Gender <span className="text-sm text-black">(Required)</span>
               </Label>
               <Select
                 value={formData.gender}
@@ -166,10 +164,10 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, gender: value })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white">
                   <SelectValue placeholder="Select your gender" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-black">
                   {GENDERS.map((gender) => (
                     <SelectItem key={gender.value} value={gender.value}>
                       {gender.label}
@@ -181,11 +179,8 @@ export default function ProfileSetupPage() {
 
             {/* Country */}
             <div className="space-y-2 w-full">
-              <Label htmlFor="country">
-                Country{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Required)
-                </span>
+              <Label htmlFor="country" className="text-black">
+                Country <span className="text-sm text-black">(Required)</span>
               </Label>
               <Select
                 value={formData.country}
@@ -193,16 +188,16 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, country: value })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white">
                   <SelectValue placeholder="Select your country" />
                 </SelectTrigger>
-                <SelectContent className="max-h-[300px]">
-                  <div className="sticky top-0 bg-background p-2 border-b">
+                <SelectContent className="max-h-[300px] bg-white border border-black">
+                  <div className="sticky top-0 bg-white p-2 border-b border-black">
                     <Input
                       placeholder="Search countries..."
                       value={countrySearch}
                       onChange={(e) => setCountrySearch(e.target.value)}
-                      className="h-8"
+                      className="h-8 bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
                       onClick={(e) => e.stopPropagation()}
                     />
                   </div>
@@ -215,7 +210,7 @@ export default function ProfileSetupPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground flex items-start gap-1">
+              <p className="text-xs text-black flex items-start gap-1">
                 <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                 Helps with time zones and culturally relevant recommendations
               </p>
@@ -223,11 +218,9 @@ export default function ProfileSetupPage() {
 
             {/* Religion */}
             <div className="space-y-2 w-full">
-              <Label htmlFor="religion">
+              <Label htmlFor="religion" className="text-black">
                 Religion/Beliefs{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Required)
-                </span>
+                <span className="text-sm text-black">(Required)</span>
               </Label>
               <Select
                 value={formData.religion}
@@ -235,10 +228,10 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, religion: value })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white">
                   <SelectValue placeholder="Select your religion/beliefs" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-black">
                   {RELIGIONS.map((religion) => (
                     <SelectItem key={religion.value} value={religion.value}>
                       {religion.label}
@@ -246,7 +239,7 @@ export default function ProfileSetupPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground flex items-start gap-1">
+              <p className="text-xs text-black flex items-start gap-1">
                 <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                 Helps provide therapy advice that respects your values and
                 beliefs
@@ -255,9 +248,9 @@ export default function ProfileSetupPage() {
 
             {/* Therapy Needs */}
             <div className="space-y-3 w-full">
-              <Label>
+              <Label className="text-black">
                 What brings you here?{" "}
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-black">
                   (Required - Select all that apply)
                 </span>
               </Label>
@@ -273,7 +266,7 @@ export default function ProfileSetupPage() {
                     />
                     <label
                       htmlFor={need.value}
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                      className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-black"
                     >
                       {need.label}
                     </label>
@@ -284,11 +277,9 @@ export default function ProfileSetupPage() {
 
             {/* Preferred Therapy Style */}
             <div className="space-y-2 w-full">
-              <Label htmlFor="therapyStyle">
+              <Label htmlFor="therapyStyle" className="text-black">
                 Preferred Therapy Approach{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Required)
-                </span>
+                <span className="text-sm text-black">(Required)</span>
               </Label>
               <Select
                 value={formData.preferredTherapyStyle}
@@ -296,10 +287,10 @@ export default function ProfileSetupPage() {
                   setFormData({ ...formData, preferredTherapyStyle: value })
                 }
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white">
                   <SelectValue placeholder="Select your preferred approach" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-black">
                   {THERAPY_STYLES.map((style) => (
                     <SelectItem key={style.value} value={style.value}>
                       {style.label}
@@ -307,7 +298,7 @@ export default function ProfileSetupPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground flex items-start gap-1">
+              <p className="text-xs text-black flex items-start gap-1">
                 <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                 The AI will adapt its communication style to match your
                 preference
@@ -316,11 +307,9 @@ export default function ProfileSetupPage() {
 
             {/* Specific Concerns */}
             <div className="space-y-2 w-full">
-              <Label htmlFor="concerns">
+              <Label htmlFor="concerns" className="text-black">
                 Any Specific Concerns?{" "}
-                <span className="text-sm text-muted-foreground">
-                  (Optional)
-                </span>
+                <span className="text-sm text-black">(Optional)</span>
               </Label>
               <Textarea
                 id="concerns"
@@ -330,12 +319,17 @@ export default function ProfileSetupPage() {
                 onChange={(e) =>
                   setFormData({ ...formData, specificConcerns: e.target.value })
                 }
+                className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
               />
             </div>
 
             {/* Actions */}
             <div className="pt-4">
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button
+                type="submit"
+                className="w-full bg-black hover:bg-gray-800 text-white"
+                disabled={loading}
+              >
                 {loading ? (
                   <>
                     <Loader className="mr-2 h-4 w-4 animate-spin" />
@@ -347,7 +341,7 @@ export default function ProfileSetupPage() {
               </Button>
             </div>
 
-            <p className="text-xs text-center text-muted-foreground mt-4">
+            <p className="text-xs text-center text-black mt-4">
               You can update your profile anytime from your account settings
             </p>
           </form>

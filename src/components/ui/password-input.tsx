@@ -28,9 +28,9 @@ export function PasswordInput({ className, ...props }: PasswordInputProps) {
         disabled={props.disabled}
       >
         {showPassword ? (
-          <EyeOff className="h-4 w-4 text-muted-foreground" />
+          <EyeOff className="h-4 w-4 text-black" />
         ) : (
-          <Eye className="h-4 w-4 text-muted-foreground" />
+          <Eye className="h-4 w-4 text-black" />
         )}
         <span className="sr-only">
           {showPassword ? "Hide password" : "Show password"}

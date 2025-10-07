@@ -75,13 +75,13 @@ export default function SignIn({
     });
   };
   return (
-    <div className="w-full h-full flex flex-col p-4 md:p-8 justify-center">
-      <Card className="w-full md:max-w-md bg-background border-none mx-auto shadow-none animate-in fade-in duration-1000">
+    <div className="w-full h-full flex flex-col p-0 sm:p-4 md:p-8 justify-center">
+      <Card className="w-full md:max-w-md bg-white border-none mx-auto shadow-lg animate-in fade-in duration-1000">
         <CardHeader className="my-4">
-          <CardTitle className="text-2xl text-center my-1">
+          <CardTitle className="text-2xl text-center my-1 text-black">
             {t("title")}
           </CardTitle>
-          <CardDescription className="text-center text-muted-foreground">
+          <CardDescription className="text-center text-black">
             {t("description")}
           </CardDescription>
         </CardHeader>
@@ -89,7 +89,9 @@ export default function SignIn({
           {emailAndPasswordEnabled && (
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-black">
+                  Email
+                </Label>
                 <Input
                   id="email"
                   autoFocus
@@ -99,15 +101,15 @@ export default function SignIn({
                   type="email"
                   placeholder="user@example.com"
                   required
+                  className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-sm text-primary hover:underline"
-                  >
+                  <Label htmlFor="password" className="text-black">
+                    Password
+                  </Label>
+                  <Link href="/forgot-password" className="text-sm text-black">
                     {t("forgotPassword")}
                   </Link>
                 </div>
@@ -123,10 +125,11 @@ export default function SignIn({
                   }}
                   onChange={(e) => setFormData({ password: e.target.value })}
                   required
+                  className="bg-white text-black border-1 border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
                 />
               </div>
               <Button
-                className="w-full"
+                className="w-full bg-black hover:bg-gray-800 text-white"
                 onClick={emailAndPasswordSignIn}
                 disabled={loading}
                 data-testid="signin-submit-button"
@@ -144,7 +147,7 @@ export default function SignIn({
               {emailAndPasswordEnabled && (
                 <div className="flex items-center my-4">
                   <div className="flex-1 h-px bg-accent"></div>
-                  <span className="px-4 text-sm text-muted-foreground">
+                  <span className="px-4 text-sm text-black">
                     {t("orContinueWith")}
                   </span>
                   <div className="flex-1 h-px bg-accent"></div>
@@ -185,9 +188,12 @@ export default function SignIn({
             </>
           )}
           {signUpEnabled && (
-            <div className="my-8 text-center text-sm text-muted-foreground">
+            <div className="my-8 text-center text-sm text-black">
               {t("noAccount")}
-              <Link href="/sign-up" className="underline-offset-4 text-primary">
+              <Link
+                href="/sign-up"
+                className="underline-offset-4 text-black underline"
+              >
                 {t("signUp")}
               </Link>
             </div>

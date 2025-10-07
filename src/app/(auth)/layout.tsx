@@ -27,7 +27,7 @@ export default async function AuthLayout({
             />
           </div>
 
-          <div className="w-full lg:w-1/2 p-6">{children}</div>
+          <div className="w-full lg:w-1/2 p-0 sm:p-6">{children}</div>
         </div>
       </div>
     </main>

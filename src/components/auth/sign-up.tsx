@@ -38,12 +38,12 @@ export default function SignUpPage({
     });
   };
   return (
-    <Card className="w-full md:max-w-md bg-background border-none mx-auto shadow-none">
+    <Card className="w-full md:max-w-md bg-white border-none mx-auto shadow-lg">
       <CardHeader>
-        <CardTitle className="text-2xl text-center ">
+        <CardTitle className="text-2xl text-center text-black">
           {isFirstUser ? t("Auth.SignUp.titleAdmin") : t("Auth.SignUp.title")}
         </CardTitle>
-        <CardDescription className="text-center">
+        <CardDescription className="text-center text-black">
           {isFirstUser
             ? t("Auth.SignUp.signUpDescriptionAdmin")
             : t("Auth.SignUp.signUpDescription")}
@@ -54,7 +54,10 @@ export default function SignUpPage({
           <Link
             href="/sign-up/email"
             data-testid="email-signup-button"
-            className={cn(buttonVariants({ variant: "default" }), "w-full")}
+            className={cn(
+              buttonVariants({ variant: "default" }),
+              "w-full bg-black hover:bg-gray-800 text-white",
+            )}
           >
             <Mail className="size-4" />
             {t("Auth.SignUp.email")}
@@ -65,7 +68,7 @@ export default function SignUpPage({
             {emailAndPasswordEnabled && (
               <div className="flex items-center my-4">
                 <div className="flex-1 h-px bg-accent"></div>
-                <span className="px-4 text-sm text-muted-foreground">
+                <span className="px-4 text-sm text-black">
                   {t("Auth.SignIn.orContinueWith")}
                 </span>
                 <div className="flex-1 h-px bg-accent"></div>
