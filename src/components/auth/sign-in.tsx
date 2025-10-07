@@ -76,6 +76,14 @@ export default function SignIn({
   };
   return (
     <div className="w-full h-full flex flex-col p-0 sm:p-4 md:p-8 justify-center">
+      {/* EchoNest AI Therapy Branding */}
+      <div className="text-center mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+          EchoNest AI Therapy
+        </h1>
+        <p className="text-white/80 text-sm">Your compassionate AI therapist</p>
+      </div>
+
       <Card className="w-full md:max-w-md bg-white border-none mx-auto shadow-lg animate-in fade-in duration-1000">
         <CardHeader className="my-4">
           <CardTitle className="text-2xl text-center my-1 text-black">
@@ -129,7 +137,7 @@ export default function SignIn({
                 />
               </div>
               <Button
-                className="w-full bg-black hover:bg-gray-800 text-white"
+                className="w-full bg-black hover:bg-gray-800 text-white px-4 sm:px-0"
                 onClick={emailAndPasswordSignIn}
                 disabled={loading}
                 data-testid="signin-submit-button"
@@ -158,7 +166,7 @@ export default function SignIn({
                   <Button
                     variant="outline"
                     onClick={() => handleSocialSignIn("google")}
-                    className="flex-1 w-full"
+                    className="flex-1 w-full px-4 sm:px-0"
                   >
                     <GoogleIcon className="size-4 fill-foreground" />
                     Google
@@ -168,7 +176,7 @@ export default function SignIn({
                   <Button
                     variant="outline"
                     onClick={() => handleSocialSignIn("github")}
-                    className="flex-1 w-full"
+                    className="flex-1 w-full px-4 sm:px-0"
                   >
                     <GithubIcon className="size-4 fill-foreground" />
                     GitHub
@@ -178,7 +186,7 @@ export default function SignIn({
                   <Button
                     variant="outline"
                     onClick={() => handleSocialSignIn("microsoft")}
-                    className="flex-1 w-full"
+                    className="flex-1 w-full px-4 sm:px-0"
                   >
                     <MicrosoftIcon className="size-4 fill-foreground" />
                     Microsoft

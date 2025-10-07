@@ -56,7 +56,7 @@ export default function SignUpPage({
             data-testid="email-signup-button"
             className={cn(
               buttonVariants({ variant: "default" }),
-              "w-full bg-black hover:bg-gray-800 text-white",
+              "w-full bg-black hover:bg-gray-800 text-white px-4 sm:px-0",
             )}
           >
             <Mail className="size-4" />
