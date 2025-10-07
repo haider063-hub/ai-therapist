@@ -5,7 +5,7 @@ import { DashboardHeaderClient } from "./dashboard-header-client";
 
 export default function DashboardPage() {
   return (
-    <div className="w-full h-screen flex flex-col">
+    <div className="w-full h-screen flex flex-col echonest-gradient-bg">
       {/* Back Button Only */}
       <DashboardHeaderClient />
 

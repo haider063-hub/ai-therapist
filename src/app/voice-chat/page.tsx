@@ -368,7 +368,7 @@ export default function VoiceChatPage() {
     }
   }, [isActive, router]);
 
-  const statusMessage = useMemo(() => {
+  const _statusMessage = useMemo(() => {
     if (isLoading) {
       return (
         <p className="fade-in animate-in duration-3000" key="start">
@@ -464,9 +464,11 @@ export default function VoiceChatPage() {
   }, [isActive, messages, currentThreadId]);
 
   return (
-    <div className="w-full h-screen flex flex-col bg-background">
+    <div className="w-full h-screen flex flex-col relative">
+      {/* Background */}
+      <div className="echonest-gradient-bg"></div>
       {/* Header */}
-      <div className="w-full border-b">
+      <div className="w-full border-b bg-white relative z-10">
         {/* Desktop: Single Row */}
         <div className="hidden sm:flex flex-row items-center p-4 md:p-6 gap-2">
           {/* Back Button */}
@@ -475,11 +477,11 @@ export default function VoiceChatPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="flex-shrink-0 text-white hover:text-white/80"
+                className="flex-shrink-0 text-black hover:text-black/80"
                 onClick={handleBackButton}
                 disabled={isActive}
               >
-                <ArrowLeft className="h-5 w-5 text-white" />
+                <ArrowLeft className="h-5 w-5 text-black" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
@@ -503,17 +505,17 @@ export default function VoiceChatPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <div className="text-sm font-semibold">
+                  <div className="text-sm font-semibold text-black">
                     {selectedTherapist.name}
                   </div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-xs text-black">
                     {selectedTherapist.specialization} •{" "}
                     {selectedTherapist.language}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-sm font-medium text-muted-foreground">
+              <div className="text-sm font-medium text-black">
                 Voice Therapy Session
               </div>
             )}
@@ -655,11 +657,11 @@ export default function VoiceChatPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="flex-shrink-0 h-8 w-8"
+                  className="flex-shrink-0 h-8 w-8 text-black hover:text-black/80"
                   onClick={handleBackButton}
                   disabled={false}
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 text-black" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side="bottom">
@@ -813,7 +815,7 @@ export default function VoiceChatPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 min-h-0 mx-auto w-full">
+      <div className="flex-1 min-h-0 mx-auto w-full relative z-10">
         {error ? (
           <div className="max-w-3xl mx-auto p-6">
             <Alert variant={"destructive"}>
@@ -837,10 +839,10 @@ export default function VoiceChatPage() {
             <div className="w-full mx-auto h-full max-h-[80vh] overflow-y-auto px-4 lg:max-w-4xl flex-1 flex items-center">
               <div className="animate-in fade-in-50 duration-1000 text-center w-full">
                 <div className="mb-8">
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold gradient-text mb-4">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
                     EchoNest AI Therapy
                   </h1>
-                  <p className="text-xl md:text-2xl text-muted-foreground mb-6">
+                  <p className="text-xl md:text-2xl text-white mb-6">
                     Voice-Only Conversation
                   </p>
                 </div>
@@ -858,12 +860,12 @@ export default function VoiceChatPage() {
                         style={{ animationDelay: "0.2s" }}
                       ></div>
                     </div>
-                    <p className="text-lg text-muted-foreground">
+                    <p className="text-lg text-white">
                       {isActive && isListening
                         ? "Listening... speak naturally"
                         : isActive
                           ? "Voice chat active - click mic to start listening"
-                          : "Ready to start voice conversation"}
+                          : ""}
                     </p>
                   </div>
                 </div>
@@ -872,16 +874,12 @@ export default function VoiceChatPage() {
           </div>
         )}
       </div>
-      <div className="relative w-full p-6 flex items-center justify-center gap-4">
-        <div className="text-sm text-muted-foreground absolute -top-5 left-0 w-full justify-center flex items-center">
-          {statusMessage}
-        </div>
-
+      <div className="relative w-full p-6 flex items-center justify-center gap-4 z-10">
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
               variant={"secondary"}
-              size={"icon"}
+              size={"default"}
               disabled={isClosing || isLoading}
               onClick={() => {
                 if (!isActive) {
@@ -893,29 +891,35 @@ export default function VoiceChatPage() {
                 }
               }}
               className={cn(
-                "rounded-full p-6 transition-colors duration-300",
+                "rounded-full px-4 py-3 transition-colors duration-300 text-lg font-semibold",
 
                 isLoading
-                  ? "bg-accent-foreground text-accent animate-pulse"
+                  ? "bg-gray-200 text-gray-600 animate-pulse"
                   : !isActive
-                    ? "pink-accent hover:opacity-90"
+                    ? "bg-white text-black hover:bg-gray-100"
                     : !isListening
-                      ? "bg-destructive/30 text-destructive hover:bg-destructive/10"
+                      ? "bg-red-100 text-red-600 hover:bg-red-200"
                       : isUserSpeaking
-                        ? "bg-input text-foreground"
-                        : "",
+                        ? "bg-blue-100 text-blue-600"
+                        : "bg-white text-black hover:bg-gray-100",
               )}
             >
               {isLoading || isClosing ? (
-                <Loader className="size-6 animate-spin" />
+                <Loader className="size-6 animate-spin mr-2" />
               ) : !isActive ? (
-                <PhoneIcon className="size-6 fill-white stroke-none" />
+                "Let's start voice chat"
               ) : isListening ? (
-                <MicIcon
-                  className={`size-6 ${isUserSpeaking ? "text-primary" : "text-muted-foreground transition-colors duration-300"}`}
-                />
+                <>
+                  <MicIcon
+                    className={`size-6 mr-2 ${isUserSpeaking ? "text-primary" : "text-muted-foreground transition-colors duration-300"}`}
+                  />
+                  Listening...
+                </>
               ) : (
-                <MicOffIcon className="size-6" />
+                <>
+                  <MicOffIcon className="size-6 mr-2" />
+                  Stop Listening
+                </>
               )}
             </Button>
           </TooltipTrigger>

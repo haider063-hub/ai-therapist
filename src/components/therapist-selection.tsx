@@ -10,7 +10,7 @@ import {
 } from "ui/card";
 import { Button } from "ui/button";
 import { Badge } from "ui/badge";
-import { Volume2, Sparkles } from "lucide-react";
+import { Volume2 } from "lucide-react";
 import { useState } from "react";
 import { appStore } from "@/app/store";
 import { useRouter } from "next/navigation";
@@ -130,16 +130,10 @@ export function TherapistSelection() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <h1 className="text-sm gradient-text font-medium">
-              EchoNest AI Therapy Platform
-            </h1>
-          </div>
-          <h2 className="text-3xl sm:text-4xl font-bold">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">
             Choose Your AI Therapist
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-white/80 max-w-2xl mx-auto">
             Connect with an AI therapist who speaks your language and
             understands your needs. Each therapist brings unique cultural
             perspectives and specialized approaches to healing.
@@ -153,11 +147,11 @@ export function TherapistSelection() {
             placeholder="Search by name, language, or specialization..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-background"
+            className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-white text-black border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
           />
 
           <div className="flex gap-2 flex-wrap justify-center items-center">
-            <span className="text-sm text-muted-foreground flex items-center gap-2">
+            <span className="text-sm text-white flex items-center gap-2">
               🌐 Languages:
             </span>
             {languages.map((lang) => (
@@ -187,7 +181,7 @@ export function TherapistSelection() {
 
         {filteredTherapists.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">
+            <p className="text-white">
               No therapists found matching your criteria
             </p>
           </div>
@@ -221,7 +215,7 @@ function TherapistCard({
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col soft-shadow">
+    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col bg-white">
       <CardHeader className="text-center pb-3 flex-shrink-0">
         {/* Avatar */}
         <div className="flex justify-center mb-3">
@@ -283,11 +277,6 @@ function TherapistCard({
               )}
             </div>
           </div>
-
-          {/* Description */}
-          <p className="text-xs text-muted-foreground text-center italic">
-            💝 {therapist.description}
-          </p>
         </div>
 
         {/* Action Buttons - Always at bottom */}

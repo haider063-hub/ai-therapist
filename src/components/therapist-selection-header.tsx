@@ -9,7 +9,7 @@ export function TherapistSelectionHeader() {
   const router = useRouter();
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+    <header className="sticky top-0 z-50">
       <div className="flex items-center px-4 py-3">
         <Tooltip>
           <TooltipTrigger asChild>
@@ -17,7 +17,7 @@ export function TherapistSelectionHeader() {
               variant="ghost"
               size="icon"
               onClick={() => router.push("/")}
-              className="text-white hover:text-white/80"
+              className="text-white hover:text-white/80 bg-transparent hover:bg-transparent"
             >
               <ArrowLeft className="h-4 w-4 text-white" />
             </Button>

@@ -13,9 +13,12 @@ export default async function TherapistsLayout({
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <TherapistSelectionHeader />
-      {children}
+    <div className="min-h-screen flex flex-col relative">
+      <div className="echonest-gradient-bg"></div>
+      <div className="relative z-10">
+        <TherapistSelectionHeader />
+        {children}
+      </div>
     </div>
   );
 }
