@@ -1,5 +1,3 @@
-import { BackgroundPaths } from "ui/background-paths";
-
 export default async function AuthLayout({
   children,
 }: { children: React.ReactNode }) {
@@ -10,10 +8,6 @@ export default async function AuthLayout({
       <div className="flex-1 relative z-10">
         <div className="flex min-h-screen w-full">
           <div className="hidden lg:flex lg:w-1/2 bg-muted border-r flex-col p-18 relative">
-            <div className="absolute inset-0 w-full h-full">
-              <BackgroundPaths />
-            </div>
-
             {/* Welcome Section - Matching the provided image */}
             <div className="flex-1 flex flex-col justify-center items-start space-y-6 animate-in fade-in duration-1000">
               <h1 className="text-4xl font-bold">
