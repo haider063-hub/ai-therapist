@@ -1,4 +1,3 @@
-import { Think } from "ui/think";
 import { getTranslations } from "next-intl/server";
 import { FlipWords } from "ui/flip-words";
 import { BackgroundPaths } from "ui/background-paths";
@@ -19,35 +18,37 @@ export default async function AuthLayout({
               <BackgroundPaths />
             </div>
 
-            {/* Top Section: Key Features */}
+            {/* Top Section: Welcome Header */}
             <div className="space-y-6 animate-in fade-in duration-1000">
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                Why Choose EchoNest?
-              </h2>
               <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Heart className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    AI-Powered Compassionate Therapy
-                  </span>
+                <h1 className="text-4xl font-bold">
+                  <span className="text-foreground">Welcome to </span>
+                  <span className="gradient-text">EchoNest</span>
+                </h1>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Your AI-powered therapy companion. Find support, guidance, and
+                  healing through personalized conversations designed to help
+                  you thrive.
+                </p>
+              </div>
+
+              {/* Feature Cards */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-white/20">
+                  <h3 className="font-semibold text-foreground mb-2">
+                    24/7 Support
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Always here when you need us
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Clock className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    24/7 Available Support
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Globe className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    Multilingual AI Therapists
-                  </span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span className="text-sm text-muted-foreground">
-                    Personalized Treatment Plans
-                  </span>
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg p-4 shadow-sm border border-white/20">
+                  <h3 className="font-semibold text-foreground mb-2">
+                    Private & Secure
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    Your conversations stay confidential
+                  </p>
                 </div>
               </div>
             </div>
