@@ -16,7 +16,7 @@ export default async function SignUpLayout({
   // and the first user always needs to sign up anyway
   return (
     <div className="animate-in fade-in duration-1000 w-full h-full flex flex-col p-4 md:p-8 justify-center relative">
-      <div className="w-full flex justify-end absolute top-0 right-0">
+      <div className="w-full flex justify-end absolute top-4 right-4">
         {signUpEnabled && (
           <Link href="/sign-in">
             <Button
