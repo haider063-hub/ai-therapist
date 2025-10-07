@@ -58,8 +58,8 @@ export default function ForgotPasswordPage() {
               {t("resetLinkSent", { email })}
               <br />
               <br />
-              <strong>Please check your spam folder</strong> if you don't see
-              the email in your inbox.
+              <strong>Please check your spam folder</strong> if you don&apos;t
+              see the email in your inbox.
             </CardDescription>
           </CardHeader>
           <CardContent>
