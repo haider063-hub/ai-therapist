@@ -1,11 +1,8 @@
-import { getTranslations } from "next-intl/server";
-import { FlipWords } from "ui/flip-words";
 import { BackgroundPaths } from "ui/background-paths";
 
 export default async function AuthLayout({
   children,
 }: { children: React.ReactNode }) {
-  const t = await getTranslations("Auth.Intro");
   return (
     <main className="relative w-full flex flex-col h-screen">
       {/* Background */}
@@ -17,13 +14,37 @@ export default async function AuthLayout({
               <BackgroundPaths />
             </div>
 
-            <div className="flex-1" />
+            {/* Welcome Section - Matching the provided image */}
+            <div className="flex-1 flex flex-col justify-center items-start space-y-6 animate-in fade-in duration-1000">
+              <h1 className="text-4xl font-bold">
+                <span className="text-foreground">Welcome to </span>
+                <span className="gradient-text">EchoNest</span>
+              </h1>
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-md">
+                Your AI-powered therapy companion. Find support, guidance, and
+                healing through personalized conversations designed to help you
+                thrive.
+              </p>
 
-            {/* Bottom Section: FlipWords Description */}
-            <FlipWords
-              words={[t("description")]}
-              className="mb-4 text-muted-foreground animate-in fade-in duration-1000 delay-500"
-            />
+              <div className="grid grid-cols-2 gap-4 w-full max-w-md">
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                  <h3 className="text-base font-semibold text-black">
+                    24/7 Support
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Always here when you need us
+                  </p>
+                </div>
+                <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+                  <h3 className="text-base font-semibold text-black">
+                    Private & Secure
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Your conversations stay confidential
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="w-full lg:w-1/2 p-0 sm:p-6">{children}</div>
