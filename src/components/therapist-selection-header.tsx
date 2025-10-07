@@ -17,8 +17,9 @@ export function TherapistSelectionHeader() {
               variant="ghost"
               size="icon"
               onClick={() => router.push("/")}
+              className="text-white hover:text-white/80"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 text-white" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Back to Home</TooltipContent>

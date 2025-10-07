@@ -84,12 +84,12 @@ export const ChatGreeting = ({ threadId }: ChatGreetingProps) => {
     >
       <div className="rounded-xl p-6 flex flex-col gap-2 leading-relaxed text-center">
         {isLoading ? (
-          <div className="flex items-center justify-center gap-2 text-muted-foreground">
-            <Loader className="h-5 w-5 animate-spin" />
-            <span className="text-lg">Loading...</span>
+          <div className="flex items-center justify-center gap-2 text-white">
+            <Loader className="h-5 w-5 animate-spin text-white" />
+            <span className="text-lg text-white">Loading...</span>
           </div>
         ) : (
-          <h1 className="text-xl md:text-2xl text-primary font-normal animate-in fade-in duration-500 leading-relaxed">
+          <h1 className="text-xl md:text-2xl text-white font-normal animate-in fade-in duration-500 leading-relaxed">
             {greeting}
           </h1>
         )}

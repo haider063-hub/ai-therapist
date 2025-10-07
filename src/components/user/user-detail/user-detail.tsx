@@ -72,8 +72,10 @@ export function UserDetail({
     >
       {/* Hero Section */}
       <div className="space-y-2 px-1 sm:px-0">
-        <h1 className="text-2xl font-bold tracking-tight">{user?.name}</h1>
-        <p className="text-muted-foreground">{t("userDetailDescription")}</p>
+        <h1 className="text-2xl font-bold tracking-tight text-white">
+          {user?.name}
+        </h1>
+        <p className="text-white/80">{t("userDetailDescription")}</p>
       </div>
 
       {/* Cards Layout */}

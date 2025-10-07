@@ -73,8 +73,9 @@ export function AppHeader() {
             }}
             data-testid="sidebar-toggle"
             data-state={open ? "open" : "closed"}
+            className="text-white hover:text-white/80"
           >
-            <PanelLeft />
+            <PanelLeft className="text-white" />
           </Button>
         </TooltipTrigger>
         <TooltipContent align="start" side="bottom">
@@ -97,7 +98,7 @@ export function AppHeader() {
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="bg-secondary/40 px-3 py-2 h-auto"
+                className="bg-white/20 px-3 py-2 h-auto text-white hover:bg-white/30"
                 onClick={async () => {
                   // First check store (TherapistLoader may have already loaded it)
                   const voiceChat = appStore.getState().voiceChat;
@@ -127,7 +128,9 @@ export function AppHeader() {
                   }
                 }}
               >
-                <span className="text-sm font-medium">Voice Chat</span>
+                <span className="text-sm font-medium text-white">
+                  Voice Chat
+                </span>
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">

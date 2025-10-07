@@ -125,8 +125,8 @@ export default function CreditDisplay({
   if (loading) {
     return (
       <div className="flex items-center gap-2">
-        <RefreshCw className="h-4 w-4 animate-spin" />
-        <span className="text-sm text-gray-500">Loading...</span>
+        <RefreshCw className="h-4 w-4 animate-spin text-white" />
+        <span className="text-sm text-white">Loading...</span>
       </div>
     );
   }
@@ -153,26 +153,26 @@ export default function CreditDisplay({
 
       return (
         <div className="flex items-center gap-2 text-sm">
-          <CreditCard className="h-4 w-4" />
+          <CreditCard className="h-4 w-4 text-white" />
 
           {hasUnlimitedChat ? (
             <Badge
               variant="secondary"
-              className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              className="text-xs px-2 py-0 h-5 bg-white/20 text-white border-white/30"
             >
               Unlimited
             </Badge>
           ) : totalChatCredits > 0 ? (
             <div className="flex items-center gap-1">
-              <span className="font-medium">{totalChatCredits}</span>
-              <span className="text-muted-foreground text-xs">
+              <span className="font-medium text-white">{totalChatCredits}</span>
+              <span className="text-white/70 text-xs">
                 {creditStatus.chatCreditsFromTopup > 0
                   ? `(${creditStatus.chatCredits} free trial + ${creditStatus.chatCreditsFromTopup} top-up)`
                   : "credits"}
               </span>
             </div>
           ) : (
-            <span className="text-red-500 text-xs">No credits</span>
+            <span className="text-red-300 text-xs">No credits</span>
           )}
 
           {showUpgradeButton &&
@@ -253,20 +253,20 @@ export default function CreditDisplay({
 
       return (
         <div className="flex items-center gap-2 text-sm">
-          <CreditCard className="h-4 w-4" />
-          <span className="font-semibold text-xs">Chat Credits</span>
+          <CreditCard className="h-4 w-4 text-white" />
+          <span className="font-semibold text-xs text-white">Chat Credits</span>
 
           {hasUnlimitedChat ? (
             <Badge
               variant="secondary"
-              className="text-xs px-2 py-0 h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+              className="text-xs px-2 py-0 h-5 bg-white/20 text-white border-white/30"
             >
               Unlimited
             </Badge>
           ) : totalChatCredits > 0 ? (
-            <span className="font-medium">{totalChatCredits}</span>
+            <span className="font-medium text-white">{totalChatCredits}</span>
           ) : (
-            <span className="text-red-500 text-xs">No credits</span>
+            <span className="text-red-300 text-xs">No credits</span>
           )}
 
           {showUpgradeButton &&

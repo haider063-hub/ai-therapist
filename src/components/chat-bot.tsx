@@ -37,7 +37,6 @@ import {
 import { useTranslations } from "next-intl";
 import { Think } from "ui/think";
 import { useGenerateThreadTitle } from "@/hooks/queries/use-generate-thread-title";
-import dynamic from "next/dynamic";
 import { useMounted } from "@/hooks/use-mounted";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -46,14 +45,6 @@ type Props = {
   initialMessages: Array<UIMessage>;
   selectedChatModel?: string;
 };
-
-const LightRays = dynamic(() => import("ui/light-rays"), {
-  ssr: false,
-});
-
-const Particles = dynamic(() => import("ui/particles"), {
-  ssr: false,
-});
 
 export default function ChatBot({ threadId, initialMessages }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -225,24 +216,8 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 5 }}
-          >
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <LightRays />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <Particles particleCount={400} particleBaseSize={10} />
-            </div>
-
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <div className="w-full h-full bg-gradient-to-t from-background to-50% to-transparent z-20" />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <div className="w-full h-full bg-gradient-to-l from-background to-20% to-transparent z-20" />
-            </div>
-            <div className="absolute top-0 left-0 w-full h-full z-10">
-              <div className="w-full h-full bg-gradient-to-r from-background to-20% to-transparent z-20" />
-            </div>
-          </motion.div>
+            className="absolute top-0 left-0 w-full h-full z-10 echonest-gradient-bg"
+          />
         )}
       </AnimatePresence>
     );
@@ -471,11 +446,11 @@ function ScrollToBottomButton({
         >
           <Button
             onClick={onClick}
-            className="shadow-lg backdrop-blur-sm border transition-colors"
+            className="shadow-lg backdrop-blur-sm border border-white/30 transition-colors text-white hover:bg-white/10"
             size="icon"
             variant="ghost"
           >
-            <ArrowDown />
+            <ArrowDown className="text-white" />
           </Button>
         </motion.div>
       )}

@@ -13,13 +13,11 @@ import { CreditCardIcon, LayoutDashboard } from "lucide-react";
 import { getIsUserAdmin } from "lib/user/utils";
 import { BasicUser } from "app-types/user";
 import { AppSidebarAdmin } from "./app-sidebar-menu-admin";
-import { appStore } from "@/app/store";
 
 export function AppSidebarMenus({ user }: { user?: BasicUser }) {
   const router = useRouter();
   const t = useTranslations("");
   const { setOpenMobile } = useSidebar();
-  const appStoreMutate = appStore((state) => state.mutate);
 
   return (
     <SidebarGroup>
@@ -72,16 +70,19 @@ export function AppSidebarMenus({ user }: { user?: BasicUser }) {
         <SidebarMenu>
           <Tooltip>
             <SidebarMenuItem>
-              <SidebarMenuButton
-                className="font-semibold"
-                onClick={() => {
+              <Link
+                href="/dashboard"
+                onClick={(e) => {
+                  e.preventDefault();
                   setOpenMobile(false);
-                  appStoreMutate({ openUserSettings: true });
+                  router.push("/dashboard");
                 }}
               >
-                <LayoutDashboard className="size-4 text-foreground" />
-                Dashboard
-              </SidebarMenuButton>
+                <SidebarMenuButton className="font-semibold">
+                  <LayoutDashboard className="size-4 text-foreground" />
+                  Dashboard
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </Tooltip>
         </SidebarMenu>

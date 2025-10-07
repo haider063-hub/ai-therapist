@@ -192,7 +192,7 @@ export default function PromptInput({
     <div className="max-w-3xl mx-auto fade-in animate-in">
       <div className="z-10 mx-auto w-full max-w-3xl relative">
         <fieldset className="flex w-full min-w-0 max-w-full flex-col px-4">
-          <div className="shadow-lg overflow-hidden rounded-4xl backdrop-blur-sm transition-all duration-200 bg-muted/60 relative flex w-full flex-col cursor-text z-10 items-stretch focus-within:bg-muted hover:bg-muted focus-within:ring-muted hover:ring-muted">
+          <div className="input-gradient-border overflow-hidden rounded-4xl backdrop-blur-sm transition-all duration-200 bg-white relative flex w-full flex-col cursor-text z-10 items-stretch focus-within:bg-white hover:bg-white focus-within:ring-muted hover:ring-muted soft-shadow">
             {mentions.length > 0 && (
               <div className="bg-input rounded-b-sm rounded-t-3xl p-3 flex flex-col gap-4 mx-2 my-2">
                 {mentions.map((mention, i) => {
@@ -282,7 +282,7 @@ export default function PromptInput({
                       <Button
                         size={"sm"}
                         onClick={toggleDictation}
-                        className={`rounded-full p-2! relative ${isDictating ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : ""}`}
+                        className={`rounded-full p-2! relative ${isDictating ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "pink-accent hover:opacity-90"}`}
                       >
                         <Mic size={16} />
                         {isDictating && (
@@ -309,15 +309,12 @@ export default function PromptInput({
                         submit();
                       }
                     }}
-                    className="fade-in animate-in cursor-pointer text-muted-foreground rounded-full p-2 bg-secondary hover:bg-accent-foreground hover:text-accent transition-all duration-200"
+                    className="fade-in animate-in cursor-pointer text-white rounded-full p-2 pink-accent-send hover:opacity-90 transition-all duration-200"
                   >
                     {isLoading ? (
-                      <Square
-                        size={16}
-                        className="fill-muted-foreground text-muted-foreground"
-                      />
+                      <Square size={16} className="fill-white text-white" />
                     ) : (
-                      <CornerRightUp size={16} />
+                      <CornerRightUp size={16} className="text-white" />
                     )}
                   </div>
                 )}

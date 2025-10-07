@@ -475,11 +475,11 @@ export default function VoiceChatPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="flex-shrink-0"
+                className="flex-shrink-0 text-white hover:text-white/80"
                 onClick={handleBackButton}
                 disabled={isActive}
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-5 w-5 text-white" />
               </Button>
             </TooltipTrigger>
             <TooltipContent side="bottom">
@@ -837,7 +837,7 @@ export default function VoiceChatPage() {
             <div className="w-full mx-auto h-full max-h-[80vh] overflow-y-auto px-4 lg:max-w-4xl flex-1 flex items-center">
               <div className="animate-in fade-in-50 duration-1000 text-center w-full">
                 <div className="mb-8">
-                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-4">
+                  <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold gradient-text mb-4">
                     EchoNest AI Therapy
                   </h1>
                   <p className="text-xl md:text-2xl text-muted-foreground mb-6">
@@ -898,7 +898,7 @@ export default function VoiceChatPage() {
                 isLoading
                   ? "bg-accent-foreground text-accent animate-pulse"
                   : !isActive
-                    ? "bg-green-500/10 text-green-500 hover:bg-green-500/30"
+                    ? "pink-accent hover:opacity-90"
                     : !isListening
                       ? "bg-destructive/30 text-destructive hover:bg-destructive/10"
                       : isUserSpeaking
@@ -909,7 +909,7 @@ export default function VoiceChatPage() {
               {isLoading || isClosing ? (
                 <Loader className="size-6 animate-spin" />
               ) : !isActive ? (
-                <PhoneIcon className="size-6 fill-green-500 stroke-none" />
+                <PhoneIcon className="size-6 fill-white stroke-none" />
               ) : isListening ? (
                 <MicIcon
                   className={`size-6 ${isUserSpeaking ? "text-primary" : "text-muted-foreground transition-colors duration-300"}`}

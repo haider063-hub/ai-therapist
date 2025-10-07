@@ -132,7 +132,7 @@ export function TherapistSelection() {
         <div className="text-center space-y-3">
           <div className="flex items-center justify-center gap-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            <h1 className="text-sm text-primary font-medium">
+            <h1 className="text-sm gradient-text font-medium">
               EchoNest AI Therapy Platform
             </h1>
           </div>
@@ -221,7 +221,7 @@ function TherapistCard({
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col">
+    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col soft-shadow">
       <CardHeader className="text-center pb-3 flex-shrink-0">
         {/* Avatar */}
         <div className="flex justify-center mb-3">

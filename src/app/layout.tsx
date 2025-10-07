@@ -51,8 +51,9 @@ export default async function RootLayout({
           <ThemeStyleProvider>
             <NextIntlClientProvider>
               <TherapistLoader />
-              <div id="root">
-                {children}
+              <div id="root" className="min-h-screen relative">
+                <div className="echonest-gradient-bg"></div>
+                <div className="relative z-10">{children}</div>
                 <Toaster richColors />
               </div>
             </NextIntlClientProvider>

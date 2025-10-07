@@ -215,29 +215,31 @@ export default function SubscriptionPage() {
               variant="ghost"
               size="icon"
               onClick={() => router.push("/")}
-              className="mb-4"
+              className="mb-4 text-white hover:text-white/80"
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-4 w-4 text-white" />
             </Button>
           </TooltipTrigger>
           <TooltipContent side="bottom">Go Back</TooltipContent>
         </Tooltip>
-        <h1 className="text-3xl font-bold mb-2">Subscription Management</h1>
-        <p className="text-gray-600">
+        <h1 className="text-3xl font-bold mb-2 text-white">
+          Subscription Management
+        </h1>
+        <p className="text-white/80">
           Manage your EchoNest AI Therapy subscription and credits
         </p>
       </div>
 
       {/* Current Status */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-black">
+              <CreditCard className="h-5 w-5 text-black" />
               Current Plan
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-black">
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="font-medium">Plan:</span>
@@ -275,14 +277,14 @@ export default function SubscriptionPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-black">
+              <CreditCard className="h-5 w-5 text-black" />
               Credits & Usage
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="text-black">
             <div className="space-y-3">
               {/* Free Trial: Show total credits */}
               {data.user.subscriptionType === "free_trial" && (
@@ -371,12 +373,12 @@ export default function SubscriptionPage() {
 
       {/* Available Plans */}
       <div className="mb-8">
-        <h2 className="text-2xl font-bold mb-6">Available Plans</h2>
+        <h2 className="text-2xl font-bold mb-6 text-white">Available Plans</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data.plans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
+              className={`relative bg-white ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
             >
               {plan.id === data.user.subscriptionType && (
                 <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
@@ -392,13 +394,15 @@ export default function SubscriptionPage() {
                 <div className="flex justify-center mb-2">
                   {getPlanIcon(plan.id)}
                 </div>
-                <CardTitle className="text-xl">{plan.name}</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl text-black">
+                  {plan.name}
+                </CardTitle>
+                <CardDescription className="text-black">
                   <span className="text-3xl font-bold">${plan.price}</span>
                   <span className="text-gray-500">/month</span>
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-black">
                 <ul className="space-y-2 mb-6">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-2">
@@ -444,9 +448,11 @@ export default function SubscriptionPage() {
 
       {/* Recent Transactions */}
       <div>
-        <h2 className="text-2xl font-bold mb-6">Recent Transactions</h2>
-        <Card>
-          <CardContent className="p-4">
+        <h2 className="text-2xl font-bold mb-6 text-white">
+          Recent Transactions
+        </h2>
+        <Card className="bg-white">
+          <CardContent className="p-4 text-black">
             {data.recentTransactions.length === 0 ? (
               <p className="text-gray-500 text-center py-4">
                 No transactions yet
