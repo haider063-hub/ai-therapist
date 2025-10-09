@@ -132,6 +132,7 @@ async function handleCheckoutSessionCompleted(session: any) {
         subscriptionStatus: "active",
         stripeSubscriptionId: subscriptionId,
         subscriptionEndDate: new Date(subscription.current_period_end * 1000),
+        voiceCredits: plan.monthlyVoiceCredits, // Update voice credits to plan amount
       });
     }
   }
@@ -156,12 +157,18 @@ async function handleSubscriptionCreated(subscription: any) {
     return;
   }
 
+  // Update user subscription - NO CREDITS YET (waiting for payment confirmation)
   await subscriptionRepository.updateUserSubscription(userId, {
     subscriptionType: plan.name,
-    subscriptionStatus: "active",
+    subscriptionStatus: "incomplete", // Payment not confirmed yet
     stripeSubscriptionId: subscription.id,
     subscriptionEndDate: new Date(subscription.current_period_end * 1000),
+    // DO NOT set voiceCredits here - waiting for invoice.payment_succeeded
   });
+
+  logger.info(
+    `Subscription created for user ${userId}: ${plan.displayName}. Waiting for payment confirmation to grant ${plan.monthlyVoiceCredits} credits.`,
+  );
 }
 
 async function handleSubscriptionUpdated(subscription: any) {
@@ -213,24 +220,22 @@ async function handleSubscriptionDeleted(subscription: any) {
     return;
   }
 
-  // Revert user to free trial with 500 credits
+  // User canceled subscription - revert to free trial with 0 plan credits
+  // Top-up credits are preserved (stored separately)
   await subscriptionRepository.updateUserSubscription(userId, {
     subscriptionType: "free_trial",
-    subscriptionStatus: "active", // Active free trial, not canceled
+    subscriptionStatus: "canceled",
     subscriptionEndDate: null,
     stripeSubscriptionId: null,
+    credits: 0, // Reset legacy field
+    chatCredits: 0, // Reset plan chat credits to 0
+    voiceCredits: 0, // Reset plan voice credits to 0
+    voiceCreditsUsedToday: 0,
+    voiceCreditsUsedThisMonth: 0,
   });
 
-  // Reset credits to free trial amount (500)
-  const user = await subscriptionRepository.getUserById(userId);
-  if (user) {
-    await subscriptionRepository.updateUserSubscription(userId, {
-      credits: 500,
-    });
-  }
-
   logger.info(
-    `Subscription deleted for user ${userId} - reverted to free trial with 500 credits`,
+    `Subscription canceled for user ${userId}. Plan credits reset to 0, top-up credits preserved. User reverted to free trial.`,
   );
 }
 
@@ -240,8 +245,14 @@ async function handleInvoicePaymentSucceeded(invoice: any) {
 
   const subscription = await stripe!.subscriptions.retrieve(subscriptionId);
   const userId = subscription.metadata?.userId;
+  const planType = subscription.metadata?.planType;
 
   if (!userId) return;
+
+  // Get the plan configuration to reset credits on renewal
+  const plan = planType
+    ? SUBSCRIPTION_PLANS[planType as keyof typeof SUBSCRIPTION_PLANS]
+    : null;
 
   // Create successful transaction record
   await subscriptionRepository.createTransaction({
@@ -256,17 +267,25 @@ async function handleInvoicePaymentSucceeded(invoice: any) {
       invoiceId: invoice.id,
       periodStart: new Date(invoice.period_start * 1000).toISOString(),
       periodEnd: new Date(invoice.period_end * 1000).toISOString(),
+      planType: planType || "unknown",
     },
   });
 
-  // Update subscription status
+  // ✅ PAYMENT SUCCESSFUL - Now update subscription status and grant/reset credits
   await subscriptionRepository.updateUserSubscription(userId, {
-    subscriptionStatus: "active",
+    subscriptionStatus: "active", // Mark as active only after successful payment
     subscriptionEndDate: new Date(subscription.current_period_end * 1000),
+    voiceCredits: plan?.monthlyVoiceCredits, // ✅ Grant/reset credits ONLY after successful payment
+    voiceCreditsUsedToday: 0,
+    voiceCreditsUsedThisMonth: 0,
+    lastMonthlyReset: new Date(),
   });
 
+  const isRenewal = invoice.billing_reason === "subscription_cycle";
+  const action = isRenewal ? "renewed" : "activated";
+
   logger.info(
-    `Payment succeeded for user ${userId}, subscription ${subscriptionId}`,
+    `✅ Payment succeeded for user ${userId}. Subscription ${action}, credits ${isRenewal ? "reset" : "granted"} to ${plan?.monthlyVoiceCredits || 0}. Next billing: ${new Date(subscription.current_period_end * 1000).toISOString()}`,
   );
 }
 
@@ -279,12 +298,13 @@ async function handleInvoicePaymentFailed(invoice: any) {
 
   if (!userId) return;
 
-  // Update subscription status to past_due
+  // ❌ PAYMENT FAILED - Update status but DO NOT grant/reset credits
   await subscriptionRepository.updateUserSubscription(userId, {
     subscriptionStatus: "past_due",
+    // DO NOT reset voiceCredits - payment failed!
   });
 
   logger.warn(
-    `Payment failed for user ${userId}, subscription ${subscriptionId}`,
+    `❌ Payment failed for user ${userId}, subscription ${subscriptionId}. Credits NOT reset. Subscription status: past_due.`,
   );
 }

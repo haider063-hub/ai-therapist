@@ -49,6 +49,12 @@ type Props = {
 export default function ChatBot({ threadId, initialMessages }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
+  const router = useRouter();
+
+  // Credit checking state
+  const [canUseChat, setCanUseChat] = useState(true);
+  const [chatCredits, setChatCredits] = useState(0);
+  const [subscriptionType, setSubscriptionType] = useState("free_trial");
 
   const [
     appStoreMutate,
@@ -76,6 +82,33 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
 
   // Always show particles
   const showParticles = true;
+
+  // Fetch credit status on mount and listen for updates
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const response = await fetch("/api/stripe/get-subscription-status");
+        if (response.ok) {
+          const data = await response.json();
+
+          // API now returns the correct chat credits based on subscription type
+          setChatCredits(data.credits.chatCredits || 0);
+          setCanUseChat(data.features.canUseChat);
+          setSubscriptionType(data.user.subscriptionType);
+        }
+      } catch (error) {
+        console.error("Failed to fetch credit status:", error);
+      }
+    };
+
+    fetchCredits();
+
+    // Listen for credit updates
+    const handleCreditUpdate = () => fetchCredits();
+    window.addEventListener("credits-updated", handleCreditUpdate);
+    return () =>
+      window.removeEventListener("credits-updated", handleCreditUpdate);
+  }, []);
 
   const onFinish = useCallback(() => {
     const messages = latestRef.current.messages;
@@ -113,7 +146,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
     setMessages,
     addToolResult: _addToolResult,
     error,
-    sendMessage,
+    sendMessage: originalSendMessage,
     stop,
   } = useChat({
     id: threadId,
@@ -142,6 +175,19 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
     experimental_throttle: 100,
     onFinish,
   });
+
+  // Wrap sendMessage to dispatch credits-updated event immediately after sending
+  const sendMessage = useCallback(
+    async (message?: any, options?: any) => {
+      await originalSendMessage(message, options);
+      // Dispatch credits-updated event immediately after sending message
+      // This will refresh the credit display since credits are deducted on the server
+      setTimeout(() => {
+        window.dispatchEvent(new Event("credits-updated"));
+      }, 100); // Small delay to ensure the server request has started
+    },
+    [originalSendMessage],
+  );
   const [isDeleteThreadPopupOpen, setIsDeleteThreadPopupOpen] = useState(false);
 
   const addToolResult = useCallback(
@@ -354,6 +400,50 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
             "w-full z-10",
           )}
         >
+          {/* Low Credits Warning Banner */}
+          {subscriptionType === "free_trial" &&
+            chatCredits > 0 &&
+            chatCredits < 20 && (
+              <div className="max-w-3xl mx-auto mb-2 px-4">
+                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      ⚠️ Low chat credits:{" "}
+                      <span className="font-bold">{chatCredits}</span> remaining
+                    </p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="text-xs"
+                      onClick={() => router.push("/subscription")}
+                    >
+                      Upgrade
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          {/* Out of Credits Warning Banner */}
+          {!canUseChat && chatCredits === 0 && (
+            <div className="max-w-3xl mx-auto mb-2 px-4">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                    ❌ Out of chat credits
+                  </p>
+                  <Button
+                    size="sm"
+                    className="text-xs bg-red-600 hover:bg-red-700"
+                    onClick={() => router.push("/subscription")}
+                  >
+                    Upgrade Now
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="max-w-3xl mx-auto relative flex justify-center items-center -top-2">
             <ScrollToBottomButton
               show={!isAtBottom && messages.length > 0}
@@ -369,8 +459,10 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
             isLoading={isLoading || isPendingToolCall}
             onStop={stop}
             onFocus={showParticles ? undefined : handleFocus}
+            disabled={!canUseChat}
           />
         </div>
+
         <DeleteThreadPopup
           threadId={threadId}
           onClose={() => setIsDeleteThreadPopupOpen(false)}

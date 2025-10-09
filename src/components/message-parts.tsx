@@ -4,14 +4,12 @@ import { getToolName, ToolUIPart, UIMessage } from "ai";
 import {
   Check,
   Copy,
-  Loader,
-  Pencil,
   ChevronDownIcon,
   ChevronUp,
   X,
-  Trash2,
   TriangleAlert,
   HammerIcon,
+  Loader,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { Button } from "ui/button";
@@ -19,15 +17,11 @@ import { Markdown } from "./markdown";
 import { cn, safeJSONParse, truncateString } from "lib/utils";
 import JsonView from "ui/json-view";
 import { useMemo, useState, memo, useEffect, useRef, useCallback } from "react";
-import { MessageEditor } from "./message-editor";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { useCopy } from "@/hooks/use-copy";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { deleteMessageAction } from "@/app/api/chat/actions";
 
-import { toast } from "sonner";
-import { safe } from "ts-safe";
 import { ManualToolConfirmTag } from "app-types/chat";
 
 import { useTranslations } from "next-intl";
@@ -38,10 +32,16 @@ import equal from "lib/equal";
 import { DefaultToolName } from "lib/ai/tools";
 
 import dynamic from "next/dynamic";
-import { notify } from "lib/notify";
+import Image from "next/image";
 
 type MessagePart = UIMessage["parts"][number];
 type TextMessagePart = Extract<MessagePart, { type: "text" }>;
+
+// Custom image part type since AI SDK doesn't include it yet
+type ImageMessagePart = {
+  type: "image";
+  image: string; // base64 data URL or image URL
+};
 type AssistMessagePart = Extract<MessagePart, { type: "text" }>;
 
 interface UserMessagePartProps {
@@ -74,6 +74,25 @@ interface ToolMessagePartProps {
   setMessages?: UseChatHelpers<UIMessage>["setMessages"];
 }
 
+// Image Message Part Component
+export const ImageMessagePart = memo<{
+  part: ImageMessagePart;
+}>(function ImageMessagePart({ part }) {
+  return (
+    <div className="relative rounded-lg overflow-hidden border border-border max-w-xs ml-auto">
+      <Image
+        src={part.image}
+        alt="Uploaded image"
+        width={200}
+        height={200}
+        className="object-contain w-full h-auto"
+        unoptimized={part.image.startsWith("data:")}
+      />
+    </div>
+  );
+});
+ImageMessagePart.displayName = "ImageMessagePart";
+
 const MAX_TEXT_LENGTH = 600;
 export const UserMessagePart = memo(
   function UserMessagePart({
@@ -87,8 +106,6 @@ export const UserMessagePart = memo(
   }: UserMessagePartProps) {
     const { copied, copy } = useCopy();
     const t = useTranslations();
-    const [mode, setMode] = useState<"view" | "edit">("view");
-    const [isDeleting, setIsDeleting] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     const scrolledRef = useRef(false);
@@ -99,47 +116,12 @@ export const UserMessagePart = memo(
         ? part.text
         : truncateString(part.text, MAX_TEXT_LENGTH);
 
-    const deleteMessage = useCallback(async () => {
-      const ok = await notify.confirm({
-        title: "Delete Message",
-        description: "Are you sure you want to delete this message?",
-      });
-      if (!ok) return;
-      safe(() => setIsDeleting(true))
-        .ifOk(() => deleteMessageAction(message.id))
-        .ifOk(() =>
-          setMessages((messages) => {
-            const index = messages.findIndex((m) => m.id === message.id);
-            if (index !== -1) {
-              return messages.filter((_, i) => i !== index);
-            }
-            return messages;
-          }),
-        )
-        .ifFail((error) => toast.error(error.message))
-        .watch(() => setIsDeleting(false))
-        .unwrap();
-    }, [message.id]);
-
     useEffect(() => {
       if (status === "submitted" && isLast && !scrolledRef.current) {
         scrolledRef.current = true;
         ref.current?.scrollIntoView({ behavior: "smooth" });
       }
     }, [status]);
-
-    if (mode === "edit") {
-      return (
-        <div className="flex flex-row gap-2 items-start w-full">
-          <MessageEditor
-            message={message}
-            setMode={setMode}
-            setMessages={setMessages}
-            sendMessage={sendMessage}
-          />
-        </div>
-      );
-    }
 
     return (
       <div className="flex flex-col gap-2 items-end my-2">
@@ -200,41 +182,6 @@ export const UserMessagePart = memo(
               </TooltipTrigger>
               <TooltipContent side="bottom">Copy</TooltipContent>
             </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  data-testid="message-edit-button"
-                  variant="ghost"
-                  size="icon"
-                  className="size-3! p-4! text-white hover:text-white/80"
-                  onClick={() => setMode("edit")}
-                >
-                  <Pencil className="text-white" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">Edit</TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  disabled={isDeleting}
-                  onClick={deleteMessage}
-                  variant="ghost"
-                  size="icon"
-                  className="size-3! p-4! text-white hover:text-white/80"
-                >
-                  {isDeleting ? (
-                    <Loader className="animate-spin text-white" />
-                  ) : (
-                    <Trash2 className="text-white" />
-                  )}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent className="text-destructive" side="bottom">
-                Delete Message
-              </TooltipContent>
-            </Tooltip>
           </div>
         )}
         <div ref={ref} className="min-w-0" />
@@ -259,21 +206,7 @@ export const AssistMessagePart = memo(function AssistMessagePart({
   message,
 }: AssistMessagePartProps) {
   const { copied, copy } = useCopy();
-  const [isDeleting, setIsDeleting] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  const deleteMessage = useCallback(async () => {
-    const ok = await notify.confirm({
-      title: "Delete Message",
-      description: "Are you sure you want to delete this message?",
-    });
-    if (!ok) return;
-    safe(() => setIsDeleting(true))
-      .ifOk(() => deleteMessageAction(message.id))
-      .ifFail((error) => toast.error(error.message))
-      .watch(() => setIsDeleting(false))
-      .unwrap();
-  }, [message.id]);
 
   return (
     <div className="flex flex-col gap-2 group/message">
@@ -302,26 +235,6 @@ export const AssistMessagePart = memo(function AssistMessagePart({
               </Button>
             </TooltipTrigger>
             <TooltipContent>Copy</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={isDeleting}
-                onClick={deleteMessage}
-                className="size-3! p-4! text-white hover:text-white/80"
-              >
-                {isDeleting ? (
-                  <Loader className="animate-spin text-white" />
-                ) : (
-                  <Trash2 className="text-white" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="text-destructive">
-              Delete Message
-            </TooltipContent>
           </Tooltip>
         </div>
       )}
@@ -498,34 +411,11 @@ export const ToolMessagePart = memo(
     const [expanded, setExpanded] = useState(false);
     const { copied: copiedInput, copy: copyInput } = useCopy();
     const { copied: copiedOutput, copy: copyOutput } = useCopy();
-    const [isDeleting, setIsDeleting] = useState(false);
 
     // Handle keyboard shortcuts for approve/reject actions
     useEffect(() => {
       // Keyboard shortcuts removed
     }, [isManualToolInvocation, isLast]);
-
-    const deleteMessage = useCallback(async () => {
-      const ok = await notify.confirm({
-        title: "Delete Message",
-        description: "Are you sure you want to delete this message?",
-      });
-      if (!ok) return;
-      safe(() => setIsDeleting(true))
-        .ifOk(() => deleteMessageAction(messageId))
-        .ifOk(() =>
-          setMessages?.((messages) => {
-            const index = messages.findIndex((m) => m.id === messageId);
-            if (index !== -1) {
-              return messages.filter((_, i) => i !== index);
-            }
-            return messages;
-          }),
-        )
-        .ifFail((error) => toast.error(error.message))
-        .watch(() => setIsDeleting(false))
-        .unwrap();
-    }, [messageId]);
 
     const onToolCallDirect = useCallback(
       (result: any) => {
@@ -779,31 +669,6 @@ export const ToolMessagePart = memo(
                 )}
               </div>
             </div>
-
-            {showActions && (
-              <div className="flex flex-row gap-2 items-center">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      disabled={isDeleting}
-                      onClick={deleteMessage}
-                      variant="ghost"
-                      size="icon"
-                      className="size-3! p-4! opacity-0 group-hover/message:opacity-100 hover:text-destructive"
-                    >
-                      {isDeleting ? (
-                        <Loader className="animate-spin" />
-                      ) : (
-                        <Trash2 />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent className="text-destructive" side="bottom">
-                    Delete Message
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-            )}
           </div>
         )}
       </div>

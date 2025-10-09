@@ -43,13 +43,14 @@ export const SUBSCRIPTION_PLANS = {
     stripePriceId: STRIPE_PRICE_IDS.CHAT_ONLY,
     chatCreditsPerMessage: 5,
     voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
-    dailyVoiceCredits: 0, // No voice access
+    dailyVoiceCredits: 0, // No daily limits
     monthlyVoiceCredits: 0, // No voice access
     unlimitedChat: true,
     unlimitedVoice: false,
-    isOneTimePayment: false, // Monthly subscription
+    isOneTimePayment: false, // Monthly recurring subscription with auto-renewal
     features: [
       "Unlimited chat credits",
+      "Renews monthly",
       "Basic mood tracking",
       "Progress insights",
       "24/7 availability",
@@ -63,13 +64,14 @@ export const SUBSCRIPTION_PLANS = {
     stripePriceId: STRIPE_PRICE_IDS.VOICE_ONLY,
     chatCreditsPerMessage: 5,
     voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
-    dailyVoiceCredits: 1000, // 1000 credits (≈ 100 minutes)
-    monthlyVoiceCredits: 1000, // 1000 credits per month
+    dailyVoiceCredits: 0, // No daily limits
+    monthlyVoiceCredits: 1000, // 1000 credits renewed monthly
     unlimitedChat: false,
     unlimitedVoice: false,
-    isOneTimePayment: false, // Monthly subscription
+    isOneTimePayment: false, // Monthly recurring subscription with auto-renewal
     features: [
-      "1,000 voice credits",
+      "1,000 voice credits monthly",
+      "Renews automatically",
       "Human-like conversation",
       "Advanced mood tracking",
       "Personalized insights",
@@ -83,14 +85,15 @@ export const SUBSCRIPTION_PLANS = {
     stripePriceId: STRIPE_PRICE_IDS.PREMIUM,
     chatCreditsPerMessage: 5,
     voiceCreditsPerMinute: 10, // 10 credits per minute (user + bot duration)
-    dailyVoiceCredits: 1400, // 1400 credits (≈ 140 minutes)
-    monthlyVoiceCredits: 1400, // 1400 credits per month
+    dailyVoiceCredits: 0, // No daily limits
+    monthlyVoiceCredits: 1400, // 1400 credits renewed monthly
     unlimitedChat: true,
     unlimitedVoice: false,
-    isOneTimePayment: false, // Monthly subscription
+    isOneTimePayment: false, // Monthly recurring subscription with auto-renewal
     features: [
       "Everything in Voice Only",
-      "1,400 voice credits",
+      "1,400 voice credits monthly",
+      "Renews automatically",
       "Unlimited chat conversations",
       "Advanced mood tracking",
       "Crisis-mode support",

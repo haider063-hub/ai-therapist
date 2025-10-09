@@ -11,6 +11,7 @@ import {
   AssistMessagePart,
   ToolMessagePart,
   ReasoningPart,
+  ImageMessagePart,
 } from "./message-parts";
 import { ChevronDown, ChevronUp, TriangleAlertIcon } from "lucide-react";
 import { Button } from "ui/button";
@@ -66,6 +67,10 @@ const PurePreviewMessage = ({
                   isThinking={isLastPart && isLastMessage && isLoading}
                 />
               );
+            }
+
+            if ((part as any).type === "image") {
+              return <ImageMessagePart key={key} part={part as any} />;
             }
 
             if (isUserMessage && part.type === "text" && part.text) {

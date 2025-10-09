@@ -44,211 +44,244 @@ export const subscriptionRepository = {
     amount: number,
     type: "chat" | "voice",
   ): Promise<UserEntity | null> {
-    const user = await this.getUserById(userId);
-    if (!user) return null;
-
-    // Premium users have unlimited access to both
-    if (user.subscriptionType === "premium") {
-      return user;
-    }
-
-    // Chat only plan has unlimited chat
-    if (user.subscriptionType === "chat_only" && type === "chat") {
-      return user;
-    }
-
-    // Voice + Chat plan has unlimited chat
-    if (user.subscriptionType === "voice_chat" && type === "chat") {
-      return user;
-    }
-
-    // Voice only plan has voice credits (with daily/monthly limits)
-    if (user.subscriptionType === "voice_only" && type === "voice") {
-      // Check voice plan daily/monthly limits
-      const now = new Date();
-      const lastDailyReset = user.lastDailyReset || user.createdAt;
-      const lastMonthlyReset = user.lastMonthlyReset || user.createdAt;
-
-      // Check if we need to reset daily credits
-      if (
-        now.getDate() !== lastDailyReset.getDate() ||
-        now.getMonth() !== lastDailyReset.getMonth() ||
-        now.getFullYear() !== lastDailyReset.getFullYear()
-      ) {
-        await this.resetDailyVoiceCredits(userId);
-      }
-
-      // Check if we need to reset monthly credits
-      if (
-        now.getMonth() !== lastMonthlyReset.getMonth() ||
-        now.getFullYear() !== lastMonthlyReset.getFullYear()
-      ) {
-        await this.resetMonthlyVoiceCredits(userId);
-      }
-
-      // Get updated user after potential resets
-      const updatedUser = await this.getUserById(userId);
-      if (!updatedUser) return null;
-
-      // Check daily limit
-      if (
-        updatedUser.voiceCreditsUsedToday + amount >
-        updatedUser.dailyVoiceCredits
-      ) {
-        throw new Error("Daily voice credit limit exceeded");
-      }
-
-      // Check monthly limit
-      if (
-        updatedUser.voiceCreditsUsedThisMonth + amount >
-        updatedUser.monthlyVoiceCredits
-      ) {
-        throw new Error("Monthly voice credit limit exceeded");
-      }
-
-      // Update voice usage counters
-      const result = await pgDb
-        .update(UserSchema)
-        .set({
-          voiceCreditsUsedToday: updatedUser.voiceCreditsUsedToday + amount,
-          voiceCreditsUsedThisMonth:
-            updatedUser.voiceCreditsUsedThisMonth + amount,
-          updatedAt: new Date(),
-        })
+    // Use atomic transaction to prevent race conditions
+    return await pgDb.transaction(async (tx) => {
+      // Lock the user row for update to prevent concurrent modifications
+      const user = await tx
+        .select()
+        .from(UserSchema)
         .where(eq(UserSchema.id, userId))
-        .returning();
+        .for("update")
+        .limit(1);
 
-      return result[0];
-    }
+      if (!user || user.length === 0) {
+        return null;
+      }
 
-    // Voice + Chat plan has voice credits (with daily/monthly limits)
-    if (user.subscriptionType === "voice_chat" && type === "voice") {
-      // Check voice plan daily/monthly limits
-      const now = new Date();
-      const lastDailyReset = user.lastDailyReset || user.createdAt;
-      const lastMonthlyReset = user.lastMonthlyReset || user.createdAt;
+      const currentUser = user[0];
 
-      // Check if we need to reset daily credits
+      // Check if paid subscription has expired
       if (
-        now.getDate() !== lastDailyReset.getDate() ||
-        now.getMonth() !== lastDailyReset.getMonth() ||
-        now.getFullYear() !== lastDailyReset.getFullYear()
+        currentUser.subscriptionType !== "free_trial" &&
+        currentUser.subscriptionEndDate &&
+        new Date() > currentUser.subscriptionEndDate
       ) {
-        await this.resetDailyVoiceCredits(userId);
+        throw new Error(
+          "Your subscription has expired. Please renew your subscription to continue.",
+        );
       }
 
-      // Check if we need to reset monthly credits
-      if (
-        now.getMonth() !== lastMonthlyReset.getMonth() ||
-        now.getFullYear() !== lastMonthlyReset.getFullYear()
-      ) {
-        await this.resetMonthlyVoiceCredits(userId);
+      // Premium users (voice_chat plan) - track monthly usage
+      if (currentUser.subscriptionType === "voice_chat") {
+        if (type === "chat") {
+          // Chat is unlimited for voice_chat plan - no deduction needed
+          // Just return the user without any changes
+          return currentUser;
+        } else {
+          // Voice: Track monthly usage against plan limit (1400) + any top-up credits
+          const planCredits = 1400; // Monthly plan credits
+          const topupCredits = currentUser.voiceCreditsFromTopup || 0;
+          const usedThisMonth = currentUser.voiceCreditsUsedThisMonth || 0;
+          const totalAvailable = planCredits + topupCredits;
+          const remainingCredits = totalAvailable - usedThisMonth;
+
+          if (remainingCredits < amount) {
+            throw new Error(
+              `Insufficient voice credits. You have ${remainingCredits} credits remaining this month.`,
+            );
+          }
+
+          // Update monthly usage counter
+          const result = await tx
+            .update(UserSchema)
+            .set({
+              voiceCreditsUsedThisMonth: sql`${UserSchema.voiceCreditsUsedThisMonth} + ${amount}`,
+              updatedAt: new Date(),
+            })
+            .where(eq(UserSchema.id, userId))
+            .returning();
+          return result[0];
+        }
       }
 
-      // Get updated user after potential resets
-      const updatedUser = await this.getUserById(userId);
-      if (!updatedUser) return null;
+      // Chat only plan
+      if (currentUser.subscriptionType === "chat_only") {
+        if (type === "chat") {
+          // Chat is unlimited for chat_only plan - no deduction needed
+          // Just return the user without any changes
+          return currentUser;
+        } else {
+          // Voice: Use free trial + top-up credits
+          const totalVoiceCredits =
+            currentUser.voiceCredits + currentUser.voiceCreditsFromTopup;
+          if (totalVoiceCredits < amount) {
+            throw new Error("Insufficient voice credits");
+          }
 
-      // Check daily limit
-      if (
-        updatedUser.voiceCreditsUsedToday + amount >
-        updatedUser.dailyVoiceCredits
-      ) {
-        throw new Error("Daily voice credit limit exceeded");
+          // Deduct from free trial credits first, then from top-up credits
+          let remainingAmount = amount;
+          let newFreeCredits = currentUser.voiceCredits;
+          let newTopupCredits = currentUser.voiceCreditsFromTopup;
+
+          if (newFreeCredits >= remainingAmount) {
+            newFreeCredits -= remainingAmount;
+          } else {
+            remainingAmount -= newFreeCredits;
+            newFreeCredits = 0;
+            newTopupCredits -= remainingAmount;
+          }
+
+          const result = await tx
+            .update(UserSchema)
+            .set({
+              voiceCredits: newFreeCredits,
+              voiceCreditsFromTopup: newTopupCredits,
+              credits: currentUser.credits - amount,
+              updatedAt: new Date(),
+            })
+            .where(eq(UserSchema.id, userId))
+            .returning();
+
+          return result[0];
+        }
       }
 
-      // Check monthly limit
-      if (
-        updatedUser.voiceCreditsUsedThisMonth + amount >
-        updatedUser.monthlyVoiceCredits
-      ) {
-        throw new Error("Monthly voice credit limit exceeded");
+      // Voice only plan - track monthly usage
+      if (currentUser.subscriptionType === "voice_only") {
+        if (type === "voice") {
+          // Voice: Track monthly usage against plan limit (1000) + any top-up credits
+          const planCredits = 1000; // Monthly plan credits
+          const topupCredits = currentUser.voiceCreditsFromTopup || 0;
+          const usedThisMonth = currentUser.voiceCreditsUsedThisMonth || 0;
+          const totalAvailable = planCredits + topupCredits;
+          const remainingCredits = totalAvailable - usedThisMonth;
+
+          if (remainingCredits < amount) {
+            throw new Error(
+              `Insufficient voice credits. You have ${remainingCredits} credits remaining this month.`,
+            );
+          }
+
+          // Update monthly usage counter
+          const result = await tx
+            .update(UserSchema)
+            .set({
+              voiceCreditsUsedThisMonth: sql`${UserSchema.voiceCreditsUsedThisMonth} + ${amount}`,
+              updatedAt: new Date(),
+            })
+            .where(eq(UserSchema.id, userId))
+            .returning();
+          return result[0];
+        } else {
+          // Chat: Use free trial + top-up credits
+          const totalChatCredits =
+            currentUser.chatCredits + currentUser.chatCreditsFromTopup;
+          if (totalChatCredits < amount) {
+            throw new Error("Insufficient chat credits");
+          }
+
+          // Deduct from free trial credits first, then from top-up credits
+          let remainingAmount = amount;
+          let newFreeCredits = currentUser.chatCredits;
+          let newTopupCredits = currentUser.chatCreditsFromTopup;
+
+          if (newFreeCredits >= remainingAmount) {
+            newFreeCredits -= remainingAmount;
+          } else {
+            remainingAmount -= newFreeCredits;
+            newFreeCredits = 0;
+            newTopupCredits -= remainingAmount;
+          }
+
+          const result = await tx
+            .update(UserSchema)
+            .set({
+              chatCredits: newFreeCredits,
+              chatCreditsFromTopup: newTopupCredits,
+              credits: currentUser.credits - amount,
+              updatedAt: new Date(),
+            })
+            .where(eq(UserSchema.id, userId))
+            .returning();
+
+          return result[0];
+        }
       }
 
-      // Update voice usage counters
-      const result = await pgDb
-        .update(UserSchema)
-        .set({
-          voiceCreditsUsedToday: updatedUser.voiceCreditsUsedToday + amount,
-          voiceCreditsUsedThisMonth:
-            updatedUser.voiceCreditsUsedThisMonth + amount,
-        })
-        .where(eq(UserSchema.id, userId))
-        .returning();
+      // For all other cases (free trial, or using bonus credits on paid plans)
+      // Deduct from the appropriate credit pool
+      if (type === "chat") {
+        const totalChatCredits =
+          currentUser.chatCredits + currentUser.chatCreditsFromTopup;
 
-      return result[0];
-    }
+        if (totalChatCredits < amount) {
+          throw new Error("Insufficient chat credits");
+        }
 
-    // For all other cases (free trial, or using bonus credits on paid plans)
-    // Deduct from the appropriate credit pool
-    if (type === "chat") {
-      const totalChatCredits = user.chatCredits + user.chatCreditsFromTopup;
-      if (totalChatCredits < amount) {
-        throw new Error("Insufficient chat credits");
-      }
+        // Deduct from free trial credits first, then from top-up credits
+        let remainingAmount = amount;
+        let newFreeCredits = currentUser.chatCredits;
+        let newTopupCredits = currentUser.chatCreditsFromTopup;
 
-      // Deduct from free trial credits first, then from top-up credits
-      let remainingAmount = amount;
-      let newFreeCredits = user.chatCredits;
-      let newTopupCredits = user.chatCreditsFromTopup;
+        if (newFreeCredits >= remainingAmount) {
+          // Enough free credits available
+          newFreeCredits -= remainingAmount;
+        } else {
+          // Use all free credits, then deduct from top-up
+          remainingAmount -= newFreeCredits;
+          newFreeCredits = 0;
+          newTopupCredits -= remainingAmount;
+        }
 
-      if (newFreeCredits >= remainingAmount) {
-        // Enough free credits available
-        newFreeCredits -= remainingAmount;
+        const result = await tx
+          .update(UserSchema)
+          .set({
+            chatCredits: newFreeCredits,
+            chatCreditsFromTopup: newTopupCredits,
+            credits: currentUser.credits - amount, // Keep legacy field in sync
+            updatedAt: new Date(),
+          })
+          .where(eq(UserSchema.id, userId))
+          .returning();
+
+        return result[0];
       } else {
-        // Use all free credits, then deduct from top-up
-        remainingAmount -= newFreeCredits;
-        newFreeCredits = 0;
-        newTopupCredits -= remainingAmount;
+        // Voice credits
+        const totalVoiceCredits =
+          currentUser.voiceCredits + currentUser.voiceCreditsFromTopup;
+        if (totalVoiceCredits < amount) {
+          throw new Error("Insufficient voice credits");
+        }
+
+        // Deduct from free trial credits first, then from top-up credits
+        let remainingAmount = amount;
+        let newFreeCredits = currentUser.voiceCredits;
+        let newTopupCredits = currentUser.voiceCreditsFromTopup;
+
+        if (newFreeCredits >= remainingAmount) {
+          // Enough free credits available
+          newFreeCredits -= remainingAmount;
+        } else {
+          // Use all free credits, then deduct from top-up
+          remainingAmount -= newFreeCredits;
+          newFreeCredits = 0;
+          newTopupCredits -= remainingAmount;
+        }
+
+        const result = await tx
+          .update(UserSchema)
+          .set({
+            voiceCredits: newFreeCredits,
+            voiceCreditsFromTopup: newTopupCredits,
+            credits: currentUser.credits - amount, // Keep legacy field in sync
+            updatedAt: new Date(),
+          })
+          .where(eq(UserSchema.id, userId))
+          .returning();
+
+        return result[0];
       }
-
-      const result = await pgDb
-        .update(UserSchema)
-        .set({
-          chatCredits: newFreeCredits,
-          chatCreditsFromTopup: newTopupCredits,
-          credits: user.credits - amount, // Keep legacy field in sync
-          updatedAt: new Date(),
-        })
-        .where(eq(UserSchema.id, userId))
-        .returning();
-
-      return result[0];
-    } else {
-      // Voice credits
-      const totalVoiceCredits = user.voiceCredits + user.voiceCreditsFromTopup;
-      if (totalVoiceCredits < amount) {
-        throw new Error("Insufficient voice credits");
-      }
-
-      // Deduct from free trial credits first, then from top-up credits
-      let remainingAmount = amount;
-      let newFreeCredits = user.voiceCredits;
-      let newTopupCredits = user.voiceCreditsFromTopup;
-
-      if (newFreeCredits >= remainingAmount) {
-        // Enough free credits available
-        newFreeCredits -= remainingAmount;
-      } else {
-        // Use all free credits, then deduct from top-up
-        remainingAmount -= newFreeCredits;
-        newFreeCredits = 0;
-        newTopupCredits -= remainingAmount;
-      }
-
-      const result = await pgDb
-        .update(UserSchema)
-        .set({
-          voiceCredits: newFreeCredits,
-          voiceCreditsFromTopup: newTopupCredits,
-          credits: user.credits - amount, // Keep legacy field in sync
-          updatedAt: new Date(),
-        })
-        .where(eq(UserSchema.id, userId))
-        .returning();
-
-      return result[0];
-    }
+    });
   },
 
   async addCredits(userId: string, amount: number): Promise<UserEntity> {
@@ -298,32 +331,24 @@ export const subscriptionRepository = {
     return result[0];
   },
 
-  async resetDailyVoiceCredits(userId: string): Promise<void> {
-    await pgDb
-      .update(UserSchema)
-      .set({
-        voiceCreditsUsedToday: 0,
-        lastDailyReset: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(UserSchema.id, userId));
-  },
-
-  async resetMonthlyVoiceCredits(userId: string): Promise<void> {
-    await pgDb
-      .update(UserSchema)
-      .set({
-        voiceCreditsUsedThisMonth: 0,
-        lastMonthlyReset: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(UserSchema.id, userId));
-  },
-
   // Transaction operations
   async createTransaction(
     transaction: Omit<TransactionEntity, "id" | "createdAt" | "updatedAt">,
   ): Promise<TransactionEntity> {
+    // Check for existing transaction with same Stripe payment ID to prevent duplicates
+    if (transaction.stripePaymentId) {
+      const existingTransaction = await this.getTransactionByStripePaymentId(
+        transaction.stripePaymentId,
+      );
+      if (existingTransaction) {
+        console.log(
+          "Transaction already exists, returning existing:",
+          existingTransaction.id,
+        );
+        return existingTransaction;
+      }
+    }
+
     const result = await pgDb
       .insert(TransactionSchema)
       .values({
@@ -455,9 +480,55 @@ export const subscriptionRepository = {
       return { canUse: false, reason: "User is banned" };
     }
 
+    // Check if paid subscription has expired
+    if (
+      user.subscriptionType !== "free_trial" &&
+      user.subscriptionEndDate &&
+      new Date() > user.subscriptionEndDate &&
+      user.subscriptionStatus === "active"
+    ) {
+      // Subscription expired - should have been handled by Stripe webhooks
+      // But handle it here as fallback
+      await this.updateUserSubscription(userId, {
+        subscriptionType: "free_trial",
+        subscriptionStatus: "expired",
+        subscriptionEndDate: null,
+        chatCredits: 0, // Reset plan credits to 0
+        voiceCredits: 0, // Reset plan credits to 0
+        voiceCreditsUsedToday: 0,
+        voiceCreditsUsedThisMonth: 0,
+      });
+
+      // Return user as free trial - recheck feature access with remaining topup credits only
+      return this.canUseFeature(userId, featureType);
+    }
+
     // Premium users can use everything
     if (user.subscriptionType === "premium") {
       return { canUse: true };
+    }
+
+    // Voice + Chat (Premium) plan
+    if (user.subscriptionType === "voice_chat") {
+      if (featureType === "voice") {
+        // Premium plan: Check monthly usage against plan limit (1400) + any top-up credits
+        const planCredits = 1400;
+        const topupCredits = user.voiceCreditsFromTopup || 0;
+        const usedThisMonth = user.voiceCreditsUsedThisMonth || 0;
+        const totalAvailable = planCredits + topupCredits;
+        const remainingCredits = totalAvailable - usedThisMonth;
+
+        if (remainingCredits < 10) {
+          return {
+            canUse: false,
+            reason: `Insufficient voice credits. You have ${remainingCredits} credits remaining this month.`,
+          };
+        }
+        return { canUse: true };
+      } else {
+        // Chat is unlimited for premium plan
+        return { canUse: true };
+      }
     }
 
     // Chat only plan
@@ -482,60 +553,19 @@ export const subscriptionRepository = {
     // Voice only plan
     if (user.subscriptionType === "voice_only") {
       if (featureType === "voice") {
-        // Check daily and monthly limits
-        const now = new Date();
-        const lastDailyReset = user.lastDailyReset || user.createdAt;
-        const lastMonthlyReset = user.lastMonthlyReset || user.createdAt;
+        // Voice only plan: Check monthly usage against plan limit (1000) + any top-up credits
+        const planCredits = 1000;
+        const topupCredits = user.voiceCreditsFromTopup || 0;
+        const usedThisMonth = user.voiceCreditsUsedThisMonth || 0;
+        const totalAvailable = planCredits + topupCredits;
+        const remainingCredits = totalAvailable - usedThisMonth;
 
-        // Check if we need to reset daily credits
-        if (
-          now.getDate() !== lastDailyReset.getDate() ||
-          now.getMonth() !== lastDailyReset.getMonth() ||
-          now.getFullYear() !== lastDailyReset.getFullYear()
-        ) {
-          await this.resetDailyVoiceCredits(userId);
-          const updatedUser = await this.getUserById(userId);
-          if (
-            updatedUser &&
-            updatedUser.voiceCreditsUsedToday + 10 <=
-              updatedUser.dailyVoiceCredits
-          ) {
-            return { canUse: true };
-          }
-        }
-
-        // Check if we need to reset monthly credits
-        if (
-          now.getMonth() !== lastMonthlyReset.getMonth() ||
-          now.getFullYear() !== lastMonthlyReset.getFullYear()
-        ) {
-          await this.resetMonthlyVoiceCredits(userId);
-          const updatedUser = await this.getUserById(userId);
-          if (
-            updatedUser &&
-            updatedUser.voiceCreditsUsedThisMonth + 10 <=
-              updatedUser.monthlyVoiceCredits
-          ) {
-            return { canUse: true };
-          }
-        }
-
-        // Check daily limit
-        if (user.voiceCreditsUsedToday + 10 > user.dailyVoiceCredits) {
+        if (remainingCredits < 10) {
           return {
             canUse: false,
-            reason: `Daily voice limit reached (${user.dailyVoiceCredits} credits). Resets tomorrow.`,
+            reason: `Insufficient voice credits. You have ${remainingCredits} credits remaining this month.`,
           };
         }
-
-        // Check monthly limit
-        if (user.voiceCreditsUsedThisMonth + 10 > user.monthlyVoiceCredits) {
-          return {
-            canUse: false,
-            reason: `Monthly voice limit reached (${user.monthlyVoiceCredits} credits). Resets next month.`,
-          };
-        }
-
         return { canUse: true };
       } else {
         // Check if user has chat credits from topup or free trial
@@ -572,5 +602,103 @@ export const subscriptionRepository = {
       }
       return { canUse: true };
     }
+  },
+
+  // Image upload tracking methods
+  async canUploadImage(userId: string): Promise<{
+    canUpload: boolean;
+    reason?: string;
+    imagesUsed?: number;
+    imagesRemaining?: number;
+  }> {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      return { canUpload: false, reason: "User not found" };
+    }
+
+    if (user.banned) {
+      return { canUpload: false, reason: "User is banned" };
+    }
+
+    // Only chat_only and voice_chat (premium) users can upload images
+    if (
+      user.subscriptionType !== "chat_only" &&
+      user.subscriptionType !== "voice_chat"
+    ) {
+      return {
+        canUpload: false,
+        reason:
+          "Image upload is only available for Chat Only and Premium plans",
+      };
+    }
+
+    // Reset monthly counter if needed
+    const now = new Date();
+    const resetDate = new Date(user.imageUsageResetDate);
+    const monthsSinceReset =
+      (now.getFullYear() - resetDate.getFullYear()) * 12 +
+      (now.getMonth() - resetDate.getMonth());
+
+    if (monthsSinceReset >= 1) {
+      // Reset the counter
+      await pgDb
+        .update(UserSchema)
+        .set({
+          imagesUsedThisMonth: 0,
+          imageUsageResetDate: now,
+          updatedAt: now,
+        })
+        .where(eq(UserSchema.id, userId));
+
+      return {
+        canUpload: true,
+        imagesUsed: 0,
+        imagesRemaining: 50,
+      };
+    }
+
+    // Check if user has reached the limit (50 images per month)
+    if (user.imagesUsedThisMonth >= 50) {
+      return {
+        canUpload: false,
+        reason: "Monthly image upload limit reached (50/month)",
+        imagesUsed: user.imagesUsedThisMonth,
+        imagesRemaining: 0,
+      };
+    }
+
+    return {
+      canUpload: true,
+      imagesUsed: user.imagesUsedThisMonth,
+      imagesRemaining: 50 - user.imagesUsedThisMonth,
+    };
+  },
+
+  async incrementImageUsage(userId: string): Promise<void> {
+    const now = new Date();
+    await pgDb
+      .update(UserSchema)
+      .set({
+        imagesUsedThisMonth: sql`${UserSchema.imagesUsedThisMonth} + 1`,
+        updatedAt: now,
+      })
+      .where(eq(UserSchema.id, userId));
+  },
+
+  async getImageUsageStats(userId: string): Promise<{
+    imagesUsed: number;
+    imagesRemaining: number;
+    resetDate: Date;
+  } | null> {
+    const user = await this.getUserById(userId);
+    if (!user) {
+      return null;
+    }
+
+    return {
+      imagesUsed: user.imagesUsedThisMonth,
+      imagesRemaining: Math.max(0, 50 - user.imagesUsedThisMonth),
+      resetDate: user.imageUsageResetDate,
+    };
   },
 };

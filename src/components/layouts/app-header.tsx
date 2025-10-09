@@ -2,7 +2,7 @@
 
 import { useSidebar } from "ui/sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
-import { ChevronDown, PanelLeft } from "lucide-react";
+import { ChevronDown, PanelLeft, Mic } from "lucide-react";
 import { Button } from "ui/button";
 import { Separator } from "ui/separator";
 
@@ -98,7 +98,7 @@ export function AppHeader() {
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="bg-white/20 px-3 py-2 h-auto text-white hover:bg-white/30"
+                className="bg-white px-3 py-2 h-auto text-gray-900 hover:bg-white focus:bg-white active:bg-white"
                 onClick={async () => {
                   // First check store (TherapistLoader may have already loaded it)
                   const voiceChat = appStore.getState().voiceChat;
@@ -128,13 +128,12 @@ export function AppHeader() {
                   }
                 }}
               >
-                <span className="text-sm font-medium text-white">
-                  Voice Chat
-                </span>
+                <Mic className="h-4 w-4 mr-0" />
+                <span className="text-sm font-medium">Speak to Therapist</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">
-              <div className="text-xs">Speak to Therapist</div>
+              <div className="text-xs">Start Voice Session</div>
             </TooltipContent>
           </Tooltip>
         </div>
@@ -174,29 +173,22 @@ function ThreadDropdownComponent() {
         beforeTitle={currentThread.title}
       >
         <div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                className="data-[state=open]:bg-input! hover:text-foreground cursor-pointer flex gap-1 items-center px-2 py-1 rounded-md hover:bg-accent"
-              >
-                {generatingTitleThreadIds.includes(currentThread.id) ? (
-                  <TextShimmer className="truncate max-w-60 min-w-0 mr-1 text-white">
-                    {currentThread.title || "New Chat"}
-                  </TextShimmer>
-                ) : (
-                  <p className="truncate max-w-60 min-w-0 mr-1 text-white">
-                    {currentThread.title || "New Chat"}
-                  </p>
-                )}
+          <Button
+            variant="ghost"
+            className="data-[state=open]:bg-input! hover:text-foreground cursor-pointer flex gap-1 items-center px-2 py-1 rounded-md hover:bg-accent"
+          >
+            {generatingTitleThreadIds.includes(currentThread.id) ? (
+              <TextShimmer className="truncate max-w-60 min-w-0 mr-1 text-white">
+                {currentThread.title || "New Chat"}
+              </TextShimmer>
+            ) : (
+              <p className="truncate max-w-60 min-w-0 mr-1 text-white">
+                {currentThread.title || "New Chat"}
+              </p>
+            )}
 
-                <ChevronDown size={14} className="text-white" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-[200px] p-4 break-all overflow-y-auto max-h-[200px]">
-              {currentThread.title || "New Chat"}
-            </TooltipContent>
-          </Tooltip>
+            <ChevronDown size={14} className="text-white" />
+          </Button>
         </div>
       </ThreadDropdown>
     </div>

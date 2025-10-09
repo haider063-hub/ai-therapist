@@ -1,21 +1,99 @@
 import { subscriptionRepository } from "../db/pg/repositories/subscription-repository.pg";
-import { CREDIT_COSTS } from "../stripe/server";
+import { CREDIT_COSTS, SUBSCRIPTION_PLANS } from "../stripe/server";
 import logger from "logger";
 
+// Helper functions for plan type checks
+export const isUnlimitedChatPlan = (subscriptionType: string): boolean => {
+  return subscriptionType === "chat_only" || subscriptionType === "voice_chat";
+};
+
+export const isUnlimitedVoicePlan = (subscriptionType: string): boolean => {
+  return subscriptionType === "voice_only" || subscriptionType === "voice_chat";
+};
+
+export const hasMonthlyVoiceCredits = (subscriptionType: string): boolean => {
+  return subscriptionType === "voice_only" || subscriptionType === "voice_chat";
+};
+
 export type FeatureType = "chat" | "voice";
+
+// Custom error enums for better debugging
+export enum CreditError {
+  USER_NOT_FOUND = "USER_NOT_FOUND",
+  INSUFFICIENT_CREDITS = "INSUFFICIENT_CREDITS",
+  DB_ERROR = "DB_ERROR",
+  FEATURE_NOT_AVAILABLE = "FEATURE_NOT_AVAILABLE",
+  SUBSCRIPTION_EXPIRED = "SUBSCRIPTION_EXPIRED",
+  DEDUCTION_FAILED = "DEDUCTION_FAILED",
+  INTERNAL_ERROR = "INTERNAL_ERROR",
+}
 
 export interface CreditCheckResult {
   canUse: boolean;
   reason?: string;
+  errorCode?: CreditError;
   creditsNeeded?: number;
   userCredits?: number;
-  dailyVoiceCreditsUsed?: number;
-  dailyVoiceCreditsLimit?: number;
-  monthlyVoiceCreditsUsed?: number;
-  monthlyVoiceCreditsLimit?: number;
+  voiceCredits?: number;
+  chatCredits?: number;
 }
 
 export class CreditService {
+  private userCache = new Map<string, { user: any; timestamp: number }>();
+  private readonly CACHE_TTL = 5000; // 5 seconds cache
+
+  /**
+   * Get user with caching to avoid duplicate fetches
+   */
+  private async getUserWithCache(userId: string): Promise<any> {
+    const cached = this.userCache.get(userId);
+    const now = Date.now();
+
+    if (cached && now - cached.timestamp < this.CACHE_TTL) {
+      return cached.user;
+    }
+
+    const user = await subscriptionRepository.getUserById(userId);
+    if (user) {
+      this.userCache.set(userId, { user, timestamp: now });
+    }
+
+    return user;
+  }
+
+  /**
+   * Invalidate user cache to ensure fresh data after updates
+   */
+  private invalidateUserCache(userId: string): void {
+    this.userCache.delete(userId);
+  }
+
+  /**
+   * Calculate total voice credits for a user based on their subscription plan
+   * Centralized function to ensure consistency across the codebase
+   */
+  private getVoiceCreditsForUser(user: any): number {
+    // Get plan credits based on subscription type
+    let planCredits = 0;
+
+    if (user.subscriptionType === "voice_chat") {
+      // Premium plan: Calculate remaining monthly credits
+      const monthlyLimit = SUBSCRIPTION_PLANS.VOICE_CHAT.monthlyVoiceCredits;
+      const usedThisMonth = user.voiceCreditsUsedThisMonth || 0;
+      planCredits = Math.max(0, monthlyLimit - usedThisMonth);
+    } else if (user.subscriptionType === "voice_only") {
+      // Voice only plan: Calculate remaining monthly credits
+      const monthlyLimit = SUBSCRIPTION_PLANS.VOICE_ONLY.monthlyVoiceCredits;
+      const usedThisMonth = user.voiceCreditsUsedThisMonth || 0;
+      planCredits = Math.max(0, monthlyLimit - usedThisMonth);
+    } else {
+      // Free trial or chat_only: use stored credits
+      planCredits = user.voiceCredits || 0;
+    }
+
+    // Add topup credits
+    return planCredits + (user.voiceCreditsFromTopup || 0);
+  }
   /**
    * Check if a user can use a specific feature
    */
@@ -33,23 +111,32 @@ export class CreditService {
         return result;
       }
 
-      // Get additional user info for response
-      const user = await subscriptionRepository.getUserById(userId);
+      // Get additional user info for response (using cache)
+      const user = await this.getUserWithCache(userId);
       if (!user) {
-        return { canUse: false, reason: "User not found" };
+        return {
+          canUse: false,
+          reason: "User not found",
+          errorCode: CreditError.USER_NOT_FOUND,
+        };
       }
+
+      // Calculate voice credits using centralized method
+      const totalVoiceCredits = this.getVoiceCreditsForUser(user);
 
       return {
         canUse: true,
         userCredits: user.credits,
-        dailyVoiceCreditsUsed: user.voiceCreditsUsedToday,
-        dailyVoiceCreditsLimit: user.dailyVoiceCredits,
-        monthlyVoiceCreditsUsed: user.voiceCreditsUsedThisMonth,
-        monthlyVoiceCreditsLimit: user.monthlyVoiceCredits,
+        voiceCredits: totalVoiceCredits,
+        chatCredits: user.chatCredits + user.chatCreditsFromTopup,
       };
     } catch (error) {
       logger.error("Error checking feature usage:", error);
-      return { canUse: false, reason: "Internal server error" };
+      return {
+        canUse: false,
+        reason: "Internal server error",
+        errorCode: CreditError.INTERNAL_ERROR,
+      };
     }
   }
 
@@ -106,10 +193,30 @@ export class CreditService {
         },
       });
 
+      // Invalidate cache to ensure fresh data on next fetch
+      this.invalidateUserCache(userId);
+
+      // Calculate appropriate remaining credits based on plan type
+      let remainingCredits;
+      if (featureType === "chat") {
+        if (isUnlimitedChatPlan(updatedUser.subscriptionType)) {
+          // Unlimited chat plans - return -1 to indicate unlimited
+          remainingCredits = -1;
+        } else {
+          // Limited chat plans
+          remainingCredits =
+            (updatedUser.chatCredits || 0) +
+            (updatedUser.chatCreditsFromTopup || 0);
+        }
+      } else {
+        // Voice credits - use the calculated method
+        remainingCredits = this.getVoiceCreditsForUser(updatedUser);
+      }
+
       return {
         success: true,
         creditsUsed: creditsToDeduct,
-        remainingCredits: updatedUser.credits,
+        remainingCredits: remainingCredits,
       };
     } catch (error) {
       logger.error("Error deducting credits:", error);
@@ -143,9 +250,9 @@ export class CreditService {
       // Calculate total duration and exact minutes (with decimals)
       const totalSeconds = userAudioDuration + botAudioDuration;
       const exactMinutes = totalSeconds / 60; // Keep decimals: 150s = 2.5 minutes
-      const creditsToDeduct = Math.round(
+      const creditsToDeduct = Math.ceil(
         exactMinutes * CREDIT_COSTS.VOICE_PER_MINUTE,
-      ); // 2.5 × 10 = 25 credits
+      ); // 2.5 × 10 = 25 credits (always round up to prevent undercharging)
       const minutesUsed = Math.round(exactMinutes * 10) / 10; // Round to 1 decimal place for display
 
       // Check if user can use voice feature
@@ -258,15 +365,11 @@ export class CreditService {
     voiceCreditsFromTopup: number;
     subscriptionType: string;
     subscriptionStatus: string;
-    dailyVoiceCreditsUsed: number;
-    dailyVoiceCreditsLimit: number;
-    monthlyVoiceCreditsUsed: number;
-    monthlyVoiceCreditsLimit: number;
     canUseChat: boolean;
     canUseVoice: boolean;
   } | null> {
     try {
-      const user = await subscriptionRepository.getUserById(userId);
+      const user = await this.getUserWithCache(userId);
       if (!user) {
         return null;
       }
@@ -274,52 +377,34 @@ export class CreditService {
       const chatCheck = await this.canUseFeature(userId, "chat");
       const voiceCheck = await this.canUseFeature(userId, "voice");
 
+      // Calculate voice credits using centralized method
+      const totalVoiceCredits = this.getVoiceCreditsForUser(user);
+
+      // Calculate chat credits based on subscription type
+      let totalChatCredits;
+      if (isUnlimitedChatPlan(user.subscriptionType)) {
+        // Unlimited chat plans - return -1 to indicate unlimited in UI
+        totalChatCredits = -1;
+      } else {
+        // Limited plans - return actual credits
+        totalChatCredits =
+          (user.chatCredits || 0) + (user.chatCreditsFromTopup || 0);
+      }
+
       return {
         credits: user.credits,
-        chatCredits: user.chatCredits || 0,
-        voiceCredits: user.voiceCredits || 0,
+        chatCredits: totalChatCredits,
+        voiceCredits: totalVoiceCredits,
         chatCreditsFromTopup: user.chatCreditsFromTopup || 0,
         voiceCreditsFromTopup: user.voiceCreditsFromTopup || 0,
         subscriptionType: user.subscriptionType,
         subscriptionStatus: user.subscriptionStatus,
-        dailyVoiceCreditsUsed: user.voiceCreditsUsedToday,
-        dailyVoiceCreditsLimit: user.dailyVoiceCredits,
-        monthlyVoiceCreditsUsed: user.voiceCreditsUsedThisMonth,
-        monthlyVoiceCreditsLimit: user.monthlyVoiceCredits,
         canUseChat: chatCheck.canUse,
         canUseVoice: voiceCheck.canUse,
       };
     } catch (error) {
       logger.error("Error getting user credit status:", error);
       return null;
-    }
-  }
-
-  /**
-   * Reset daily voice credits (called by cron job)
-   */
-  async resetDailyVoiceCredits(userId: string): Promise<void> {
-    try {
-      await subscriptionRepository.resetDailyVoiceCredits(userId);
-    } catch (error) {
-      logger.error(
-        `Error resetting daily voice credits for user ${userId}:`,
-        error,
-      );
-    }
-  }
-
-  /**
-   * Reset monthly voice credits (called by cron job)
-   */
-  async resetMonthlyVoiceCredits(userId: string): Promise<void> {
-    try {
-      await subscriptionRepository.resetMonthlyVoiceCredits(userId);
-    } catch (error) {
-      logger.error(
-        `Error resetting monthly voice credits for user ${userId}:`,
-        error,
-      );
     }
   }
 

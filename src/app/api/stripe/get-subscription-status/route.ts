@@ -58,13 +58,9 @@ export async function GET(_request: NextRequest) {
       credits: {
         current: creditStatus.credits,
         chatCredits: creditStatus.chatCredits,
-        voiceCredits: creditStatus.voiceCredits,
+        voiceCredits: creditStatus.voiceCredits, // This now returns calculated credits based on plan
         chatCreditsFromTopup: creditStatus.chatCreditsFromTopup,
         voiceCreditsFromTopup: creditStatus.voiceCreditsFromTopup,
-        dailyVoiceUsed: creditStatus.dailyVoiceCreditsUsed,
-        dailyVoiceLimit: creditStatus.dailyVoiceCreditsLimit,
-        monthlyVoiceUsed: creditStatus.monthlyVoiceCreditsUsed,
-        monthlyVoiceLimit: creditStatus.monthlyVoiceCreditsLimit,
       },
       features: {
         canUseChat: creditStatus.canUseChat,

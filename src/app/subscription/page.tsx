@@ -76,6 +76,61 @@ interface SubscriptionData {
   }>;
 }
 
+// Helper function to get proper plan display names
+function getPlanDisplayName(subscriptionType: string): string {
+  switch (subscriptionType) {
+    case "voice_chat":
+      return "Voice + Chat (Premium Plan)";
+    case "chat_only":
+      return "Chat Only Plan";
+    case "voice_only":
+      return "Voice Only Plan";
+    case "free_trial":
+      return "Free Trial";
+    default:
+      return subscriptionType.replace("_", " ");
+  }
+}
+
+// Helper function to get transaction plan display name
+function getTransactionPlanName(
+  transaction: any,
+  userSubscriptionType?: string,
+): string {
+  // Check metadata first
+  if (transaction.metadata?.planType) {
+    return getPlanDisplayName(transaction.metadata.planType);
+  }
+
+  // Check if transaction has planType in metadata as string
+  if (transaction.metadata && typeof transaction.metadata === "object") {
+    const planType = Object.keys(transaction.metadata).find(
+      (key) =>
+        key.toLowerCase().includes("plan") ||
+        key.toLowerCase().includes("type"),
+    );
+    if (planType && transaction.metadata[planType]) {
+      return getPlanDisplayName(transaction.metadata[planType]);
+    }
+  }
+
+  // Fallback: if it's a subscription transaction, use the user's current subscription type
+  if (transaction.type === "subscription") {
+    if (userSubscriptionType) {
+      return getPlanDisplayName(userSubscriptionType);
+    }
+    // Default fallback
+    return "Voice + Chat (Premium Plan)";
+  }
+
+  // If it's a topup, show appropriate name
+  if (transaction.type === "topup") {
+    return "Voice Top-Up";
+  }
+
+  return transaction.type || "Unknown Plan";
+}
+
 export default function SubscriptionPage() {
   const router = useRouter();
   const [data, setData] = useState<SubscriptionData | null>(null);
@@ -88,7 +143,9 @@ export default function SubscriptionPage() {
 
   const fetchSubscriptionData = async () => {
     try {
-      const response = await fetch("/api/stripe/get-subscription-status");
+      const response = await fetch("/api/stripe/get-subscription-status", {
+        cache: "no-store", // Force fresh data
+      });
       if (response.ok) {
         const subscriptionData = await response.json();
         setData(subscriptionData);
@@ -246,8 +303,8 @@ export default function SubscriptionPage() {
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-medium">Plan:</span>
-                  <span className="capitalize">
-                    {data.user.subscriptionType.replace("_", " ")}
+                  <span className="font-semibold">
+                    {getPlanDisplayName(data.user.subscriptionType)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
@@ -291,44 +348,30 @@ export default function SubscriptionPage() {
             </CardHeader>
             <CardContent className="text-black">
               <div className="space-y-3">
-                {/* Free Trial: Show total credits */}
-                {data.user.subscriptionType === "free_trial" && (
+                {/* Voice Credits - Show for all plans with voice access */}
+                {(data.user.subscriptionType === "free_trial" ||
+                  data.user.subscriptionType === "voice_only" ||
+                  data.user.subscriptionType === "voice_chat") && (
                   <div className="flex items-center justify-between">
-                    <span className="font-medium">Available Credits:</span>
-                    <span className="font-bold">{data.credits.current}</span>
+                    <span className="font-medium">Voice Credits:</span>
+                    <span className="font-semibold text-blue-600">
+                      {data.credits.voiceCredits +
+                        data.credits.voiceCreditsFromTopup}
+                    </span>
                   </div>
                 )}
 
-                {/* Chat Only: Show unlimited chat */}
-                {data.user.subscriptionType === "chat_only" && (
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium">Chat Access:</span>
-                    <span className="font-bold">Unlimited</span>
-                  </div>
-                )}
-
-                {/* Voice Only & Premium: Show voice credits */}
-                {(data.user.subscriptionType === "voice_only" ||
-                  data.user.subscriptionType === "premium") && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Daily Voice Credits:</span>
-                      <span>
-                        {data.credits.dailyVoiceUsed} /{" "}
-                        {data.credits.dailyVoiceLimit}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">
-                        Monthly Voice Credits:
-                      </span>
-                      <span>
-                        {data.credits.monthlyVoiceUsed} /{" "}
-                        {data.credits.monthlyVoiceLimit}
-                      </span>
-                    </div>
-                  </>
-                )}
+                {/* Chat Credits for all plans */}
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">Chat Credits:</span>
+                  <span className="font-semibold text-green-600">
+                    {data.user.subscriptionType === "chat_only" ||
+                    data.user.subscriptionType === "voice_chat"
+                      ? "Unlimited"
+                      : data.credits.chatCredits +
+                        data.credits.chatCreditsFromTopup}
+                  </span>
+                </div>
 
                 {/* Premium: Also show unlimited chat */}
                 {data.user.subscriptionType === "premium" && (
@@ -462,55 +505,61 @@ export default function SubscriptionPage() {
           </h2>
           <Card className="bg-white">
             <CardContent className="p-4 text-black">
-              {data.recentTransactions.length === 0 ? (
+              {data.recentTransactions.filter((t) => t.status === "succeeded")
+                .length === 0 ? (
                 <p className="text-gray-500 text-center py-4">
-                  No transactions yet
+                  No successful transactions yet
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {data.recentTransactions.map((transaction) => (
-                    <div
-                      key={transaction.id}
-                      className="flex items-center justify-between py-2 border-b last:border-b-0"
-                    >
-                      <div>
-                        <div className="font-medium capitalize">
-                          {transaction.type === "subscription"
-                            ? transaction.metadata?.planType
-                              ? `${transaction.metadata.planType.replace(/_/g, " ")} Plan`
-                              : "Subscription"
-                            : "Voice Top-Up"}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(transaction.createdAt).toLocaleDateString()}{" "}
-                          {new Date(transaction.createdAt).toLocaleTimeString(
-                            [],
-                            {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            },
-                          )}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">${transaction.amount}</div>
-                        {transaction.creditsAdded > 0 && (
-                          <div className="text-sm text-muted-foreground">
-                            +{transaction.creditsAdded} credits
+                  {data.recentTransactions
+                    .filter((transaction) => transaction.status === "succeeded")
+                    .map((transaction) => (
+                      <div
+                        key={transaction.id}
+                        className="flex items-center justify-between py-2 border-b last:border-b-0"
+                      >
+                        <div>
+                          <div className="font-medium">
+                            {getTransactionPlanName(
+                              transaction,
+                              data.user.subscriptionType,
+                            )}
                           </div>
-                        )}
-                        <Badge
-                          variant={
-                            transaction.status === "succeeded"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {transaction.status}
-                        </Badge>
+                          <div className="text-sm text-gray-500">
+                            {new Date(
+                              transaction.createdAt,
+                            ).toLocaleDateString()}{" "}
+                            {new Date(transaction.createdAt).toLocaleTimeString(
+                              [],
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              },
+                            )}
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">
+                            ${transaction.amount}
+                          </div>
+                          {transaction.creditsAdded > 0 && (
+                            <div className="text-sm text-muted-foreground">
+                              +{transaction.creditsAdded} credits
+                            </div>
+                          )}
+                          <Badge
+                            variant={
+                              transaction.status === "succeeded"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {transaction.status}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               )}
             </CardContent>

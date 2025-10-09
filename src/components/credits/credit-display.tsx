@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard, MessageSquare, Mic, RefreshCw } from "lucide-react";
+import { MessageSquare, Mic, RefreshCw } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
+import { ChatCreditsView } from "./chat-credits-view";
+import { VoiceCreditsView } from "./voice-credits-view";
+import { GlobalCreditsView } from "./global-credits-view";
 
 interface CreditStatus {
   credits: number;
@@ -15,10 +18,6 @@ interface CreditStatus {
   voiceCreditsFromTopup: number;
   subscriptionType: string;
   subscriptionStatus: string;
-  dailyVoiceCreditsUsed: number;
-  dailyVoiceCreditsLimit: number;
-  monthlyVoiceCreditsUsed: number;
-  monthlyVoiceCreditsLimit: number;
   canUseChat: boolean;
   canUseVoice: boolean;
 }
@@ -80,10 +79,6 @@ export default function CreditDisplay({
           voiceCreditsFromTopup: data.credits.voiceCreditsFromTopup || 0,
           subscriptionType: data.user.subscriptionType,
           subscriptionStatus: data.user.subscriptionStatus,
-          dailyVoiceCreditsUsed: data.credits.dailyVoiceUsed,
-          dailyVoiceCreditsLimit: data.credits.dailyVoiceLimit,
-          monthlyVoiceCreditsUsed: data.credits.monthlyVoiceUsed,
-          monthlyVoiceCreditsLimit: data.credits.monthlyVoiceLimit,
           canUseChat: data.features.canUseChat,
           canUseVoice: data.features.canUseVoice,
         });
@@ -138,148 +133,27 @@ export default function CreditDisplay({
   }
 
   if (compact) {
-    const hasUnlimitedChat =
-      creditStatus.subscriptionType === "chat_only" ||
-      creditStatus.subscriptionType === "premium";
-    const hasUnlimitedVoice =
-      creditStatus.subscriptionType === "voice_only" ||
-      creditStatus.subscriptionType === "premium";
-
     // Context-aware credit display
     if (effectiveContext === "chat") {
-      // CHAT PAGE VIEW
-      const totalChatCredits =
-        creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
-
       return (
-        <div className="flex items-center gap-2 text-sm">
-          <CreditCard className="h-4 w-4 text-white" />
-
-          {hasUnlimitedChat ? (
-            <Badge
-              variant="secondary"
-              className="text-xs px-2 py-0 h-5 bg-white/20 text-white border-white/30"
-            >
-              Unlimited
-            </Badge>
-          ) : totalChatCredits > 0 ? (
-            <div className="flex items-center gap-1">
-              <span className="font-medium text-white">{totalChatCredits}</span>
-              <span className="text-white/70 text-xs">
-                {creditStatus.chatCreditsFromTopup > 0
-                  ? `(${creditStatus.chatCredits} free trial + ${creditStatus.chatCreditsFromTopup} top-up)`
-                  : "credits"}
-              </span>
-            </div>
-          ) : (
-            <span className="text-red-300 text-xs">No credits</span>
-          )}
-
-          {showUpgradeButton &&
-            creditStatus.subscriptionType === "free_trial" && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => router.push("/subscription")}
-              >
-                Upgrade
-              </Button>
-            )}
-        </div>
+        <ChatCreditsView
+          creditStatus={creditStatus}
+          showUpgradeButton={showUpgradeButton}
+        />
       );
     } else if (effectiveContext === "voice") {
-      // VOICE PAGE VIEW
-      const totalVoiceCredits =
-        creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup;
-
       return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-2 text-sm">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <CreditCard className="h-3 sm:h-4 w-3 sm:w-4" />
-            <span className="font-semibold text-[10px] sm:text-xs">
-              Voice Credits
-            </span>
-          </div>
-
-          {hasUnlimitedVoice ? (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1">
-              <Badge
-                variant="secondary"
-                className="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0 h-4 sm:h-5 bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-              >
-                Unlimited
-              </Badge>
-              {/* Show daily usage for voice-only and premium users */}
-              <span className="text-[10px] sm:text-xs text-muted-foreground">
-                {creditStatus.dailyVoiceCreditsUsed}/
-                {creditStatus.dailyVoiceCreditsLimit} today
-              </span>
-            </div>
-          ) : totalVoiceCredits > 0 ? (
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-0.5 sm:gap-1">
-              <span className="font-medium text-xs sm:text-sm">
-                {totalVoiceCredits}
-              </span>
-              <span className="text-muted-foreground text-[10px] sm:text-xs">
-                {creditStatus.voiceCreditsFromTopup > 0
-                  ? `(${creditStatus.voiceCredits} trial + ${creditStatus.voiceCreditsFromTopup} top-up)`
-                  : ""}
-              </span>
-            </div>
-          ) : (
-            <span className="text-red-500 text-[10px] sm:text-xs">
-              No credits
-            </span>
-          )}
-
-          {showUpgradeButton &&
-            creditStatus.subscriptionType === "free_trial" && (
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-[10px] sm:text-xs px-2 h-6 sm:h-8"
-                onClick={() => router.push("/subscription")}
-              >
-                Upgrade
-              </Button>
-            )}
-        </div>
+        <VoiceCreditsView
+          creditStatus={creditStatus}
+          showUpgradeButton={showUpgradeButton}
+        />
       );
     } else {
-      // GLOBAL VIEW (navbar/header - not on specific page)
-      // Show credit card icon with "Chat Credits" text
-      const totalChatCredits =
-        creditStatus.chatCredits + creditStatus.chatCreditsFromTopup;
-
       return (
-        <div className="flex items-center gap-2 text-sm">
-          <CreditCard className="h-4 w-4 text-white" />
-          <span className="font-semibold text-xs text-white">Chat Credits</span>
-
-          {hasUnlimitedChat ? (
-            <Badge
-              variant="secondary"
-              className="text-xs px-2 py-0 h-5 bg-white/20 text-white border-white/30"
-            >
-              Unlimited
-            </Badge>
-          ) : totalChatCredits > 0 ? (
-            <span className="font-medium text-white">{totalChatCredits}</span>
-          ) : (
-            <span className="text-red-300 text-xs">No credits</span>
-          )}
-
-          {showUpgradeButton &&
-            creditStatus.subscriptionType === "free_trial" && (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => router.push("/subscription")}
-              >
-                Upgrade
-              </Button>
-            )}
-        </div>
+        <GlobalCreditsView
+          creditStatus={creditStatus}
+          showUpgradeButton={showUpgradeButton}
+        />
       );
     }
   }
@@ -307,25 +181,15 @@ export default function CreditDisplay({
             </div>
           )}
 
-          {/* Voice Usage (for voice plans) */}
+          {/* Voice Credits (for voice plans) */}
           {(creditStatus.subscriptionType === "voice_only" ||
-            creditStatus.subscriptionType === "premium") && (
-            <>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Daily Voice</span>
-                <span className="text-sm">
-                  {creditStatus.dailyVoiceCreditsUsed} /{" "}
-                  {creditStatus.dailyVoiceCreditsLimit}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium">Monthly Voice</span>
-                <span className="text-sm">
-                  {creditStatus.monthlyVoiceCreditsUsed} /{" "}
-                  {creditStatus.monthlyVoiceCreditsLimit}
-                </span>
-              </div>
-            </>
+            creditStatus.subscriptionType === "voice_chat") && (
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Voice Credits</span>
+              <span className="text-sm font-bold text-blue-600">
+                {creditStatus.voiceCredits + creditStatus.voiceCreditsFromTopup}
+              </span>
+            </div>
           )}
 
           {/* Feature Access */}

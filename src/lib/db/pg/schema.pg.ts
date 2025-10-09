@@ -77,6 +77,12 @@ export const UserSchema = pgTable("user", {
 
   // Selected AI Therapist for Voice
   selectedTherapistId: text("selected_therapist_id"), // ID of selected therapist (e.g., "yuki-tanaka")
+
+  // Image Upload Tracking (for chat_only and premium plans)
+  imagesUsedThisMonth: integer("images_used_this_month").default(0).notNull(), // Count of images uploaded this month
+  imageUsageResetDate: timestamp("image_usage_reset_date")
+    .defaultNow()
+    .notNull(), // Last monthly reset date
 });
 
 // Session table

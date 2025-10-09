@@ -53,6 +53,10 @@ export default function VoiceChatPage() {
   const lastCreditDeductionTime = useRef<number | null>(null);
   const creditDeductionInterval = useRef<NodeJS.Timeout | null>(null);
 
+  // Credit checking state
+  const [canUseVoice, setCanUseVoice] = useState(true);
+  const [voiceCreditsTotal, setVoiceCreditsTotal] = useState(0);
+
   // Parse therapist languages
   const getAvailableLanguages = useCallback(() => {
     if (!selectedTherapist) return [];
@@ -162,6 +166,35 @@ export default function VoiceChatPage() {
     : 0;
 
   const freeTrialCredits = creditStatus?.credits?.voiceCredits || 0;
+
+  // Fetch and monitor voice credit status
+  useEffect(() => {
+    const fetchVoiceCredits = async () => {
+      try {
+        const response = await fetch("/api/stripe/get-subscription-status");
+        if (response.ok) {
+          const data = await response.json();
+
+          const total =
+            (data.credits.voiceCredits || 0) +
+            (data.credits.voiceCreditsFromTopup || 0);
+
+          setVoiceCreditsTotal(total);
+          setCanUseVoice(data.features.canUseVoice);
+        }
+      } catch (error) {
+        console.error("Failed to fetch voice credit status:", error);
+      }
+    };
+
+    fetchVoiceCredits();
+
+    // Listen for credit updates
+    const handleCreditUpdate = () => fetchVoiceCredits();
+    window.addEventListener("credits-updated", handleCreditUpdate);
+    return () =>
+      window.removeEventListener("credits-updated", handleCreditUpdate);
+  }, []); // Run once on mount
   const topUpCredits = creditStatus?.credits?.voiceCreditsFromTopup || 0;
 
   // Listen for credit updates
@@ -830,9 +863,54 @@ export default function VoiceChatPage() {
         )}
       </div>
       <div className="relative w-full p-6 flex flex-col items-center justify-center gap-4 z-10">
+        {/* Low Credits Warning Banner */}
+        {!isActive && voiceCreditsTotal > 0 && voiceCreditsTotal < 100 && (
+          <div className="max-w-md mx-auto mb-2">
+            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  ⚠️ Low voice credits:{" "}
+                  <span className="font-bold">{voiceCreditsTotal}</span>{" "}
+                  remaining
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-xs"
+                  onClick={() => router.push("/subscription")}
+                >
+                  Get More
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Out of Credits Warning Banner */}
+        {!isActive && !canUseVoice && voiceCreditsTotal === 0 && (
+          <div className="max-w-md mx-auto mb-2">
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-red-800 dark:text-red-200 font-medium">
+                  ❌ Out of voice credits
+                </p>
+                <Button
+                  size="sm"
+                  className="text-xs bg-red-600 hover:bg-red-700"
+                  onClick={() => router.push("/subscription")}
+                >
+                  Upgrade Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Text above the button */}
         {!isActive && (
-          <p className="text-white text-lg mb-2">Start voice chat?</p>
+          <p className="text-white text-lg mb-2">
+            {canUseVoice ? "Start voice chat?" : "Out of credits"}
+          </p>
         )}
 
         <Tooltip>
@@ -840,10 +918,14 @@ export default function VoiceChatPage() {
             <Button
               variant={"secondary"}
               size={"default"}
-              disabled={isClosing || isLoading}
+              disabled={isClosing || isLoading || !canUseVoice}
               onClick={() => {
                 if (!isActive) {
-                  startWithSound();
+                  if (canUseVoice) {
+                    startWithSound();
+                  } else {
+                    router.push("/subscription");
+                  }
                 } else if (isListening) {
                   stopListening();
                 } else {
@@ -855,13 +937,15 @@ export default function VoiceChatPage() {
 
                 isLoading
                   ? "bg-gray-200 text-gray-600 animate-pulse"
-                  : !isActive
-                    ? "bg-white text-black hover:bg-gray-100"
-                    : !isListening
-                      ? "bg-red-100 text-red-600 hover:bg-red-200"
-                      : isUserSpeaking
-                        ? "bg-blue-100 text-blue-600"
-                        : "bg-white text-black hover:bg-gray-100",
+                  : !canUseVoice && !isActive
+                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                    : !isActive
+                      ? "bg-white text-black hover:bg-gray-100"
+                      : !isListening
+                        ? "bg-red-100 text-red-600 hover:bg-red-200"
+                        : isUserSpeaking
+                          ? "bg-blue-100 text-blue-600"
+                          : "bg-white text-black hover:bg-gray-100",
               )}
             >
               {isLoading || isClosing ? (

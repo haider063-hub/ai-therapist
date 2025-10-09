@@ -1,9 +1,15 @@
 "use client";
 
-import { Mic, CornerRightUp, PlusIcon, Square, XIcon } from "lucide-react";
+import {
+  Mic,
+  CornerRightUp,
+  Square,
+  XIcon,
+  PlusIcon,
+  Loader2,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "ui/button";
-import { notImplementedToast } from "ui/shared-toast";
 import { UIMessage, UseChatHelpers } from "@ai-sdk/react";
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
@@ -14,6 +20,8 @@ import equal from "lib/equal";
 import { DefaultToolName } from "lib/ai/tools";
 import { DefaultToolIcon } from "./default-tool-icon";
 import { toast } from "sonner";
+import { ImagePreview } from "./image-preview";
+import { processImageForUpload } from "lib/services/image-upload-service";
 
 interface PromptInputProps {
   placeholder?: string;
@@ -29,6 +37,7 @@ interface PromptInputProps {
   threadId?: string;
   disabledMention?: boolean;
   onFocus?: () => void;
+  disabled?: boolean; // Added: Disable input when out of credits
 }
 
 import SimpleChatInput, { SimpleChatInputRef } from "./simple-chat-input";
@@ -42,10 +51,26 @@ export default function PromptInput({
   onStop,
   isLoading,
   threadId,
+  disabled = false,
 }: PromptInputProps) {
   const t = useTranslations("Chat");
   const [isDictating, setIsDictating] = useState(false);
   const recognitionRef = useRef<any>(null);
+
+  // Image upload state
+  const [uploadedImage, setUploadedImage] = useState<{
+    base64: string;
+    name: string;
+  } | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [imageUploadStats, setImageUploadStats] = useState<{
+    canUpload: boolean;
+    reason?: string;
+    imagesUsed: number;
+    imagesRemaining: number;
+    subscriptionType?: string;
+  } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [threadMentions, appStoreMutate] = appStore(
     useShallow((state) => [state.threadMentions, state.mutate]),
@@ -74,20 +99,106 @@ export default function PromptInput({
     [mentions, threadId],
   );
 
+  // Fetch image upload stats on mount
+  useEffect(() => {
+    async function fetchImageStats() {
+      try {
+        const response = await fetch("/api/chat/image-upload-check");
+        if (response.ok) {
+          const data = await response.json();
+          setImageUploadStats(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch image upload stats:", error);
+      }
+    }
+    fetchImageStats();
+  }, []);
+
+  // Handle image file selection
+  const handleImageSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const processedImage = await processImageForUpload(file);
+      setUploadedImage({
+        base64: processedImage.base64,
+        name: processedImage.originalName,
+      });
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to upload image");
+    } finally {
+      setIsUploadingImage(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setUploadedImage(null);
+  };
+
+  const handleImageButtonClick = () => {
+    if (disabled) {
+      // Show credits exhausted message
+      toast.error(
+        "Out of credits - Please upgrade to continue using image upload",
+      );
+      return;
+    }
+    if (!imageUploadStats?.canUpload) {
+      // Show upgrade toast for users without permission
+      toast.error(
+        imageUploadStats?.reason ||
+          "Image upload is only available for Chat Only and Premium plans",
+      );
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
   const submit = () => {
     if (isLoading) return;
     const userMessage = input?.trim() || "";
-    if (userMessage.length === 0) return;
+    if (userMessage.length === 0 && !uploadedImage) return;
+
+    const parts: any[] = [];
+
+    // Add image part if present
+    if (uploadedImage) {
+      parts.push({
+        type: "image",
+        image: uploadedImage.base64,
+      });
+    }
+
+    // Add text part if present
+    if (userMessage.length > 0) {
+      parts.push({
+        type: "text",
+        text: userMessage,
+      });
+    }
+
     setInput("");
+    setUploadedImage(null); // Clear image after sending
     sendMessage({
       role: "user",
-      parts: [
-        {
-          type: "text",
-          text: userMessage,
-        },
-      ],
+      parts,
     });
+
+    // Refresh image stats after sending
+    fetch("/api/chat/image-upload-check")
+      .then((res) => res.json())
+      .then((data) => setImageUploadStats(data))
+      .catch(console.error);
   };
 
   // Handle ESC key to clear mentions
@@ -232,26 +343,87 @@ export default function PromptInput({
               </div>
             )}
             <div className="flex flex-col gap-0.5 px-5 pt-4 pb-4">
+              {/* Image Preview */}
+              {uploadedImage && (
+                <div className="mb-2 px-1">
+                  <ImagePreview
+                    imageUrl={uploadedImage.base64}
+                    imageName={uploadedImage.name}
+                    onRemove={handleRemoveImage}
+                  />
+                </div>
+              )}
+
               <div className="relative min-h-[2rem]">
                 <SimpleChatInput
                   input={input}
                   onChange={setInput}
                   onEnter={submit}
-                  placeholder={placeholder ?? t("placeholder")}
+                  placeholder={
+                    disabled
+                      ? "Out of credits - Upgrade to continue"
+                      : (placeholder ?? t("placeholder"))
+                  }
                   ref={editorRef}
                   onFocus={onFocus}
-                  disabled={isLoading}
+                  disabled={isLoading || disabled}
                 />
               </div>
               <div className="flex w-full items-center z-30">
-                <Button
-                  variant={"ghost"}
-                  size={"sm"}
-                  className="rounded-full hover:bg-input! p-2!"
-                  onClick={notImplementedToast}
-                >
-                  <PlusIcon />
-                </Button>
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+
+                {/* Image Upload Button */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant={"ghost"}
+                      size={"sm"}
+                      className={`rounded-full hover:bg-input! p-2! ${
+                        !imageUploadStats?.canUpload || disabled
+                          ? "opacity-50 cursor-not-allowed"
+                          : ""
+                      }`}
+                      onClick={handleImageButtonClick}
+                      disabled={
+                        isUploadingImage ||
+                        isLoading ||
+                        uploadedImage !== null ||
+                        disabled ||
+                        !imageUploadStats?.canUpload
+                      }
+                    >
+                      {isUploadingImage ? (
+                        <Loader2 className="animate-spin" size={18} />
+                      ) : (
+                        <PlusIcon size={18} />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    {!imageUploadStats ? (
+                      <p className="text-xs">Loading...</p>
+                    ) : disabled ? (
+                      <p className="text-xs">
+                        Out of credits - Upload disabled
+                      </p>
+                    ) : !imageUploadStats.canUpload ? (
+                      <p className="text-xs">Available on paid plans only</p>
+                    ) : uploadedImage ? (
+                      <p className="text-xs">
+                        Remove current image to upload another
+                      </p>
+                    ) : (
+                      <p className="text-xs">Upload Image</p>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
 
                 <div className="flex-1 flex items-center justify-center">
                   {/* Recording Indicator */}
@@ -282,7 +454,14 @@ export default function PromptInput({
                       <Button
                         size={"sm"}
                         onClick={toggleDictation}
-                        className={`rounded-full p-2! relative ${isDictating ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" : "pink-accent hover:opacity-90"}`}
+                        disabled={disabled}
+                        className={`rounded-full p-2! relative ${
+                          disabled
+                            ? "opacity-50 cursor-not-allowed"
+                            : isDictating
+                              ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+                              : "pink-accent hover:opacity-90"
+                        }`}
                       >
                         <Mic size={16} />
                         {isDictating && (
@@ -294,7 +473,11 @@ export default function PromptInput({
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      {isDictating ? "Stop Dictating" : "Dictate"}
+                      {disabled
+                        ? "Out of credits"
+                        : isDictating
+                          ? "Stop Dictating"
+                          : "Dictate"}
                     </TooltipContent>
                   </Tooltip>
                 )}

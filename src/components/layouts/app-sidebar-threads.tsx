@@ -32,7 +32,6 @@ import { useMemo, useState } from "react";
 
 import { useTranslations } from "next-intl";
 import { TextShimmer } from "ui/text-shimmer";
-import { Tooltip, TooltipContent, TooltipTrigger } from "ui/tooltip";
 import { deduplicateByKey, groupBy } from "lib/utils";
 import { ChatThread } from "app-types/chat";
 
@@ -234,35 +233,28 @@ export function AppSidebarThreads() {
                           beforeTitle={thread.title}
                         >
                           <div className="flex items-center data-[state=open]:bg-input! group-hover/thread:bg-input! rounded-lg">
-                            <Tooltip delayDuration={1000}>
-                              <TooltipTrigger asChild>
-                                <SidebarMenuButton
-                                  asChild
-                                  className="group-hover/thread:bg-transparent!"
-                                  isActive={currentThreadId === thread.id}
-                                >
-                                  <Link
-                                    href={`/chat/${thread.id}`}
-                                    className="flex items-center"
-                                  >
-                                    {generatingTitleThreadIds.includes(
-                                      thread.id,
-                                    ) ? (
-                                      <TextShimmer className="truncate min-w-0">
-                                        {thread.title || "New Chat"}
-                                      </TextShimmer>
-                                    ) : (
-                                      <p className="truncate min-w-0">
-                                        {thread.title || "New Chat"}
-                                      </p>
-                                    )}
-                                  </Link>
-                                </SidebarMenuButton>
-                              </TooltipTrigger>
-                              <TooltipContent className="max-w-[200px] p-4 break-all overflow-y-auto max-h-[200px]">
-                                {thread.title || "New Chat"}
-                              </TooltipContent>
-                            </Tooltip>
+                            <SidebarMenuButton
+                              asChild
+                              className="group-hover/thread:bg-transparent!"
+                              isActive={currentThreadId === thread.id}
+                            >
+                              <Link
+                                href={`/chat/${thread.id}`}
+                                className="flex items-center"
+                              >
+                                {generatingTitleThreadIds.includes(
+                                  thread.id,
+                                ) ? (
+                                  <TextShimmer className="truncate min-w-0">
+                                    {thread.title || "New Chat"}
+                                  </TextShimmer>
+                                ) : (
+                                  <p className="truncate min-w-0">
+                                    {thread.title || "New Chat"}
+                                  </p>
+                                )}
+                              </Link>
+                            </SidebarMenuButton>
 
                             <SidebarMenuAction className="data-[state=open]:bg-input data-[state=open]:opacity-100 opacity-0 group-hover/thread:opacity-100">
                               <MoreHorizontal />
