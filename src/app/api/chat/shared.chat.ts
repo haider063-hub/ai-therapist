@@ -130,14 +130,12 @@ export const loadAppDefaultTools = (opt?: {
     })
     .orElse({} as Record<string, Tool>);
 
-export const convertToSavePart = <T extends UIMessagePart<any, any>>(
-  part: T,
-) => {
+export const convertToSavePart = <T extends UIMessagePart>(part: T) => {
   return safe(
     exclude(part as any, ["providerMetadata", "callProviderMetadata"]) as T,
   )
     .map((v) => {
-      if (isToolUIPart(v) && v.state.startsWith("output")) {
+      if (isToolUIPart(v as any) && (v as any).state.startsWith("output")) {
         // Remove workflow-related processing
         return v;
       }

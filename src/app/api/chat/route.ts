@@ -316,7 +316,7 @@ You are now analyzing an image that the user has uploaded. Please:
           logger.info(
             "Converting messages with custom transformer for vision model",
           );
-          convertedMessages = messages.map((msg, index) => {
+          convertedMessages = messages.map((msg, _index) => {
             if (msg.role === "user" && msg.parts) {
               // Convert user message with image parts to vision model format
               const content = msg.parts.map((part: any) => {
@@ -412,21 +412,21 @@ You are now analyzing an image that the user has uploaded. Please:
           await chatRepository.upsertMessage({
             threadId: thread!.id,
             ...responseMessage,
-            parts: convertedParts,
+            parts: convertedParts as any,
             metadata,
           });
         } else {
           await chatRepository.upsertMessage({
             threadId: thread!.id,
             role: message.role,
-            parts: message.parts.map(convertToSavePart),
+            parts: message.parts.map(convertToSavePart) as any,
             id: message.id,
           });
           await chatRepository.upsertMessage({
             threadId: thread!.id,
             role: responseMessage.role,
             id: responseMessage.id,
-            parts: convertedParts,
+            parts: convertedParts as any,
             metadata,
           });
         }
