@@ -29,7 +29,7 @@ interface ChatSidebarProps {
 
 export function ChatSidebar({ user }: ChatSidebarProps) {
   const router = useRouter();
-  const isAdmin = getIsUserAdmin(user);
+  const isAdmin = getIsUserAdmin(user); // Admin button visibility check
 
   return (
     <Sidebar
