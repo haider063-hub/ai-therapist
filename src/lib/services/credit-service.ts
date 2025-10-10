@@ -42,9 +42,6 @@ export class CreditService {
   private userCache = new Map<string, { user: any; timestamp: number }>();
   private readonly CACHE_TTL = 5000; // 5 seconds cache
 
-  /**
-   * Get user with caching to avoid duplicate fetches
-   */
   private async getUserWithCache(userId: string): Promise<any> {
     const cached = this.userCache.get(userId);
     const now = Date.now();
