@@ -6,7 +6,7 @@ import { subscriptionRepository } from "lib/db/pg/repositories/subscription-repo
  * API endpoint to check if user can upload images
  * Returns upload permission and usage stats
  */
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getSession();
 

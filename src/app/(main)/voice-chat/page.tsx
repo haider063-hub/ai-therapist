@@ -10,7 +10,6 @@ import {
   CreditCard,
   ChevronDown,
   TriangleAlertIcon,
-  ArrowLeft,
   Languages,
   User,
 } from "lucide-react";
@@ -28,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "ui/select";
+import { SidebarTrigger } from "ui/sidebar";
 
 import { appStore } from "@/app/store";
 import { useShallow } from "zustand/shallow";
@@ -394,12 +394,6 @@ export default function VoiceChatPage() {
     router.push("/");
   }, [stop, router, messages, currentThreadId]);
 
-  const handleBackButton = useCallback(() => {
-    if (!isActive) {
-      router.push("/");
-    }
-  }, [isActive, router]);
-
   // Cleanup interval when session ends
   useEffect(() => {
     if (!isActive && creditDeductionInterval.current) {
@@ -452,30 +446,15 @@ export default function VoiceChatPage() {
   }, [isActive, messages, currentThreadId]);
 
   return (
-    <div className="w-full h-screen flex flex-col relative">
+    <div className="w-full h-full flex flex-col relative">
       {/* Background */}
       <div className="echonest-gradient-bg"></div>
       {/* Header */}
-      <div className="w-full border-b bg-white relative z-10">
+      <div className="w-full relative z-10">
         {/* Desktop: Single Row */}
         <div className="hidden sm:flex flex-row items-center p-4 md:p-6 gap-2">
-          {/* Back Button */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="flex-shrink-0 text-black hover:text-black/80"
-                onClick={handleBackButton}
-                disabled={isActive}
-              >
-                <ArrowLeft className="h-5 w-5 text-black" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="bottom">
-              {isActive ? "Please end the session first to go back" : "Go Back"}
-            </TooltipContent>
-          </Tooltip>
+          {/* Sidebar Toggle Button */}
+          <SidebarTrigger className="flex-shrink-0 text-white hover:text-white/80" />
 
           {/* Therapist Info */}
           <div className="flex items-center gap-2 flex-1">
@@ -493,17 +472,17 @@ export default function VoiceChatPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                  <div className="text-sm font-semibold text-black">
+                  <div className="text-sm font-semibold text-white">
                     {selectedTherapist.name}
                   </div>
-                  <div className="text-xs text-black">
+                  <div className="text-xs text-white/80">
                     {selectedTherapist.specialization} •{" "}
                     {selectedTherapist.language}
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="text-sm font-medium text-black">
+              <div className="text-sm font-medium text-white">
                 Voice Therapy Session
               </div>
             )}
@@ -542,8 +521,8 @@ export default function VoiceChatPage() {
                   }}
                   disabled={false}
                 >
-                  <SelectTrigger className="h-8 px-3 py-2 text-xs border border-input bg-background whitespace-nowrap min-w-[120px] min-h-[36px]">
-                    <Languages className="h-3.5 w-3.5 mr-1" />
+                  <SelectTrigger className="h-8 px-3 py-2 text-xs border border-gray-300 bg-white text-black whitespace-nowrap min-w-[120px] min-h-[36px]">
+                    <Languages className="h-3.5 w-3.5 mr-1 text-black" />
                     <SelectValue placeholder="Language" />
                   </SelectTrigger>
                   <SelectContent>
@@ -560,10 +539,10 @@ export default function VoiceChatPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-3 py-2 text-xs whitespace-nowrap min-w-[120px] min-h-[36px]"
+                className="h-8 px-3 py-2 text-xs whitespace-nowrap min-w-[120px] min-h-[36px] border-gray-300 bg-white text-black"
                 onClick={() => router.push("/therapists")}
               >
-                <User className="h-3.5 w-3.5 mr-1" />
+                <User className="h-3.5 w-3.5 mr-1 text-black" />
                 {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
               </Button>
             </div>
@@ -574,16 +553,14 @@ export default function VoiceChatPage() {
             <PopoverTrigger asChild>
               <Button
                 variant="ghost"
-                className={`flex items-center gap-2 h-auto px-2 py-1 transition-all ${creditUpdateAnimation ? "ring-2 ring-green-500 ring-offset-2 scale-105" : ""}`}
+                className={`flex items-center gap-2 h-auto px-2 py-1 transition-all text-white hover:text-white/80 ${creditUpdateAnimation ? "ring-2 ring-green-500 ring-offset-2 scale-105" : ""}`}
               >
-                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold">
+                <CreditCard className="h-4 w-4 text-white" />
+                <span className="text-sm font-semibold text-white">
                   {totalVoiceCredits}
                 </span>
-                <span className="text-xs text-muted-foreground">
-                  Voice Credits
-                </span>
-                <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs text-white/80">Voice Credits</span>
+                <ChevronDown className="h-3 w-3 text-white" />
               </Button>
             </PopoverTrigger>
             <PopoverContent
@@ -638,24 +615,10 @@ export default function VoiceChatPage() {
 
         {/* Mobile: Stacked Layout */}
         <div className="flex sm:hidden flex-col gap-3 p-3">
-          {/* Top Row: Back + Therapist + Credits */}
+          {/* Top Row: Sidebar Toggle + Therapist + Credits */}
           <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="flex-shrink-0 h-8 w-8 text-black hover:text-black/80"
-                  onClick={handleBackButton}
-                  disabled={false}
-                >
-                  <ArrowLeft className="h-4 w-4 text-black" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="bottom">
-                {isActive ? "Please end the session first" : "Go Back"}
-              </TooltipContent>
-            </Tooltip>
+            {/* Sidebar Toggle Button */}
+            <SidebarTrigger className="flex-shrink-0 text-white hover:text-white/80" />
 
             {selectedTherapist && (
               <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -670,7 +633,7 @@ export default function VoiceChatPage() {
                       selectedTherapist.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-semibold truncate">
+                <span className="text-sm font-semibold truncate text-white">
                   {selectedTherapist.name}
                 </span>
               </div>

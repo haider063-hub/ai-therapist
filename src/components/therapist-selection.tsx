@@ -16,6 +16,7 @@ import { appStore } from "@/app/store";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "ui/avatar";
 import { toast } from "sonner";
+import { TherapistSelectionHeader } from "./therapist-selection-header";
 
 export function TherapistSelection() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -126,66 +127,72 @@ export function TherapistSelection() {
   };
 
   return (
-    <div className="flex-1 p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-3">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            Choose Your AI Therapist
-          </h2>
-          <p className="text-white/80 max-w-2xl mx-auto">
-            Connect with an AI therapist who speaks your language and
-            understands your needs. Each therapist brings unique cultural
-            perspectives and specialized approaches to healing.
-          </p>
-        </div>
+    <div className="min-h-screen relative">
+      <div className="echonest-gradient-bg"></div>
+      <div className="relative z-10">
+        <TherapistSelectionHeader />
+        <div className="flex-1 p-4 sm:p-6 md:p-8">
+          <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
+            <div className="text-center space-y-3">
+              <h2 className="text-3xl sm:text-4xl font-bold text-white">
+                Choose Your AI Therapist
+              </h2>
+              <p className="text-white/80 max-w-2xl mx-auto">
+                Connect with an AI therapist who speaks your language and
+                understands your needs. Each therapist brings unique cultural
+                perspectives and specialized approaches to healing.
+              </p>
+            </div>
 
-        {/* Search and Filters */}
-        <div className="flex flex-col gap-4 items-center justify-center">
-          <input
-            type="text"
-            placeholder="Search by name, language, or specialization..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-white text-black border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
-          />
+            {/* Search and Filters */}
+            <div className="flex flex-col gap-4 items-center justify-center">
+              <input
+                type="text"
+                placeholder="Search by name, language, or specialization..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-white text-black border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white"
+              />
 
-          <div className="flex gap-2 flex-wrap justify-center items-center">
-            <span className="text-sm text-white flex items-center gap-2">
-              🌐 Languages:
-            </span>
-            {languages.map((lang) => (
-              <Button
-                key={lang}
-                variant={selectedLanguage === lang ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedLanguage(lang)}
-              >
-                {lang}
-              </Button>
-            ))}
+              <div className="flex gap-2 flex-wrap justify-center items-center">
+                <span className="text-sm text-white flex items-center gap-2">
+                  🌐 Languages:
+                </span>
+                {languages.map((lang) => (
+                  <Button
+                    key={lang}
+                    variant={selectedLanguage === lang ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedLanguage(lang)}
+                  >
+                    {lang}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Therapist Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch auto-rows-fr mt-8">
+              {filteredTherapists.map((therapist) => (
+                <TherapistCard
+                  key={therapist.id}
+                  therapist={therapist}
+                  onSelect={() => handleSelectTherapist(therapist)}
+                  onPreview={() => handlePreview(therapist)}
+                />
+              ))}
+            </div>
+
+            {filteredTherapists.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-white">
+                  No therapists found matching your criteria
+                </p>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* Therapist Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch auto-rows-fr mt-8">
-          {filteredTherapists.map((therapist) => (
-            <TherapistCard
-              key={therapist.id}
-              therapist={therapist}
-              onSelect={() => handleSelectTherapist(therapist)}
-              onPreview={() => handlePreview(therapist)}
-            />
-          ))}
-        </div>
-
-        {filteredTherapists.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-white">
-              No therapists found matching your criteria
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -1,0 +1,30 @@
+[33mcommit 7971cd24467a7cb2481be430aa1f4f1be62c24ab[m
+Author: haider063-hub <haiderofficial127@gmail.com>
+Date:   Tue Oct 7 22:30:03 2025 +0500
+
+    feat: Complete EchoNest AI Therapy rebranding and fixes
+    
+    - Rebranded from 'better-chatbot' to 'EchoNest AI Therapy' throughout the project
+    - Fixed Better Auth configuration with proper ID generation
+    - Added missing emailVerified field to user schema
+    - Added missing ipAddress and userAgent fields to session schema
+    - Implemented show/hide password functionality for all password inputs
+    - Fixed accessibility issues in drawer components
+    - Removed all Docker-related files and configurations
+    - Updated database configuration for local PostgreSQL setup
+    - Added user deletion script for database cleanup
+    - Updated all language files with new branding
+    - Fixed console errors and improved user experience
+
+public/favicon.ico
+public/favicon.png
+public/new-favicon.png
+src/app/apple-touch-icon.png
+src/app/favicon-16x16.png
+src/app/favicon-32x32.png
+src/app/favicon-96x96.png
+src/app/favicon.ico
+src/app/favicon.png
+src/app/layout.tsx
+src/app/web-app-manifest-192x192.png
+src/app/web-app-manifest-512x512.png
