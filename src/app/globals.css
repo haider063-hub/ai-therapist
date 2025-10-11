@@ -1,16 +1,5 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
-/* Prevent page scrolling on profile setup page */
-html,
-body {
-  overflow: hidden;
-}
-
-/* Allow scrolling only within specific containers */
-.allow-scroll {
-  overflow: auto !important;
-}
 /* Individual theme variants - themes from  https://github.com/rawestmoreland/theme-generator/blob/main/src/app/globals.css */
 
 @theme inline {
