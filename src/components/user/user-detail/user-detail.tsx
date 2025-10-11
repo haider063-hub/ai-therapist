@@ -29,8 +29,10 @@ export function UserDetail({
   currentUserId,
   userAccountInfo,
 }: UserDetailProps) {
-  const sidebarContext = view === "admin" ? null : useSidebar();
-  const sidebarOpen = sidebarContext?.open ?? false;
+  // Always call the hook, but handle the conditional logic afterward
+  const sidebarContext = useSidebar();
+  const sidebarOpen =
+    view === "admin" ? false : (sidebarContext?.open ?? false);
   const userDetailRoute =
     currentUserId === initialUser.id
       ? `/api/user/details`
