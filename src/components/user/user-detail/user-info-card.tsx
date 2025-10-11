@@ -165,7 +165,10 @@ export function UserInfoCard({
                 <User className="h-4 w-4 text-blue-600" />,
               )}
               {user.id === currentUserId && (
-                <Badge variant="outline" className="text-xs ml-2">
+                <Badge
+                  variant="outline"
+                  className="text-xs ml-2 !border-purple-300 !bg-purple-50 !text-purple-700 font-medium"
+                >
                   {tCommon("you")}
                 </Badge>
               )}

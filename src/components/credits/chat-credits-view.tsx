@@ -1,4 +1,3 @@
-import { CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -32,7 +31,7 @@ export function ChatCreditsView({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-sm">
-        <CreditCard className="h-4 w-4 text-white" />
+        <span className="text-base">🪙</span>
 
         {totalChatCredits === -1 || hasUnlimitedChat ? (
           <Badge

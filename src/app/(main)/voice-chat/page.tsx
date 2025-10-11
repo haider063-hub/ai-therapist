@@ -7,7 +7,6 @@ import {
   MicIcon,
   MicOffIcon,
   PhoneIcon,
-  CreditCard,
   ChevronDown,
   TriangleAlertIcon,
   Languages,
@@ -563,11 +562,11 @@ export default function VoiceChatPage() {
                   variant="ghost"
                   className="flex items-center gap-2 h-auto px-2 py-1 transition-all text-white hover:text-white/80"
                 >
-                  <CreditCard className="h-4 w-4 text-white" />
+                  <span className="text-base">🪙</span>
                   <span className="text-sm font-semibold text-white">
                     {totalVoiceCredits}
                   </span>
-                  <span className="text-xs text-white/80">Voice Credits</span>
+                  <span className="text-xs text-white">Voice Credits</span>
                   <ChevronDown className="h-3 w-3 text-white" />
                 </Button>
               </PopoverTrigger>
@@ -581,7 +580,7 @@ export default function VoiceChatPage() {
                     <span className="text-sm font-semibold">
                       Credit Breakdown
                     </span>
-                    <CreditCard className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-base">🪙</span>
                   </div>
 
                   <div className="space-y-2">
@@ -620,11 +619,11 @@ export default function VoiceChatPage() {
             </Popover>
           ) : (
             <div className="flex items-center gap-2 h-auto px-2 py-1 transition-all text-white">
-              <CreditCard className="h-4 w-4 text-white" />
+              <span className="text-base">🪙</span>
               <span className="text-sm font-semibold text-white">
                 {totalVoiceCredits}
               </span>
-              <span className="text-xs text-white/80">Voice Credits</span>
+              <span className="text-xs text-white">Voice Credits</span>
             </div>
           )}
         </div>
@@ -649,7 +648,7 @@ export default function VoiceChatPage() {
                       selectedTherapist.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-semibold truncate text-white">
+                <span className="text-sm font-normal truncate text-white">
                   {selectedTherapist.name}
                 </span>
               </div>
@@ -661,13 +660,14 @@ export default function VoiceChatPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="flex items-center gap-1 h-8 px-2 flex-shrink-0"
+                    className="flex items-center gap-1 h-8 px-2 flex-shrink-0 text-white hover:text-white/80"
                   >
-                    <CreditCard className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-sm font-semibold">
+                    <span className="text-sm">🪙</span>
+                    <span className="text-sm font-semibold text-white">
                       {totalVoiceCredits}
                     </span>
-                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-white">Voice Credits</span>
+                    <ChevronDown className="h-3 w-3 text-white" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent
@@ -680,7 +680,7 @@ export default function VoiceChatPage() {
                       <span className="text-sm font-semibold">
                         Credit Breakdown
                       </span>
-                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-base">🪙</span>
                     </div>
 
                     <div className="space-y-2">
@@ -720,11 +720,12 @@ export default function VoiceChatPage() {
                 </PopoverContent>
               </Popover>
             ) : (
-              <div className="flex items-center gap-1 h-8 px-2 flex-shrink-0">
-                <CreditCard className="h-3 w-3 text-muted-foreground" />
-                <span className="text-sm font-semibold">
+              <div className="flex items-center gap-1 h-8 px-2 flex-shrink-0 text-white">
+                <span className="text-sm">🪙</span>
+                <span className="text-sm font-semibold text-white">
                   {totalVoiceCredits}
                 </span>
+                <span className="text-xs text-white">Voice Credits</span>
               </div>
             )}
           </div>

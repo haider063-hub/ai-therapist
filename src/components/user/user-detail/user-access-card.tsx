@@ -69,7 +69,7 @@ export function UserAccessCard({
                     size="sm"
                     onClick={() => setShowRoleDialog(true)}
                     disabled={disabled}
-                    className="h-8 text-xs"
+                    className="h-8 text-xs !bg-black !text-white hover:!bg-gray-800"
                     data-testid="edit-roles-button"
                   >
                     {tCommon("editRoles")}
@@ -152,10 +152,10 @@ export function UserAccessCard({
                     variant="secondary"
                     size="sm"
                     disabled={disabled || !userAccountInfo?.hasPassword}
-                    className="h-8 text-xs"
+                    className="h-8 text-xs !bg-black !text-white hover:!bg-gray-800"
                     data-testid="update-password-button"
                   >
-                    <Lock className="w-3 h-3 mr-1" />
+                    <Lock className="w-3 h-3 mr-1 text-white" />
                     {t("updatePassword")}
                   </Button>
                 </UpdateUserPasswordDialog>
@@ -188,10 +188,10 @@ export function UserAccessCard({
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="h-8 text-xs"
+                        className="h-8 text-xs !bg-black !text-white hover:!bg-gray-800"
                         data-testid="delete-user-button"
                       >
-                        <Trash2 className="w-3 h-3 mr-1" />
+                        <Trash2 className="w-3 h-3 mr-1 text-white" />
                         {t("deleteUser")}
                       </Button>
                     </UserDeleteDialog>

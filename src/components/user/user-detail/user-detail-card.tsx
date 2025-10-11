@@ -41,7 +41,7 @@ export function UserDetailCard({
                 {user.id === currentUserId && (
                   <Badge
                     variant="outline"
-                    className="text-xs"
+                    className="text-xs !border-purple-300 !bg-purple-50 !text-purple-700 font-medium"
                     data-testid="current-user-badge"
                   >
                     {tCommon("you")}

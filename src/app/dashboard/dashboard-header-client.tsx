@@ -18,12 +18,12 @@ export function DashboardHeaderClient() {
               variant="ghost"
               size="icon"
               className="flex-shrink-0 text-white hover:text-white/80"
-              onClick={() => router.back()}
+              onClick={() => router.push("/")}
             >
               <ArrowLeft className="h-5 w-5 text-white" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="bottom">Go Back</TooltipContent>
+          <TooltipContent side="bottom">Go to Home</TooltipContent>
         </Tooltip>
 
         {/* Dashboard Title */}

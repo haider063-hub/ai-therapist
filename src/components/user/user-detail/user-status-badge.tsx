@@ -83,7 +83,8 @@ export function UserStatusBadge({
         variant="secondary"
         data-testid="status-badge-active"
         className={cn(
-          canModify && "cursor-pointer hover:bg-muted transition-colors",
+          "border border-gray-300 !bg-green-100 !text-green-800",
+          canModify && "cursor-pointer hover:!bg-green-200 transition-colors",
           canModify && "flex items-center gap-1",
         )}
       >
@@ -144,6 +145,7 @@ export function UserStatusBadge({
                   e.preventDefault();
                   setShowConfirmDialog(false);
                 }}
+                className="!bg-black !text-white hover:!bg-gray-800"
               >
                 {tGlobalCommon("cancel")}
               </AlertDialogCancel>
@@ -156,7 +158,9 @@ export function UserStatusBadge({
               >
                 <SubmitButton
                   className={
-                    willBan ? "bg-destructive hover:bg-destructive/90" : ""
+                    willBan
+                      ? "!bg-black !text-white hover:!bg-gray-800"
+                      : "!bg-black !text-white hover:!bg-gray-800"
                   }
                 >
                   {isPending

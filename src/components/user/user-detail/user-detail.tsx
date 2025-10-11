@@ -66,7 +66,7 @@ export function UserDetail({
 
   return (
     <div
-      className="min-h-full p-2 sm:p-4 md:p-6 space-y-4 md:space-y-6"
+      className="min-h-full space-y-4 md:space-y-6"
       data-testid="user-detail-content"
     >
       {/* Hero Section */}

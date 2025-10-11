@@ -64,7 +64,10 @@ export function UserDetailFormCard({
           <User className="h-5 w-5 text-primary" />
           {tCommon("userDetailsCardTitle")}
           {user.id === currentUserId && (
-            <Badge variant="outline" className="text-xs ml-auto">
+            <Badge
+              variant="outline"
+              className="text-xs ml-auto !border-purple-300 !bg-purple-50 !text-purple-700 font-medium"
+            >
               {tCommon("you")}
             </Badge>
           )}
@@ -150,7 +153,7 @@ export function UserDetailFormCard({
           {/* Save Button */}
           <div className="mt-4">
             <SubmitButton
-              className="w-full"
+              className="w-full !bg-black !text-white hover:!bg-gray-800"
               data-testid="save-changes-button"
               disabled={isPending}
             >

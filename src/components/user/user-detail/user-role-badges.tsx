@@ -37,7 +37,7 @@ export function UserRoleBadges({
             key={role}
             variant="secondary"
             className={cn(
-              "text-xs",
+              "text-xs border border-gray-300",
               isClickable &&
                 "cursor-pointer hover:bg-secondary/80 transition-colors",
               isClickable && "flex items-center gap-1",

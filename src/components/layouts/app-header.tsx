@@ -98,7 +98,7 @@ export function AppHeader() {
             <TooltipTrigger asChild>
               <Button
                 variant={"ghost"}
-                className="bg-white px-3 py-2 h-auto text-gray-900 hover:bg-white focus:bg-white active:bg-white"
+                className="bg-white px-2 sm:px-3 py-1.5 sm:py-2 h-auto text-gray-900 hover:bg-white focus:bg-white active:bg-white text-xs sm:text-sm"
                 onClick={async () => {
                   // First check store (TherapistLoader may have already loaded it)
                   const voiceChat = appStore.getState().voiceChat;
@@ -128,8 +128,8 @@ export function AppHeader() {
                   }
                 }}
               >
-                <Mic className="h-4 w-4 mr-0" />
-                <span className="text-sm font-normal">Speak to Therapist</span>
+                <Mic className="h-3 sm:h-4 w-3 sm:w-4 mr-1 sm:mr-2" />
+                <span className="font-normal">Speak to Therapist</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">

@@ -101,8 +101,9 @@ export function UserProfileCard({
                 variant="outline"
                 size="sm"
                 onClick={() => setEditDialogOpen(true)}
+                className="!bg-black !text-white hover:!bg-gray-800"
               >
-                <Edit className="h-4 w-4 mr-2" />
+                <Edit className="h-4 w-4 mr-2 text-white" />
                 Edit
               </Button>
             )}
