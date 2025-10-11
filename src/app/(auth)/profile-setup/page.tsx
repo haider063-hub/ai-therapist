@@ -95,7 +95,7 @@ export default function ProfileSetupPage() {
 
       if (response.ok) {
         toast.success("Profile setup complete!");
-        router.push("/therapists");
+        router.push("/");
       } else {
         const error = await response.json();
         toast.error(error.message || "Failed to save profile");
@@ -109,9 +109,9 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col p-4 sm:p-4 overflow-y-auto chat-scrollbar">
-      {/* EchoNest AI Therapy Branding - Sticky */}
-      <div className="sticky top-0 z-10 text-center mb-6 mt-8 bg-gradient-to-br from-blue-600 via-purple-600 to-purple-800 -mx-4 sm:-mx-6 px-4 sm:px-6 py-4">
+    <div className="flex flex-col p-4 sm:p-4">
+      {/* EchoNest AI Therapy Branding */}
+      <div className="text-center mb-6 mt-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
           EchoNest AI Therapy
         </h1>
