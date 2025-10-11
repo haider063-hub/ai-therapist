@@ -109,9 +109,9 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col p-4 sm:p-4 justify-center">
+    <div className="min-h-screen flex flex-col p-4 sm:p-4 overflow-y-auto chat-scrollbar">
       {/* EchoNest AI Therapy Branding */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-6 mt-8">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
           EchoNest AI Therapy
         </h1>
@@ -359,6 +359,9 @@ export default function ProfileSetupPage() {
           </form>
         </CardContent>
       </Card>
+
+      {/* Bottom spacing to prevent content cutoff */}
+      <div className="h-8"></div>
     </div>
   );
 }
