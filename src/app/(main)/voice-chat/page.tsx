@@ -47,7 +47,6 @@ export default function VoiceChatPage() {
 
   const [isClosing, setIsClosing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
-  const [creditUpdateAnimation, setCreditUpdateAnimation] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
   const sessionStartTime = useRef<number | null>(null);
   const lastCreditDeductionTime = useRef<number | null>(null);
@@ -165,7 +164,14 @@ export default function VoiceChatPage() {
       creditStatus.credits.voiceCreditsFromTopup
     : 0;
 
-  const freeTrialCredits = creditStatus?.credits?.voiceCredits || 0;
+  // Calculate plan credits (remaining from subscription)
+  const hasVoicePlan =
+    creditStatus?.credits?.subscriptionType === "voice_only" ||
+    creditStatus?.credits?.subscriptionType === "voice_chat";
+
+  const planCredits = hasVoicePlan
+    ? creditStatus?.credits?.voiceCredits || 0
+    : 0;
 
   // Fetch and monitor voice credit status
   useEffect(() => {
@@ -197,6 +203,9 @@ export default function VoiceChatPage() {
   }, []); // Run once on mount
   const topUpCredits = creditStatus?.credits?.voiceCreditsFromTopup || 0;
 
+  // Only show dropdown if user has both plan credits and top-up credits
+  const showBreakdown = hasVoicePlan && planCredits > 0 && topUpCredits > 0;
+
   // Listen for credit updates
   useEffect(() => {
     const handleCreditsUpdate = () => {
@@ -204,9 +213,7 @@ export default function VoiceChatPage() {
         "🔄 Credits updated event received, refreshing credit display...",
       );
       mutateCredits();
-      // Trigger visual animation
-      setCreditUpdateAnimation(true);
-      setTimeout(() => setCreditUpdateAnimation(false), 2000);
+      // Remove visual animation to prevent green border flash
     };
     window.addEventListener("credits-updated", handleCreditsUpdate);
     return () =>
@@ -539,7 +546,7 @@ export default function VoiceChatPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 px-3 py-2 text-xs whitespace-nowrap min-w-[120px] min-h-[36px] border-gray-300 bg-white text-black"
+                className="h-8 px-3 py-2 text-xs font-normal whitespace-nowrap min-w-[120px] min-h-[36px] border-gray-300 bg-white text-black"
                 onClick={() => router.push("/therapists")}
               >
                 <User className="h-3.5 w-3.5 mr-1 text-black" />
@@ -549,44 +556,45 @@ export default function VoiceChatPage() {
           )}
 
           {/* Credits */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                className={`flex items-center gap-2 h-auto px-2 py-1 transition-all text-white hover:text-white/80 ${creditUpdateAnimation ? "ring-2 ring-green-500 ring-offset-2 scale-105" : ""}`}
-              >
-                <CreditCard className="h-4 w-4 text-white" />
-                <span className="text-sm font-semibold text-white">
-                  {totalVoiceCredits}
-                </span>
-                <span className="text-xs text-white/80">Voice Credits</span>
-                <ChevronDown className="h-3 w-3 text-white" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-64 p-3 z-[200]"
-              align="end"
-              side="bottom"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between pb-2 border-b">
-                  <span className="text-sm font-semibold">
-                    Credit Breakdown
+          {showBreakdown ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 h-auto px-2 py-1 transition-all text-white hover:text-white/80"
+                >
+                  <CreditCard className="h-4 w-4 text-white" />
+                  <span className="text-sm font-semibold text-white">
+                    {totalVoiceCredits}
                   </span>
-                  <CreditCard className="h-4 w-4 text-muted-foreground" />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-muted-foreground">
-                      Free Trial
+                  <span className="text-xs text-white/80">Voice Credits</span>
+                  <ChevronDown className="h-3 w-3 text-white" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-64 p-3 z-[200]"
+                align="end"
+                side="bottom"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between pb-2 border-b">
+                    <span className="text-sm font-semibold">
+                      Credit Breakdown
                     </span>
-                    <span className="text-sm font-medium">
-                      {freeTrialCredits}
-                    </span>
+                    <CreditCard className="h-4 w-4 text-muted-foreground" />
                   </div>
 
-                  {topUpCredits > 0 && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        {creditStatus?.credits?.subscriptionType ===
+                        "voice_only"
+                          ? "Voice Only Plan"
+                          : "Voice + Chat Plan"}
+                      </span>
+                      <span className="text-sm font-medium">{planCredits}</span>
+                    </div>
+
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-muted-foreground">
                         Top-Up
@@ -595,22 +603,30 @@ export default function VoiceChatPage() {
                         {topUpCredits}
                       </span>
                     </div>
-                  )}
 
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="text-sm font-semibold">Total</span>
-                    <span className="text-base font-bold">
-                      {totalVoiceCredits}
-                    </span>
+                    <div className="flex items-center justify-between pt-2 border-t">
+                      <span className="text-sm font-semibold">Total</span>
+                      <span className="text-base font-bold">
+                        {totalVoiceCredits}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="text-[10px] text-muted-foreground text-center pt-2 border-t">
+                    Plan credits are used first
                   </div>
                 </div>
-
-                <div className="text-[10px] text-muted-foreground text-center pt-2 border-t">
-                  Free trial credits are used first
-                </div>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <div className="flex items-center gap-2 h-auto px-2 py-1 transition-all text-white">
+              <CreditCard className="h-4 w-4 text-white" />
+              <span className="text-sm font-semibold text-white">
+                {totalVoiceCredits}
+              </span>
+              <span className="text-xs text-white/80">Voice Credits</span>
+            </div>
+          )}
         </div>
 
         {/* Mobile: Stacked Layout */}
@@ -639,44 +655,47 @@ export default function VoiceChatPage() {
               </div>
             )}
 
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="flex items-center gap-1 h-8 px-2 flex-shrink-0"
-                >
-                  <CreditCard className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-sm font-semibold">
-                    {totalVoiceCredits}
-                  </span>
-                  <ChevronDown className="h-3 w-3 text-muted-foreground" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[calc(100vw-1rem)] p-3 z-[200]"
-                align="end"
-                side="bottom"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between pb-2 border-b">
+            {showBreakdown ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center gap-1 h-8 px-2 flex-shrink-0"
+                  >
+                    <CreditCard className="h-3 w-3 text-muted-foreground" />
                     <span className="text-sm font-semibold">
-                      Credit Breakdown
+                      {totalVoiceCredits}
                     </span>
-                    <CreditCard className="h-4 w-4 text-muted-foreground" />
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-muted-foreground">
-                        Free Trial
+                    <ChevronDown className="h-3 w-3 text-muted-foreground" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[calc(100vw-1rem)] p-3 z-[200]"
+                  align="end"
+                  side="bottom"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b">
+                      <span className="text-sm font-semibold">
+                        Credit Breakdown
                       </span>
-                      <span className="text-sm font-medium">
-                        {freeTrialCredits}
-                      </span>
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
                     </div>
 
-                    {topUpCredits > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-muted-foreground">
+                          {creditStatus?.credits?.subscriptionType ===
+                          "voice_only"
+                            ? "Voice Only Plan"
+                            : "Voice + Chat Plan"}
+                        </span>
+                        <span className="text-sm font-medium">
+                          {planCredits}
+                        </span>
+                      </div>
+
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-muted-foreground">
                           Top-Up
@@ -685,22 +704,29 @@ export default function VoiceChatPage() {
                           {topUpCredits}
                         </span>
                       </div>
-                    )}
 
-                    <div className="flex items-center justify-between pt-2 border-t">
-                      <span className="text-sm font-semibold">Total</span>
-                      <span className="text-base font-bold">
-                        {totalVoiceCredits}
-                      </span>
+                      <div className="flex items-center justify-between pt-2 border-t">
+                        <span className="text-sm font-semibold">Total</span>
+                        <span className="text-base font-bold">
+                          {totalVoiceCredits}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-[10px] text-muted-foreground text-center pt-2 border-t">
+                      Plan credits are used first
                     </div>
                   </div>
-
-                  <div className="text-[10px] text-muted-foreground text-center pt-2 border-t">
-                    Free trial credits are used first
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <div className="flex items-center gap-1 h-8 px-2 flex-shrink-0">
+                <CreditCard className="h-3 w-3 text-muted-foreground" />
+                <span className="text-sm font-semibold">
+                  {totalVoiceCredits}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Bottom Row: Action Buttons - Only if not active */}
@@ -754,7 +780,7 @@ export default function VoiceChatPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className={`h-8 px-3 py-2 text-xs whitespace-nowrap min-h-[36px] ${selectedTherapist && availableLanguages.length > 1 ? "flex-1" : "w-full"}`}
+                className={`h-8 px-3 py-2 text-xs font-normal whitespace-nowrap min-h-[36px] ${selectedTherapist && availableLanguages.length > 1 ? "flex-1" : "w-full"}`}
                 onClick={() => router.push("/therapists")}
               >
                 <User className="h-3.5 w-3.5 mr-1" />
@@ -771,11 +797,13 @@ export default function VoiceChatPage() {
           <div className="max-w-3xl mx-auto p-6">
             <Alert variant={"destructive"}>
               <TriangleAlertIcon className="size-4" />
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error.message}</AlertDescription>
+              <AlertTitle className="text-white">Error</AlertTitle>
+              <AlertDescription className="text-white">
+                {error.message}
+              </AlertDescription>
 
               <AlertDescription className="my-4">
-                <p className="text-muted-foreground">
+                <p className="text-white/80">
                   {t("VoiceChat.pleaseCloseTheVoiceChatAndTryAgain")}
                 </p>
               </AlertDescription>
@@ -787,7 +815,7 @@ export default function VoiceChatPage() {
         ) : (
           <div className="h-full w-full">
             {/* Voice-only mode - no text messages displayed */}
-            <div className="w-full mx-auto h-full max-h-[80vh] overflow-y-auto px-4 lg:max-w-4xl flex-1 flex items-center">
+            <div className="w-full mx-auto h-full max-h-[80vh] overflow-y-auto px-4 lg:max-w-4xl flex-1 flex items-center chat-scrollbar">
               <div className="animate-in fade-in-50 duration-1000 text-center w-full">
                 <div className="mb-8">
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
@@ -825,7 +853,9 @@ export default function VoiceChatPage() {
           </div>
         )}
       </div>
-      <div className="relative w-full p-6 flex flex-col items-center justify-center gap-4 z-10">
+      <div
+        className={`relative w-full p-6 flex ${isActive ? "flex-row" : "flex-col"} items-center justify-center gap-4 z-10`}
+      >
         {/* Low Credits Warning Banner */}
         {!isActive && voiceCreditsTotal > 0 && voiceCreditsTotal < 100 && (
           <div className="max-w-md mx-auto mb-2">
@@ -876,68 +906,79 @@ export default function VoiceChatPage() {
           </p>
         )}
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              variant={"secondary"}
-              size={"default"}
-              disabled={isClosing || isLoading || !canUseVoice}
-              onClick={() => {
-                if (!isActive) {
+        {/* Start/Stop Voice Chat Button - Only show when not active */}
+        {!isActive && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"secondary"}
+                size={"default"}
+                disabled={isClosing || isLoading || !canUseVoice}
+                onClick={() => {
                   if (canUseVoice) {
                     startWithSound();
                   } else {
                     router.push("/subscription");
                   }
-                } else if (isListening) {
-                  stopListening();
-                } else {
-                  startListening();
-                }
-              }}
-              className={cn(
-                "rounded-full px-6 py-6 transition-colors duration-300 text-lg font-semibold",
+                }}
+                className={cn(
+                  "w-12 h-12 p-0 rounded-full flex items-center justify-center transition-colors duration-300",
+                  isLoading
+                    ? "bg-gray-200 text-gray-600 animate-pulse"
+                    : !canUseVoice
+                      ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+                      : "bg-white text-black hover:bg-gray-100",
+                )}
+              >
+                {isLoading || isClosing ? (
+                  <Loader className="size-5 animate-spin" />
+                ) : (
+                  <PhoneIcon className="size-5 fill-green-600 stroke-green-600 stroke-1" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t("VoiceChat.startConversation")}</TooltipContent>
+          </Tooltip>
+        )}
 
-                isLoading
-                  ? "bg-gray-200 text-gray-600 animate-pulse"
-                  : !canUseVoice && !isActive
-                    ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                    : !isActive
-                      ? "bg-white text-black hover:bg-gray-100"
-                      : !isListening
-                        ? "bg-red-100 text-red-600 hover:bg-red-200"
-                        : isUserSpeaking
-                          ? "bg-blue-100 text-blue-600"
-                          : "bg-white text-black hover:bg-gray-100",
-              )}
-            >
-              {isLoading || isClosing ? (
-                <Loader className="size-6 animate-spin mr-2" />
-              ) : !isActive ? (
-                <PhoneIcon className="size-6 fill-green-600 stroke-green-600 stroke-1" />
-              ) : isListening ? (
-                <>
+        {/* Mic Control Button - Only show when active */}
+        {isActive && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={"secondary"}
+                size={"default"}
+                disabled={isLoading || isClosing}
+                onClick={() => {
+                  if (isListening) {
+                    stopListening();
+                  } else {
+                    startListening();
+                  }
+                }}
+                className={cn(
+                  "w-12 h-12 p-0 rounded-full flex items-center justify-center transition-colors duration-300",
+                  !isListening
+                    ? "bg-red-100 text-red-600 hover:bg-red-200"
+                    : isUserSpeaking
+                      ? "bg-blue-100 text-blue-600"
+                      : "bg-white text-black hover:bg-gray-100",
+                )}
+              >
+                {isListening ? (
                   <MicIcon
-                    className={`size-6 mr-2 ${isUserSpeaking ? "text-primary" : "text-muted-foreground transition-colors duration-300"}`}
+                    className={`size-5 ${isUserSpeaking ? "text-primary" : "text-muted-foreground transition-colors duration-300"}`}
                   />
-                  Listening...
-                </>
-              ) : (
-                <>
-                  <MicOffIcon className="size-6 mr-2" />
-                  Stop Listening
-                </>
-              )}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            {!isActive
-              ? t("VoiceChat.startConversation")
-              : isListening
-                ? t("VoiceChat.closeMic")
-                : t("VoiceChat.openMic")}
-          </TooltipContent>
-        </Tooltip>
+                ) : (
+                  <MicOffIcon className="size-5" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {isListening ? t("VoiceChat.closeMic") : t("VoiceChat.openMic")}
+            </TooltipContent>
+          </Tooltip>
+        )}
         {/* End Conversation Button - Only show when session is active */}
         {isActive && (
           <Tooltip>
@@ -945,7 +986,7 @@ export default function VoiceChatPage() {
               <Button
                 variant={"destructive"}
                 size={"default"}
-                className="rounded-full px-6 py-3"
+                className="rounded-full px-7 py-4 bg-red-600 hover:bg-red-700 text-white font-medium"
                 disabled={isLoading || isClosing}
                 onClick={endVoiceChat}
               >

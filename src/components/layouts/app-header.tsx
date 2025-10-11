@@ -59,7 +59,7 @@ export function AppHeader() {
   }, [currentPaths, searchParams]);
 
   return (
-    <header className="sticky top-0 z-50 flex items-center px-2 sm:px-3 py-2">
+    <header className="sticky top-0 z-50 flex items-center p-4 md:p-6">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button
@@ -86,7 +86,7 @@ export function AppHeader() {
       {componentByPage}
       <div className="flex-1" />
       {showActionButtons && (
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-3 sm:gap-4">
           {/* Credit Display - Context-aware based on current page */}
           <CreditDisplay
             compact={true}
@@ -129,7 +129,7 @@ export function AppHeader() {
                 }}
               >
                 <Mic className="h-4 w-4 mr-0" />
-                <span className="text-sm font-medium">Speak to Therapist</span>
+                <span className="text-sm font-normal">Speak to Therapist</span>
               </Button>
             </TooltipTrigger>
             <TooltipContent align="end" side="bottom">

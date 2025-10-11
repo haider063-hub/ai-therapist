@@ -324,11 +324,13 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
           break;
         }
         case "conversation.item.input_audio_transcription.completed": {
+          const transcript = event.transcript || "...speaking";
+
           updateUIMessage(event.item_id, {
             parts: [
               {
                 type: "text",
-                text: event.transcript || "...speaking",
+                text: transcript,
               },
             ],
             completed: true,

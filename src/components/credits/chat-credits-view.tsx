@@ -33,7 +33,6 @@ export function ChatCreditsView({
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2 text-sm">
         <CreditCard className="h-4 w-4 text-white" />
-        <span className="font-semibold text-xs text-white">Chat Credits</span>
 
         {totalChatCredits === -1 || hasUnlimitedChat ? (
           <Badge
@@ -47,6 +46,8 @@ export function ChatCreditsView({
         ) : (
           <span className="text-red-300 text-xs">No credits</span>
         )}
+
+        <span className="font-normal text-xs text-white">Chat Credits</span>
       </div>
 
       {showUpgradeButton && creditStatus.subscriptionType === "free_trial" && (

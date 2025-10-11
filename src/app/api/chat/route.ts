@@ -36,6 +36,7 @@ import { creditService } from "lib/services/credit-service";
 import { moodTrackingService } from "lib/services/mood-tracking-service";
 import { checkUserHistoryAction } from "./actions";
 import { subscriptionRepository } from "lib/db/pg/repositories/subscription-repository.pg";
+import { getEmergencyContacts } from "lib/services/emergency-contacts";
 
 const logger = globalLogger.withDefaults({
   message: colorize("blackBright", `Chat API: `),
@@ -267,8 +268,15 @@ You are now analyzing an image that the user has uploaded. Please:
 </image_analysis_instructions>`;
         }
 
+        // Get user data and emergency contacts
+        const user = await subscriptionRepository.getUserById(session.user.id);
+        const userCountry = user?.country || undefined;
+        const emergencyContacts = userCountry
+          ? getEmergencyContacts(userCountry)
+          : [];
+
         const systemPrompt = mergeSystemPrompt(
-          buildUserSystemPrompt(session.user),
+          buildUserSystemPrompt(session.user, emergencyContacts, userCountry),
           !supportToolCall && buildToolCallUnsupportedModelSystemPrompt(),
           historyContext, // Add previous conversation context
           imageAnalysisPrompt,

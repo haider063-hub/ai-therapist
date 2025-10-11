@@ -48,6 +48,7 @@ type Props = {
 
 export default function ChatBot({ threadId, initialMessages }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+
   const [isAtBottom, setIsAtBottom] = useState(true);
   const router = useRouter();
 
@@ -338,6 +339,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
   return (
     <>
       {particle}
+
       <div
         className={cn(
           emptyMessage && "justify-center pb-24",
@@ -349,7 +351,9 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
         ) : (
           <>
             <div
-              className={"flex flex-col gap-2 overflow-y-auto py-6 z-10"}
+              className={
+                "flex flex-col gap-2 overflow-y-auto py-6 z-10 chat-scrollbar"
+              }
               ref={containerRef}
               onScroll={handleScroll}
             >

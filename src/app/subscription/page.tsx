@@ -430,7 +430,7 @@ export default function SubscriptionPage() {
             {data.plans.map((plan) => (
               <Card
                 key={plan.id}
-                className={`relative bg-white ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
+                className={`relative bg-white flex flex-col ${plan.id === data.user.subscriptionType ? "ring-2 ring-primary" : ""}`}
               >
                 {plan.id === data.user.subscriptionType && (
                   <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
@@ -454,8 +454,8 @@ export default function SubscriptionPage() {
                     <span className="text-gray-500">/month</span>
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="text-black">
-                  <ul className="space-y-2 mb-6">
+                <CardContent className="text-black flex flex-col flex-1">
+                  <ul className="space-y-2 mb-6 flex-1">
                     {plan.features.map((feature, index) => (
                       <li key={index} className="flex items-start gap-2">
                         <Check className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -463,35 +463,37 @@ export default function SubscriptionPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    className="w-full"
-                    variant={
-                      plan.id === data.user.subscriptionType
-                        ? "outline"
-                        : "default"
-                    }
-                    disabled={
-                      (plan.id === data.user.subscriptionType &&
-                        plan.id !== "voice_topup") ||
-                      processing === plan.id
-                    }
-                    onClick={() => handleCheckout(plan.id.toUpperCase())}
-                  >
-                    {processing === plan.id
-                      ? "Processing..."
-                      : plan.id === data.user.subscriptionType &&
-                          plan.id !== "voice_topup"
-                        ? "Current Plan"
-                        : plan.id === "voice_topup"
-                          ? "Buy Voice Credits"
-                          : plan.id === "chat_only"
-                            ? "Start Chat Plan"
-                            : plan.id === "voice_only"
-                              ? "Start Voice Plan"
-                              : plan.id === "voice_chat"
-                                ? "Start Premium Plan"
-                                : "Upgrade"}
-                  </Button>
+                  <div className="mt-auto">
+                    <Button
+                      className="w-full"
+                      variant={
+                        plan.id === data.user.subscriptionType
+                          ? "outline"
+                          : "default"
+                      }
+                      disabled={
+                        (plan.id === data.user.subscriptionType &&
+                          plan.id !== "voice_topup") ||
+                        processing === plan.id
+                      }
+                      onClick={() => handleCheckout(plan.id.toUpperCase())}
+                    >
+                      {processing === plan.id
+                        ? "Processing..."
+                        : plan.id === data.user.subscriptionType &&
+                            plan.id !== "voice_topup"
+                          ? "Current Plan"
+                          : plan.id === "voice_topup"
+                            ? "Buy Voice Credits"
+                            : plan.id === "chat_only"
+                              ? "Start Chat Plan"
+                              : plan.id === "voice_only"
+                                ? "Start Voice Plan"
+                                : plan.id === "voice_chat"
+                                  ? "Start Premium Plan"
+                                  : "Upgrade"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ))}

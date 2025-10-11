@@ -82,20 +82,34 @@ export const subscriptionRepository = {
           const planCredits = 1400; // Monthly plan credits
           const topupCredits = currentUser.voiceCreditsFromTopup || 0;
           const usedThisMonth = currentUser.voiceCreditsUsedThisMonth || 0;
-          const totalAvailable = planCredits + topupCredits;
-          const remainingCredits = totalAvailable - usedThisMonth;
+          const remainingPlanCredits = Math.max(0, planCredits - usedThisMonth);
+          const totalAvailable = remainingPlanCredits + topupCredits;
 
-          if (remainingCredits < amount) {
+          if (totalAvailable < amount) {
             throw new Error(
-              `Insufficient voice credits. You have ${remainingCredits} credits remaining this month.`,
+              `Insufficient voice credits. You have ${totalAvailable} credits remaining (${remainingPlanCredits} from plan, ${topupCredits} from top-up).`,
             );
           }
 
-          // Update monthly usage counter
+          // Deduct from plan credits first, then from top-up credits
+          let planUsage = 0;
+          let topupUsage = 0;
+
+          if (remainingPlanCredits >= amount) {
+            // Enough plan credits available
+            planUsage = amount;
+          } else {
+            // Use all remaining plan credits, then deduct from top-up
+            planUsage = remainingPlanCredits;
+            topupUsage = amount - remainingPlanCredits;
+          }
+
+          // Update monthly usage counter and deduct from top-up if needed
           const result = await tx
             .update(UserSchema)
             .set({
-              voiceCreditsUsedThisMonth: sql`${UserSchema.voiceCreditsUsedThisMonth} + ${amount}`,
+              voiceCreditsUsedThisMonth: usedThisMonth + planUsage,
+              voiceCreditsFromTopup: topupCredits - topupUsage,
               updatedAt: new Date(),
             })
             .where(eq(UserSchema.id, userId))
@@ -153,20 +167,34 @@ export const subscriptionRepository = {
           const planCredits = 1000; // Monthly plan credits
           const topupCredits = currentUser.voiceCreditsFromTopup || 0;
           const usedThisMonth = currentUser.voiceCreditsUsedThisMonth || 0;
-          const totalAvailable = planCredits + topupCredits;
-          const remainingCredits = totalAvailable - usedThisMonth;
+          const remainingPlanCredits = Math.max(0, planCredits - usedThisMonth);
+          const totalAvailable = remainingPlanCredits + topupCredits;
 
-          if (remainingCredits < amount) {
+          if (totalAvailable < amount) {
             throw new Error(
-              `Insufficient voice credits. You have ${remainingCredits} credits remaining this month.`,
+              `Insufficient voice credits. You have ${totalAvailable} credits remaining (${remainingPlanCredits} from plan, ${topupCredits} from top-up).`,
             );
           }
 
-          // Update monthly usage counter
+          // Deduct from plan credits first, then from top-up credits
+          let planUsage = 0;
+          let topupUsage = 0;
+
+          if (remainingPlanCredits >= amount) {
+            // Enough plan credits available
+            planUsage = amount;
+          } else {
+            // Use all remaining plan credits, then deduct from top-up
+            planUsage = remainingPlanCredits;
+            topupUsage = amount - remainingPlanCredits;
+          }
+
+          // Update monthly usage counter and deduct from top-up if needed
           const result = await tx
             .update(UserSchema)
             .set({
-              voiceCreditsUsedThisMonth: sql`${UserSchema.voiceCreditsUsedThisMonth} + ${amount}`,
+              voiceCreditsUsedThisMonth: usedThisMonth + planUsage,
+              voiceCreditsFromTopup: topupCredits - topupUsage,
               updatedAt: new Date(),
             })
             .where(eq(UserSchema.id, userId))

@@ -7,6 +7,8 @@ import { checkUserHistoryAction } from "../actions";
 import { DEFAULT_VOICE_TOOLS } from "lib/ai/speech";
 import logger from "logger";
 import { creditService } from "lib/services/credit-service";
+import { subscriptionRepository } from "lib/db/pg/repositories/subscription-repository.pg";
+import { getEmergencyContacts } from "lib/services/emergency-contacts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -239,8 +241,15 @@ COMMUNICATION STYLE:
 12. Avoid lengthy explanations or overly detailed responses`;
     }
 
+    // Get user data and emergency contacts
+    const user = await subscriptionRepository.getUserById(session.user.id);
+    const userCountry = user?.country || undefined;
+    const emergencyContacts = userCountry
+      ? getEmergencyContacts(userCountry)
+      : [];
+
     const systemPrompt = mergeSystemPrompt(
-      buildSpeechSystemPrompt(session.user),
+      buildSpeechSystemPrompt(session.user, emergencyContacts, userCountry),
       historyContext, // Add history context to voice chat system prompt
       therapistContext, // Add therapist-specific context
     );

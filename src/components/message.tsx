@@ -181,9 +181,11 @@ export const ErrorMessage = ({
               <TriangleAlertIcon className="h-3.5 w-3.5 text-destructive" />
             </div>
             <div className="flex-1">
-              <p className="font-medium text-sm mb-2">{t("Chat.Error")}</p>
-              <div className="text-sm text-muted-foreground">
-                <div className="whitespace-pre-wrap">
+              <p className="font-medium text-sm mb-2 text-white">
+                {t("Chat.Error")}
+              </p>
+              <div className="text-sm text-white">
+                <div className="whitespace-pre-wrap text-white">
                   {isExpanded
                     ? error.message
                     : truncateString(error.message, maxLength)}
@@ -192,7 +194,7 @@ export const ErrorMessage = ({
                   <Button
                     onClick={() => setIsExpanded(!isExpanded)}
                     variant={"ghost"}
-                    className="h-auto p-1 text-xs mt-2"
+                    className="h-auto p-1 text-xs mt-2 text-white hover:text-white/80"
                     size={"sm"}
                   >
                     {isExpanded ? (
@@ -208,7 +210,7 @@ export const ErrorMessage = ({
                     )}
                   </Button>
                 )}
-                <p className="text-xs text-muted-foreground mt-3 italic">
+                <p className="text-xs text-white/80 mt-3 italic">
                   {t("Chat.thisMessageWasNotSavedPleaseTryTheChatAgain")}
                 </p>
               </div>

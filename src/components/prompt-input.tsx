@@ -382,39 +382,46 @@ export default function PromptInput({
                 {/* Image Upload Button */}
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button
-                      variant={"ghost"}
-                      size={"sm"}
-                      className={`rounded-full hover:bg-input! p-2! ${
+                    <div
+                      className={`rounded-full hover:bg-input cursor-pointer inline-flex items-center justify-center ${
                         !imageUploadStats?.canUpload || disabled
                           ? "opacity-50 cursor-not-allowed"
                           : ""
                       }`}
-                      onClick={handleImageButtonClick}
-                      disabled={
-                        isUploadingImage ||
-                        isLoading ||
-                        uploadedImage !== null ||
-                        disabled ||
-                        !imageUploadStats?.canUpload
-                      }
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleImageButtonClick();
+                      }}
                     >
-                      {isUploadingImage ? (
-                        <Loader2 className="animate-spin" size={18} />
-                      ) : (
-                        <PlusIcon size={18} />
-                      )}
-                    </Button>
+                      <Button
+                        variant={"ghost"}
+                        size={"sm"}
+                        className="p-2 h-8 w-8 rounded-full"
+                        disabled={false} // Never disable the button itself to allow tooltip
+                      >
+                        {isUploadingImage ? (
+                          <Loader2 className="animate-spin" size={18} />
+                        ) : (
+                          <PlusIcon size={18} />
+                        )}
+                      </Button>
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     {!imageUploadStats ? (
                       <p className="text-xs">Loading...</p>
                     ) : disabled ? (
-                      <p className="text-xs">
-                        Out of credits - Upload disabled
-                      </p>
+                      <div className="text-xs">
+                        <p className="font-medium">Image upload disabled</p>
+                        <p className="text-muted-foreground mt-1">
+                          Out of credits - Upgrade to continue using image
+                          upload
+                        </p>
+                      </div>
                     ) : !imageUploadStats.canUpload ? (
-                      <p className="text-xs">Available on paid plans only</p>
+                      <p className="text-xs">
+                        Upgrade to enable image uploads.
+                      </p>
                     ) : uploadedImage ? (
                       <p className="text-xs">
                         Remove current image to upload another
