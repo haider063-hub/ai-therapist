@@ -8,9 +8,8 @@ import { UserSessionStatsCard } from "./user-session-stats-card";
 import { UserWeeklyMoodCard } from "./user-weekly-mood-card";
 import { UserQuickMoodCard } from "./user-quick-mood-card";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
-import { useSidebar } from "ui/sidebar";
 import useSWR, { mutate } from "swr";
-import { cn, fetcher } from "lib/utils";
+import { fetcher } from "lib/utils";
 import { useEffect, useState } from "react";
 
 interface UserDetailProps {
@@ -29,10 +28,7 @@ export function UserDetail({
   currentUserId,
   userAccountInfo,
 }: UserDetailProps) {
-  // Always call the hook, but handle the conditional logic afterward
-  const sidebarContext = useSidebar();
-  const sidebarOpen =
-    view === "admin" ? false : (sidebarContext?.open ?? false);
+  // No sidebar logic needed - admin pages don't use sidebar
   const userDetailRoute =
     currentUserId === initialUser.id
       ? `/api/user/details`
@@ -82,14 +78,7 @@ export function UserDetail({
       </div>
 
       {/* Cards Layout */}
-      <div
-        className={cn(
-          "grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6",
-          {
-            "grid-cols-1 md:grid-cols-1 lg:grid-cols-2": sidebarOpen,
-          },
-        )}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
         {/* Top Row: User Details Form & Access & Account */}
         <UserDetailFormCard
           user={user ?? initialUser}
