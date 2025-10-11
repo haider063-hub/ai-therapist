@@ -9,6 +9,7 @@ import {
   PhoneIcon,
   ChevronDown,
   TriangleAlertIcon,
+  Coins,
   Languages,
   User,
 } from "lucide-react";
@@ -562,7 +563,7 @@ export default function VoiceChatPage() {
                   variant="ghost"
                   className="flex items-center gap-2 h-auto px-2 py-1 transition-all text-white hover:text-white/80"
                 >
-                  <span className="text-base">🪙</span>
+                  <Coins className="h-4 w-4 text-yellow-400" />
                   <span className="text-sm font-semibold text-white">
                     {totalVoiceCredits}
                   </span>
@@ -580,7 +581,7 @@ export default function VoiceChatPage() {
                     <span className="text-sm font-semibold">
                       Credit Breakdown
                     </span>
-                    <span className="text-base">🪙</span>
+                    <Coins className="h-4 w-4 text-yellow-400" />
                   </div>
 
                   <div className="space-y-2">
@@ -619,7 +620,7 @@ export default function VoiceChatPage() {
             </Popover>
           ) : (
             <div className="flex items-center gap-2 h-auto px-2 py-1 transition-all text-white">
-              <span className="text-base">🪙</span>
+              <Coins className="h-4 w-4 text-yellow-400" />
               <span className="text-sm font-semibold text-white">
                 {totalVoiceCredits}
               </span>
@@ -662,7 +663,7 @@ export default function VoiceChatPage() {
                     size="sm"
                     className="flex items-center gap-1 h-8 px-2 flex-shrink-0 text-white hover:text-white/80"
                   >
-                    <span className="text-sm">🪙</span>
+                    <Coins className="h-3 w-3 text-yellow-400" />
                     <span className="text-sm font-semibold text-white">
                       {totalVoiceCredits}
                     </span>
@@ -680,7 +681,7 @@ export default function VoiceChatPage() {
                       <span className="text-sm font-semibold">
                         Credit Breakdown
                       </span>
-                      <span className="text-base">🪙</span>
+                      <Coins className="h-4 w-4 text-yellow-400" />
                     </div>
 
                     <div className="space-y-2">
@@ -721,7 +722,7 @@ export default function VoiceChatPage() {
               </Popover>
             ) : (
               <div className="flex items-center gap-1 h-8 px-2 flex-shrink-0 text-white">
-                <span className="text-sm">🪙</span>
+                <Coins className="h-3 w-3 text-yellow-400" />
                 <span className="text-sm font-semibold text-white">
                   {totalVoiceCredits}
                 </span>

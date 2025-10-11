@@ -1,3 +1,4 @@
+import { Coins } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -30,7 +31,7 @@ export function GlobalCreditsView({
 
   return (
     <div className="flex items-center gap-2 text-sm">
-      <span className="text-base">🪙</span>
+      <Coins className="h-4 w-4 text-yellow-400" />
 
       {totalChatCredits === -1 || hasUnlimitedChat ? (
         <Badge
