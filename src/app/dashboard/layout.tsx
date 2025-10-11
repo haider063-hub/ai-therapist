@@ -1,7 +1,7 @@
 import { SidebarProvider } from "ui/sidebar";
 import { getSession } from "lib/auth/server";
 import { AppPopupProvider } from "@/components/layouts/app-popup-provider";
-import { SWRConfigProvider } from "../(chat)/swr-config";
+import { SWRConfigProvider } from "../(main)/swr-config";
 
 import { redirect } from "next/navigation";
 export const experimental_ppr = true;

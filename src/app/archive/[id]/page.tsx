@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Card, CardContent, CardHeader } from "ui/card";
 import { MessageCircleXIcon } from "lucide-react";
-import { ArchiveActionsClient } from "@/app/(chat)/archive/[id]/archive-actions-client";
+import { ArchiveActionsClient } from "./archive-actions-client";
 import { Separator } from "ui/separator";
 
 import LightRays from "ui/light-rays";
