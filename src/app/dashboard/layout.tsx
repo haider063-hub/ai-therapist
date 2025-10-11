@@ -18,7 +18,9 @@ export default async function DashboardLayout({
       <SWRConfigProvider>
         <AppPopupProvider userSettingsComponent={<div />} />
         <main className="relative w-full flex flex-col h-screen min-h-screen">
-          <div className="flex-1 overflow-y-auto ">{children}</div>
+          <div className="flex-1 overflow-y-auto chat-scrollbar">
+            {children}
+          </div>
         </main>
       </SWRConfigProvider>
     </SidebarProvider>

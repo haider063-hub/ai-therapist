@@ -1,5 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+
+/* Prevent page scrolling on profile setup page */
+html,
+body {
+  overflow: hidden;
+}
+
+/* Allow scrolling only within specific containers */
+.allow-scroll {
+  overflow: auto !important;
+}
 /* Individual theme variants - themes from  https://github.com/rawestmoreland/theme-generator/blob/main/src/app/globals.css */
 
 @theme inline {
@@ -1517,27 +1528,45 @@
   }
 
   /* Firefox scrollbar styling */
-  /* Global custom scrollbar - applies to all elements by default */
   * {
     scrollbar-width: thin;
     scrollbar-color: white transparent;
   }
 
-  *::-webkit-scrollbar {
+  /* Custom scrollbar for specific containers */
+  .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
   }
 
-  *::-webkit-scrollbar-track {
+  .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
   }
 
-  *::-webkit-scrollbar-thumb {
+  .custom-scrollbar::-webkit-scrollbar-thumb {
     background: white;
     border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  /* Thin scrollbar for chat messages */
+  .chat-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .chat-scrollbar::-webkit-scrollbar-thumb {
+    background: white;
+    border-radius: 2px;
     opacity: 0.8;
   }
 
-  *::-webkit-scrollbar-thumb:hover {
+  .chat-scrollbar::-webkit-scrollbar-thumb:hover {
     opacity: 1;
     background: rgba(255, 255, 255, 0.9);
   }

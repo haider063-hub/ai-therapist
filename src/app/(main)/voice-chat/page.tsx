@@ -816,7 +816,7 @@ export default function VoiceChatPage() {
         ) : (
           <div className="h-full w-full">
             {/* Voice-only mode - no text messages displayed */}
-            <div className="w-full mx-auto h-full max-h-[80vh] overflow-y-auto px-4 lg:max-w-4xl flex-1 flex items-center ">
+            <div className="w-full mx-auto h-full max-h-[80vh] overflow-y-auto px-4 lg:max-w-4xl flex-1 flex items-center chat-scrollbar">
               <div className="animate-in fade-in-50 duration-1000 text-center w-full">
                 <div className="mb-8">
                   <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">

@@ -109,17 +109,17 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="flex flex-col p-4 sm:p-4">
+    <div className="h-full flex flex-col p-4 sm:p-4 justify-center overflow-hidden">
       {/* EchoNest AI Therapy Branding */}
-      <div className="text-center mb-6 mt-8">
+      <div className="text-center mb-6 flex-shrink-0">
         <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">
           EchoNest AI Therapy
         </h1>
         <p className="text-white/80 text-sm">Your compassionate AI therapist</p>
       </div>
 
-      <Card className="w-full max-w-3xl bg-white shadow-lg mx-auto">
-        <CardHeader>
+      <Card className="w-full max-w-3xl bg-white shadow-lg mx-auto flex-1 flex flex-col min-h-0">
+        <CardHeader className="flex-shrink-0">
           <CardTitle className="text-2xl text-black">
             Complete Your Profile
           </CardTitle>
@@ -128,7 +128,7 @@ export default function ProfileSetupPage() {
             our AI provide better support tailored to your needs.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 overflow-y-auto chat-scrollbar max-h-96">
           <Alert className="mb-6 bg-white border border-black">
             <Shield className="h-4 w-4 text-black" />
             <AlertDescription className="text-black">
@@ -335,7 +335,7 @@ export default function ProfileSetupPage() {
             </div>
 
             {/* Actions */}
-            <div className="pt-4">
+            <div className="pt-4 flex-shrink-0">
               <Button
                 type="submit"
                 className="w-full bg-black hover:bg-gray-800 text-white"
@@ -353,15 +353,14 @@ export default function ProfileSetupPage() {
               </Button>
             </div>
 
-            <p className="text-xs text-center text-black mt-4">
+            <p className="text-xs text-center text-black mt-4 flex-shrink-0">
               You can update your profile anytime from your account settings
             </p>
           </form>
         </CardContent>
       </Card>
-
-      {/* Bottom spacing to prevent content cutoff */}
-      <div className="h-8"></div>
     </div>
   );
 }
+
+

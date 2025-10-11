@@ -2,12 +2,12 @@ export default async function AuthLayout({
   children,
 }: { children: React.ReactNode }) {
   return (
-    <main className="relative w-full flex flex-col min-h-screen">
+    <main className="relative w-full flex flex-col h-screen">
       {/* Background */}
       <div className="echonest-gradient-bg"></div>
       <div className="flex-1 relative z-10">
         <div className="flex min-h-screen w-full">
-          <div className="hidden lg:flex lg:w-1/2 bg-muted border-r flex-col p-18 relative sticky top-0 h-screen">
+          <div className="hidden lg:flex lg:w-1/2 bg-muted border-r flex-col p-18 relative">
             {/* Welcome Section - Matching the provided image */}
             <div className="flex-1 flex flex-col justify-center items-start space-y-6 animate-in fade-in duration-1000">
               <h1 className="text-4xl font-bold">
@@ -41,9 +41,7 @@ export default async function AuthLayout({
             </div>
           </div>
 
-          <div className="w-full lg:w-1/2 p-0 sm:p-6 overflow-y-auto">
-            {children}
-          </div>
+          <div className="w-full lg:w-1/2 p-0 sm:p-6">{children}</div>
         </div>
       </div>
     </main>
