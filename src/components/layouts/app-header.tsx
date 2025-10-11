@@ -87,13 +87,6 @@ export function AppHeader() {
       <div className="flex-1" />
       {showActionButtons && (
         <div className="flex items-center gap-3 sm:gap-4">
-          {/* Credit Display - Context-aware based on current page */}
-          <CreditDisplay
-            compact={true}
-            showUpgradeButton={false}
-            context={creditContext}
-          />
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -136,6 +129,13 @@ export function AppHeader() {
               <div className="text-xs">Start Voice Session</div>
             </TooltipContent>
           </Tooltip>
+
+          {/* Credit Display - Context-aware based on current page */}
+          <CreditDisplay
+            compact={true}
+            showUpgradeButton={false}
+            context={creditContext}
+          />
         </div>
       )}
     </header>
