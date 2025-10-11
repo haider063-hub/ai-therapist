@@ -97,7 +97,7 @@ export function VoiceSidebar({ user }: VoiceSidebarProps) {
                 {isAdmin && (
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      onClick={() => router.push("/voice-chat")}
+                      onClick={() => router.push("/admin/users")}
                       className="font-semibold"
                     >
                       <Shield className="size-4" />
