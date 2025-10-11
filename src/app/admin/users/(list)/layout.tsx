@@ -18,7 +18,7 @@ export default async function UsersLayout({ children }: UsersLayoutProps) {
       <div className="echonest-gradient-bg"></div>
 
       {/* Content */}
-      <div className="relative z-10 flex-1 overflow-y-auto p-6 w-full">
+      <div className="relative z-10 flex-1 overflow-y-auto chat-scrollbar p-6 w-full">
         <div className="space-y-6 w-full max-w-none">
           {/* Header with Back Button */}
           <div className="flex items-center gap-4">
