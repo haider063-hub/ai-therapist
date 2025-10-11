@@ -12,6 +12,7 @@ import { UserRoleSelector } from "./user-role-selection-dialog";
 import { UpdateUserPasswordDialog } from "./user-update-password-dialog";
 import { UserDeleteDialog } from "./user-delete-dialog";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
+import { getIsUserAdmin } from "lib/user/utils";
 
 interface UserAccessCardProps {
   user: BasicUserWithLastLogin;
@@ -163,39 +164,41 @@ export function UserAccessCard({
           </div>
 
           {/* Danger Zone Section */}
-          {view === "admin" && user.id !== currentUserId && (
-            <div className="space-y-3 pt-4 border-t">
-              <Label className="text-sm font-medium flex items-center gap-2 text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                {tCommon("dangerZone")}
-              </Label>
+          {view === "admin" &&
+            user.id !== currentUserId &&
+            !getIsUserAdmin(user) && (
+              <div className="space-y-3 pt-4 border-t">
+                <Label className="text-sm font-medium flex items-center gap-2 text-destructive">
+                  <AlertTriangle className="h-4 w-4" />
+                  {tCommon("dangerZone")}
+                </Label>
 
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium text-destructive">
-                      {t("deleteUser")}
-                    </p>
-                    <p className="text-xs text-destructive/80">
-                      {t("deleteUserPermanently")}
-                    </p>
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-destructive">
+                        {t("deleteUser")}
+                      </p>
+                      <p className="text-xs text-destructive/80">
+                        {t("deleteUserPermanently")}
+                      </p>
+                    </div>
+
+                    <UserDeleteDialog user={user} view={view}>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="h-8 text-xs"
+                        data-testid="delete-user-button"
+                      >
+                        <Trash2 className="w-3 h-3 mr-1" />
+                        {t("deleteUser")}
+                      </Button>
+                    </UserDeleteDialog>
                   </div>
-
-                  <UserDeleteDialog user={user} view={view}>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      className="h-8 text-xs"
-                      data-testid="delete-user-button"
-                    >
-                      <Trash2 className="w-3 h-3 mr-1" />
-                      {t("deleteUser")}
-                    </Button>
-                  </UserDeleteDialog>
                 </div>
               </div>
-            </div>
-          )}
+            )}
         </CardContent>
       </Card>
 

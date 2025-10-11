@@ -29,7 +29,8 @@ export function UserDetail({
   currentUserId,
   userAccountInfo,
 }: UserDetailProps) {
-  const { open: sidebarOpen } = useSidebar();
+  const sidebarContext = view === "admin" ? null : useSidebar();
+  const sidebarOpen = sidebarContext?.open ?? false;
   const userDetailRoute =
     currentUserId === initialUser.id
       ? `/api/user/details`

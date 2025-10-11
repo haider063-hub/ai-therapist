@@ -26,8 +26,6 @@ import Link from "next/link";
 import { SortableHeader } from "ui/sortable-header";
 import { getUserAvatar } from "lib/user/utils";
 import { useTranslations } from "next-intl";
-import { UserRoleBadges } from "@/components/user/user-detail/user-role-badges";
-import { UserStatusBadge } from "@/components/user/user-detail/user-status-badge";
 import { buildUserDetailUrl } from "@/lib/admin/navigation-utils";
 
 const DEFAULT_SORT_BY = "createdAt";
@@ -177,15 +175,12 @@ export function UsersTable({
             {t("clear")}
           </Link>
         )}
-        <div
-          className="text-sm text-muted-foreground"
-          data-testid="users-total-count"
-        >
+        <div className="text-sm text-white" data-testid="users-total-count">
           {t("totalCount", { count: total })}
         </div>
       </div>
 
-      <div className="rounded-lg border bg-card w-full overflow-x-auto">
+      <div className="rounded-lg border bg-white/95 backdrop-blur-sm shadow-lg w-full overflow-x-auto p-2">
         <Table data-testid="users-table" className="w-full">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -240,11 +235,11 @@ export function UsersTable({
                   onClick={() => handleRowClick(user.id)}
                   data-testid={`user-row-${user.id}`}
                 >
-                  <TableCell>
-                    <div className="flex items-center gap-3 px-2">
-                      <Avatar className="size-8 rounded-full bg-white">
+                  <TableCell className="py-4">
+                    <div className="flex items-center gap-3 px-3">
+                      <Avatar className="size-8 rounded-full bg-black border-2 border-gray-200">
                         <AvatarImage src={getUserAvatar(user)} />
-                        <AvatarFallback className="bg-white text-black text-base font-bold uppercase">
+                        <AvatarFallback className="bg-black text-white text-base uppercase">
                           {user.name?.charAt(0) || "U"}
                         </AvatarFallback>
                       </Avatar>
@@ -254,7 +249,7 @@ export function UsersTable({
                           {user.id === currentUserId && (
                             <Badge
                               variant="outline"
-                              className="text-xs"
+                              className="text-xs border-purple-300 bg-purple-50 text-purple-700 font-medium"
                               data-testid="current-user-badge"
                             >
                               {t("youBadge")}
@@ -267,24 +262,35 @@ export function UsersTable({
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <UserRoleBadges
-                      user={{ ...user }}
-                      showBanned={false}
-                      className="mt-0"
-                    />
+                  <TableCell className="py-4">
+                    <div className="flex flex-wrap gap-1">
+                      {user.role?.split(",").map((role) => (
+                        <Badge
+                          key={role}
+                          variant="outline"
+                          className="text-xs border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100"
+                        >
+                          {role}
+                        </Badge>
+                      ))}
+                    </div>
                   </TableCell>
-                  <TableCell>
-                    <UserStatusBadge
-                      user={{ ...user, lastLogin: user.lastLogin || null }}
-                      currentUserId={currentUserId}
-                      showClickable={false}
-                    />
+                  <TableCell className="py-4">
+                    <Badge
+                      variant="outline"
+                      className={`text-xs ${
+                        user.banned
+                          ? "border-red-300 bg-red-50 text-red-700 hover:bg-red-100"
+                          : "border-green-300 bg-green-50 text-green-700 hover:bg-green-100"
+                      }`}
+                    >
+                      {user.banned ? "Banned" : "Active"}
+                    </Badge>
                   </TableCell>
-                  <TableCell className="text-muted-foreground">
+                  <TableCell className="text-muted-foreground py-4">
                     {format(new Date(user.createdAt), "MMM d, yyyy")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-4">
                     <ChevronRight
                       className="h-4 w-4 text-muted-foreground"
                       data-testid="user-row-chevron"
@@ -297,11 +303,13 @@ export function UsersTable({
         </Table>
       </div>
 
-      <TablePagination
-        currentPage={page}
-        totalPages={totalPages}
-        buildUrl={buildUrl}
-      />
+      <div className="flex justify-center">
+        <TablePagination
+          currentPage={page}
+          totalPages={totalPages}
+          buildUrl={buildUrl}
+        />
+      </div>
     </div>
   );
 }
