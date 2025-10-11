@@ -26,8 +26,14 @@ export default async function HomePage() {
       redirect("/therapists");
     }
   } catch (error) {
+    // Check if it's a redirect error (which is normal Next.js behavior)
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      // Re-throw redirect errors to let Next.js handle them
+      throw error;
+    }
+
     console.error("Error checking therapist selection:", error);
-    // If error, default to therapists page for safety
+    // If it's a real error, default to therapists page for safety
     redirect("/therapists");
   }
 }
