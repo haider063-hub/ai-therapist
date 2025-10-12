@@ -4,7 +4,6 @@ import { generateUUID } from "lib/utils";
 import { customModelProvider } from "lib/ai/models";
 import { generateText } from "ai";
 import logger from "logger";
-import { eq } from "drizzle-orm";
 
 interface MoodAnalysisResult {
   moodScore: number; // 1-10

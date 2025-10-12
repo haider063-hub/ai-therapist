@@ -865,7 +865,7 @@ export default function VoiceChatPage() {
         )}
       </div>
       <div
-        className={`relative w-full p-6 flex ${isActive ? "flex-row" : "flex-col"} items-center justify-center gap-4 z-10`}
+        className={`relative w-full p-6 flex ${isActive ? "flex-row" : "flex-col"} items-center justify-start gap-4 z-10 pb-18`}
       >
         {/* Low Credits Warning Banner - Removed: Only show when credits are completely exhausted */}
 
@@ -891,7 +891,7 @@ export default function VoiceChatPage() {
 
         {/* Text above the button */}
         {!isActive && (
-          <p className="text-white text-lg mb-2 -mt-16">
+          <p className="text-white text-lg mb-2">
             {canUseVoice ? "Start voice chat?" : "Out of credits"}
           </p>
         )}
