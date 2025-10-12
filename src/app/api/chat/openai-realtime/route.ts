@@ -137,7 +137,7 @@ ${
   historyResult.isReturningUser &&
   historyResult.lastMessages &&
   historyResult.lastMessages.length > 0
-    ? `- This is a RETURNING user. Briefly reference their previous conversation topics: ${historyResult.lastMessages.join(", ")}`
+    ? `- This is a RETURNING user. Their last conversation was via ${historyResult.lastSessionType === "voice" ? "voice therapy" : "text chat"}. Briefly reference their previous conversation topics: ${historyResult.lastMessages.join(", ")}`
     : "- This is a NEW user. Welcome them warmly"
 }
 

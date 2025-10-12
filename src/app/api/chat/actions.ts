@@ -90,7 +90,7 @@ export async function deleteMessageAction(messageId: string) {
 }
 
 /**
- * Check if user has any previous chat history
+ * Check if user has any previous conversation history (both chat and voice)
  * Returns null if new user, or last messages if returning user
  * @param currentThreadId - The current thread ID to exclude from history check
  */
@@ -99,6 +99,7 @@ export async function checkUserHistoryAction(
 ): Promise<{
   isReturningUser: boolean;
   lastMessages?: string[];
+  lastSessionType?: "chat" | "voice";
 } | null> {
   const session = await getSession();
   if (!session?.user?.id) {
@@ -106,15 +107,16 @@ export async function checkUserHistoryAction(
   }
 
   try {
-    // Get all user threads
+    // Get all user threads (chat conversations)
     const allThreads = await chatRepository.selectThreadsByUserId(
       session.user.id,
     );
 
-    // Filter to find previous threads with actual messages
-    const previousThreadsWithMessages: Array<{
+    // Filter to find previous chat threads with actual messages
+    const previousChatThreadsWithMessages: Array<{
       thread: ChatThread & { lastMessageAt: number };
       messages: ChatMessage[];
+      sessionType: "chat";
     }> = [];
 
     for (const thread of allThreads) {
@@ -130,30 +132,72 @@ export async function checkUserHistoryAction(
       );
 
       if (userMessages.length > 0) {
-        previousThreadsWithMessages.push({
+        previousChatThreadsWithMessages.push({
           thread,
           messages: userMessages,
+          sessionType: "chat",
         });
       }
     }
 
-    if (previousThreadsWithMessages.length === 0) {
+    // Get voice conversation history from mood tracking
+    const voiceConversations =
+      await chatRepository.selectVoiceConversationsByUserId(session.user.id);
+
+    // Combine chat and voice conversations
+    const allConversations: Array<{
+      thread: ChatThread & { lastMessageAt: number };
+      messages: ChatMessage[];
+      sessionType: "chat" | "voice";
+      lastMessageTime: number;
+    }> = [];
+
+    // Add chat conversations
+    for (const chatConv of previousChatThreadsWithMessages) {
+      const lastMsgTime =
+        chatConv.messages[chatConv.messages.length - 1]?.createdAt?.getTime() ||
+        0;
+      allConversations.push({
+        ...chatConv,
+        lastMessageTime: lastMsgTime,
+      });
+    }
+
+    // Add voice conversations
+    for (const voiceConv of voiceConversations) {
+      const messages = await chatRepository.selectMessagesByThreadId(
+        voiceConv.threadId,
+      );
+      const userMessages = messages.filter(
+        (m) => m.role === "user" || m.role === "assistant",
+      );
+
+      if (userMessages.length > 0) {
+        const lastMsgTime =
+          userMessages[userMessages.length - 1]?.createdAt?.getTime() || 0;
+        allConversations.push({
+          thread: {
+            id: voiceConv.threadId,
+            lastMessageAt: lastMsgTime,
+          } as ChatThread & { lastMessageAt: number },
+          messages: userMessages,
+          sessionType: "voice",
+          lastMessageTime: lastMsgTime,
+        });
+      }
+    }
+
+    if (allConversations.length === 0) {
       return { isReturningUser: false };
     }
 
-    // Sort by most recent message and get the latest
-    previousThreadsWithMessages.sort((a, b) => {
-      const aLastMsg =
-        a.messages[a.messages.length - 1]?.createdAt?.getTime() || 0;
-      const bLastMsg =
-        b.messages[b.messages.length - 1]?.createdAt?.getTime() || 0;
-      return bLastMsg - aLastMsg;
-    });
+    // Sort by most recent message across both chat and voice
+    allConversations.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
 
-    const mostRecentPrevious = previousThreadsWithMessages[0];
+    const mostRecentConversation = allConversations[0];
 
     // Get last 2-3 user messages for better context
-    const userMessages = mostRecentPrevious.messages
+    const userMessages = mostRecentConversation.messages
       .filter((m) => m.role === "user")
       .slice(-3)
       .map((m) => {
@@ -165,6 +209,7 @@ export async function checkUserHistoryAction(
     return {
       isReturningUser: userMessages.length > 0,
       lastMessages: userMessages,
+      lastSessionType: mostRecentConversation.sessionType,
     };
   } catch (error) {
     logger.error("Error checking user history:", error);
@@ -292,6 +337,7 @@ function validateGreetingReferencesLastChat(
  */
 export async function generateReturningUserHeaderGreetingAction(
   lastMessages: string[],
+  lastSessionType?: "chat" | "voice",
 ): Promise<string> {
   const session = await getSession();
   if (!session) {
@@ -309,6 +355,11 @@ export async function generateReturningUserHeaderGreetingAction(
     return generateNewUserHeaderGreetingAction();
   }
 
+  const sessionTypeContext =
+    lastSessionType === "voice"
+      ? "Their last conversation was via voice therapy"
+      : "Their last conversation was via text chat";
+
   const systemPrompt = `You are Econest, a professional AI therapist.
 Generate a warm, empathetic greeting for a returning user.
 
@@ -319,6 +370,7 @@ CRITICAL REQUIREMENTS:
 4. MUST use phrases like "last time", "we discussed", "you shared", "you mentioned"
 5. Keep tone warm, supportive, and professional
 6. DO NOT be vague - reference the actual topic briefly
+7. ${sessionTypeContext}
 
 COMMUNICATION STYLE:
 - Keep responses SHORT and SIMPLE - never give long ChatGPT-style responses

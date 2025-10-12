@@ -1,5 +1,10 @@
 import { pgDb } from "../db.pg";
-import { ChatThreadSchema, ChatMessageSchema, UserSchema } from "../schema.pg";
+import {
+  ChatThreadSchema,
+  ChatMessageSchema,
+  UserSchema,
+  MoodTrackingSchema,
+} from "../schema.pg";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 import type { ChatThread, ChatMessage } from "app-types/chat";
 import { UIMessage } from "ai";
@@ -371,5 +376,37 @@ export const pgChatRepository = {
         updatedAt: new Date(),
       })
       .where(eq(UserSchema.id, userId));
+  },
+
+  async selectVoiceConversationsByUserId(
+    userId: string,
+  ): Promise<Array<{ threadId: string; createdAt: Date }>> {
+    const voiceConversations = await pgDb
+      .select({
+        threadId: MoodTrackingSchema.threadId,
+        createdAt: MoodTrackingSchema.createdAt,
+      })
+      .from(MoodTrackingSchema)
+      .where(
+        and(
+          eq(MoodTrackingSchema.userId, userId),
+          eq(MoodTrackingSchema.sessionType, "voice"),
+          sql`${MoodTrackingSchema.threadId} IS NOT NULL`,
+        ),
+      )
+      .orderBy(desc(MoodTrackingSchema.createdAt));
+
+    // Remove duplicates and return unique thread IDs with their latest creation time
+    const uniqueThreads = new Map<string, Date>();
+    for (const conv of voiceConversations) {
+      if (conv.threadId && !uniqueThreads.has(conv.threadId)) {
+        uniqueThreads.set(conv.threadId, conv.createdAt);
+      }
+    }
+
+    return Array.from(uniqueThreads.entries()).map(([threadId, createdAt]) => ({
+      threadId,
+      createdAt,
+    }));
   },
 };

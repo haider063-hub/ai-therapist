@@ -156,6 +156,15 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
       prepareSendMessagesRequest: ({ messages, body, id }) => {
         const lastMessage = messages.at(-1)!;
 
+        // Validate threadId before sending
+        if (!threadId || threadId.trim() === "") {
+          console.error(
+            "ChatBot - Empty threadId detected, generating new one",
+          );
+          const newThreadId = generateUUID();
+          console.log("ChatBot - Generated new threadId:", newThreadId);
+        }
+
         // Debug logging to track thread ID issues
         console.log("ChatBot - prepareSendMessagesRequest:", {
           threadIdProp: threadId,
@@ -165,7 +174,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
 
         const requestBody: ChatApiSchemaRequestBody = {
           ...body,
-          id: threadId, // Use the threadId prop instead of the id from useChat
+          id: threadId || generateUUID(), // Use the threadId prop, fallback to new UUID if empty
           chatModel:
             (body as { model: ChatModel })?.model ?? latestRef.current.model,
           toolChoice: latestRef.current.toolChoice,
@@ -364,9 +373,6 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
               ref={containerRef}
               onScroll={handleScroll}
             >
-              {/* Spacer div to prevent messages from going behind the header */}
-              <div className="h-16 flex-shrink-0" />
-
               {messages.map((message, index) => {
                 const isLastMessage = messages.length - 1 === index;
                 return (

@@ -47,6 +47,7 @@ export const ChatGreeting = ({ threadId }: ChatGreetingProps) => {
           // Returning user with previous conversation - ALWAYS reference it
           greetingText = await generateReturningUserHeaderGreetingAction(
             historyResult.lastMessages,
+            historyResult.lastSessionType,
           );
         } else {
           // True first-time user - generate introductory greeting
