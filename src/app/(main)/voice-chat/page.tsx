@@ -409,6 +409,51 @@ export default function VoiceChatPage() {
     }
   }, [isActive]);
 
+  // Track session end when session becomes inactive (for mood tracking)
+  useEffect(() => {
+    if (!isActive && messages.length > 0 && currentThreadId) {
+      console.log("🔄 Session became inactive, tracking for mood analysis");
+
+      // Extract conversation messages for mood tracking
+      const conversationMessages = messages
+        .map((m) => {
+          const textPart = m.parts.find((p) => p.type === "text");
+          return {
+            role: m.role,
+            content: textPart ? (textPart as any).text || "" : "",
+          };
+        })
+        .filter((m) => m.content.trim().length > 0);
+
+      // Send session end for mood tracking (non-blocking)
+      fetch("/api/chat/voice-session-end", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          threadId: currentThreadId,
+          messages: conversationMessages,
+          userAudioDuration: 0, // Credits already deducted in real-time
+          botAudioDuration: 0, // Credits already deducted in real-time
+        }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            console.log("✅ Voice session end tracked successfully");
+          } else {
+            console.error(
+              "❌ Failed to track voice session end:",
+              response.status,
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("❌ Error tracking voice session end:", error);
+        });
+    }
+  }, [isActive, messages, currentThreadId]);
+
   // Handle session cleanup when user closes window/tab or navigates away
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {

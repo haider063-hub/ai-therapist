@@ -232,6 +232,56 @@ export function ChatBotVoice() {
     }
   }, [voiceChat.isOpen, isActive, stop]);
 
+  // Track session end when voice chat becomes inactive (for mood tracking)
+  useEffect(() => {
+    if (!isActive && messages.length > 0 && currentThreadId) {
+      console.log("🔄 Voice chat became inactive, tracking for mood analysis");
+
+      // Extract conversation messages for mood tracking
+      const conversationMessages = messages
+        .map((m) => {
+          const textPart = m.parts.find((p) => p.type === "text");
+          return {
+            role: m.role,
+            content: textPart ? (textPart as any).text || "" : "",
+          };
+        })
+        .filter((m) => m.content.trim().length > 0);
+
+      // Send session end for mood tracking (non-blocking)
+      fetch("/api/chat/voice-session-end", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          threadId: currentThreadId,
+          messages: conversationMessages,
+          userAudioDuration: 0,
+          botAudioDuration: 0,
+        }),
+      })
+        .then((response) => {
+          if (response.ok) {
+            console.log(
+              "✅ Voice session end tracked successfully from chat-bot-voice",
+            );
+          } else {
+            console.error(
+              "❌ Failed to track voice session end from chat-bot-voice:",
+              response.status,
+            );
+          }
+        })
+        .catch((error) => {
+          console.error(
+            "❌ Error tracking voice session end from chat-bot-voice:",
+            error,
+          );
+        });
+    }
+  }, [isActive, messages, currentThreadId]);
+
   useEffect(() => {
     if (error && isActive) {
       toast.error(error.message);
