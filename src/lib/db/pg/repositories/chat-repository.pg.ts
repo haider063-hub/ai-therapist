@@ -380,11 +380,18 @@ export const pgChatRepository = {
 
   async selectVoiceConversationsByUserId(
     userId: string,
-  ): Promise<Array<{ threadId: string; lastMessageTime: number }>> {
-    // Get voice conversation thread IDs from mood tracking
-    const voiceThreadIds = await pgDb
+  ): Promise<
+    Array<{ threadId: string; lastMessageTime: number; notes?: string }>
+  > {
+    console.log(`=== DATABASE QUERY: selectVoiceConversationsByUserId ===`);
+    console.log(`Querying for userId: ${userId}`);
+
+    // Get voice conversations directly from mood tracking with their timestamps
+    const voiceConversations = await pgDb
       .select({
         threadId: MoodTrackingSchema.threadId,
+        createdAt: MoodTrackingSchema.createdAt,
+        notes: MoodTrackingSchema.notes,
       })
       .from(MoodTrackingSchema)
       .where(
@@ -394,36 +401,54 @@ export const pgChatRepository = {
           sql`${MoodTrackingSchema.threadId} IS NOT NULL`,
         ),
       )
-      .groupBy(MoodTrackingSchema.threadId);
+      .orderBy(desc(MoodTrackingSchema.createdAt));
 
-    // For each voice thread, get the actual last message timestamp
-    const voiceConversationsWithTimestamps: Array<{
-      threadId: string;
-      lastMessageTime: number;
-    }> = [];
-    for (const { threadId } of voiceThreadIds) {
-      if (threadId) {
-        const messages = await pgDb
-          .select({
-            createdAt: ChatMessageSchema.createdAt,
-          })
-          .from(ChatMessageSchema)
-          .where(eq(ChatMessageSchema.threadId, threadId))
-          .orderBy(desc(ChatMessageSchema.createdAt))
-          .limit(1);
+    console.log(
+      `Raw voice conversations from DB: ${voiceConversations.length}`,
+    );
+    voiceConversations.forEach((conv, index) => {
+      console.log(
+        `Raw ${index + 1}: threadId=${conv.threadId}, createdAt=${conv.createdAt?.toISOString()}, notes="${conv.notes?.substring(0, 30)}..."`,
+      );
+    });
 
-        if (messages.length > 0) {
-          voiceConversationsWithTimestamps.push({
-            threadId,
-            lastMessageTime: messages[0].createdAt.getTime(),
-          });
-        }
+    // Group by threadId and get the most recent entry for each thread
+    const threadMap = new Map<
+      string,
+      { threadId: string; lastMessageTime: number; notes?: string }
+    >();
+
+    console.log(
+      `Processing ${voiceConversations.length} voice conversations...`,
+    );
+    for (const voiceConv of voiceConversations) {
+      if (voiceConv.threadId && !threadMap.has(voiceConv.threadId)) {
+        const lastMessageTime = voiceConv.createdAt.getTime();
+        console.log(
+          `Adding to map: threadId=${voiceConv.threadId}, lastMessageTime=${lastMessageTime}, notes="${voiceConv.notes?.substring(0, 30)}..."`,
+        );
+        threadMap.set(voiceConv.threadId, {
+          threadId: voiceConv.threadId,
+          lastMessageTime: lastMessageTime,
+          notes: voiceConv.notes || undefined,
+        });
+      } else if (voiceConv.threadId) {
+        console.log(`Skipping duplicate threadId: ${voiceConv.threadId}`);
       }
     }
 
-    // Sort by most recent message time
-    return voiceConversationsWithTimestamps.sort(
+    const result = Array.from(threadMap.values()).sort(
       (a, b) => b.lastMessageTime - a.lastMessageTime,
     );
+
+    console.log(`Final result: ${result.length} unique voice conversations`);
+    result.forEach((conv, index) => {
+      const timestamp = new Date(conv.lastMessageTime);
+      console.log(
+        `Result ${index + 1}: threadId=${conv.threadId}, lastMessageTime=${conv.lastMessageTime} (${timestamp.toISOString()})`,
+      );
+    });
+
+    return result;
   },
 };

@@ -60,9 +60,27 @@ export async function POST(request: NextRequest) {
       Array.isArray(messages) &&
       messages.length > 0
     ) {
+      console.log("=== VOICE SESSION END - MOOD TRACKING ===");
+      console.log(`User ID: ${session.user.id}`);
+      console.log(`Thread ID: ${threadId}`);
+      console.log(`Messages count: ${messages.length}`);
+      console.log(`Session type: voice`);
+
       moodTrackingService
         .trackConversationMood(session.user.id, threadId, messages, "voice")
-        .catch((err) => logger.error("Voice mood tracking failed:", err));
+        .then(() => {
+          console.log("Voice mood tracking completed successfully");
+        })
+        .catch((err) => {
+          console.error("Voice mood tracking failed:", err);
+          logger.error("Voice mood tracking failed:", err);
+        });
+    } else {
+      console.log("=== VOICE SESSION END - NO MOOD TRACKING ===");
+      console.log(`Thread ID: ${threadId}`);
+      console.log(`Messages: ${messages}`);
+      console.log(`Messages is array: ${Array.isArray(messages)}`);
+      console.log(`Messages length: ${messages?.length || 0}`);
     }
 
     return NextResponse.json({ success: true });

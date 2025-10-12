@@ -82,6 +82,14 @@ Return ONLY valid JSON in this format:
     try {
       const today = new Date().toISOString().split("T")[0];
 
+      console.log("=== SAVING MOOD TRACKING ===");
+      console.log(`User ID: ${userId}`);
+      console.log(`Thread ID: ${threadId}`);
+      console.log(`Session Type: ${sessionType}`);
+      console.log(`Mood Score: ${moodAnalysis.moodScore}`);
+      console.log(`Sentiment: ${moodAnalysis.sentiment}`);
+      console.log(`Notes: ${moodAnalysis.notes?.substring(0, 100)}...`);
+
       await pgDb.insert(MoodTrackingSchema).values({
         id: generateUUID(),
         userId,
@@ -94,10 +102,12 @@ Return ONLY valid JSON in this format:
         createdAt: new Date(),
       });
 
+      console.log("Mood tracking saved successfully to database");
       logger.info(
         `Mood tracked for user ${userId}: ${moodAnalysis.moodScore}/10 (${moodAnalysis.sentiment})`,
       );
     } catch (error) {
+      console.error("Error saving mood tracking:", error);
       logger.error("Error saving mood tracking:", error);
       // Don't throw - mood tracking should not break the main flow
     }
@@ -113,28 +123,45 @@ Return ONLY valid JSON in this format:
     sessionType: "chat" | "voice",
   ): Promise<void> {
     try {
+      console.log("=== TRACKING CONVERSATION MOOD ===");
+      console.log(`User ID: ${userId}`);
+      console.log(`Thread ID: ${threadId}`);
+      console.log(`Session Type: ${sessionType}`);
+      console.log(`Total messages: ${messages.length}`);
+
       // Extract user messages for mood analysis
       const userMessages = messages
         .filter((m) => m.role === "user")
         .map((m) => m.content)
         .filter((content) => content && content.trim().length > 0);
 
+      console.log(`User messages extracted: ${userMessages.length}`);
+      userMessages.forEach((msg, index) => {
+        console.log(`User message ${index + 1}: "${msg.substring(0, 50)}..."`);
+      });
+
       if (userMessages.length === 0) {
+        console.log("No user messages to analyze - returning");
         return; // No user messages to analyze
       }
 
       // Analyze the mood
+      console.log("Analyzing mood...");
       const moodAnalysis = await this.analyzeMood(userMessages);
 
       if (moodAnalysis) {
+        console.log("Mood analysis successful, saving...");
         await this.saveMoodTracking(
           userId,
           threadId,
           sessionType,
           moodAnalysis,
         );
+      } else {
+        console.log("Mood analysis failed - no analysis returned");
       }
     } catch (error) {
+      console.error("Error tracking conversation mood:", error);
       logger.error("Error tracking conversation mood:", error);
       // Don't throw - mood tracking should not break the main flow
     }

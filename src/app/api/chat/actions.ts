@@ -144,6 +144,15 @@ export async function checkUserHistoryAction(
     const voiceConversations =
       await chatRepository.selectVoiceConversationsByUserId(session.user.id);
 
+    console.log("=== VOICE CONVERSATION DEBUG ===");
+    console.log(`User ID: ${session.user.id}`);
+    console.log(`Voice conversations found: ${voiceConversations.length}`);
+    voiceConversations.forEach((voiceConv, index) => {
+      console.log(
+        `Voice ${index + 1}: threadId=${voiceConv.threadId}, lastMessageTime=${voiceConv.lastMessageTime}, notes="${voiceConv.notes?.substring(0, 50)}..."`,
+      );
+    });
+
     // Combine chat and voice conversations
     const allConversations: Array<{
       thread: ChatThread & { lastMessageAt: number };
@@ -153,12 +162,11 @@ export async function checkUserHistoryAction(
     }> = [];
 
     // Add chat conversations
+    console.log("=== CHAT CONVERSATIONS DEBUG ===");
+    console.log(
+      `Chat conversations found: ${previousChatThreadsWithMessages.length}`,
+    );
     for (const chatConv of previousChatThreadsWithMessages) {
-      // Debug: Check what lastMessageAt contains
-      console.log(
-        `Chat thread ${chatConv.thread.id}: lastMessageAt = ${chatConv.thread.lastMessageAt}`,
-      );
-
       // If lastMessageAt is 0 (Unix epoch), calculate from actual messages
       let lastMessageTime = chatConv.thread.lastMessageAt;
       if (lastMessageTime === 0 && chatConv.messages.length > 0) {
@@ -168,10 +176,11 @@ export async function checkUserHistoryAction(
             (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0),
         );
         lastMessageTime = sortedMessages[0]?.createdAt?.getTime() || 0;
-        console.log(
-          `Chat thread ${chatConv.thread.id}: calculated lastMessageTime = ${lastMessageTime}`,
-        );
       }
+
+      console.log(
+        `Chat thread ${chatConv.thread.id}: lastMessageTime=${lastMessageTime}, messages=${chatConv.messages.length}`,
+      );
 
       allConversations.push({
         ...chatConv,
@@ -179,26 +188,44 @@ export async function checkUserHistoryAction(
       });
     }
 
-    // Add voice conversations (already sorted by most recent message time)
+    // Add voice conversations (they don't have individual messages, use mood tracking data)
+    console.log("=== ADDING VOICE CONVERSATIONS ===");
     for (const voiceConv of voiceConversations) {
-      const messages = await chatRepository.selectMessagesByThreadId(
-        voiceConv.threadId,
-      );
-      const userMessages = messages.filter(
-        (m) => m.role === "user" || m.role === "assistant",
+      // For voice conversations, we don't have individual messages stored
+      // Instead, we use the mood tracking notes as a proxy for conversation content
+      const mockMessages: ChatMessage[] = [];
+
+      if (voiceConv.notes) {
+        // Create a mock user message from the mood tracking notes
+        mockMessages.push({
+          id: `voice-${voiceConv.threadId}`,
+          threadId: voiceConv.threadId,
+          role: "user",
+          parts: [
+            {
+              type: "text",
+              text: voiceConv.notes.substring(0, 100) + "...", // Truncate for context
+            },
+          ],
+          createdAt: new Date(voiceConv.lastMessageTime),
+          updatedAt: new Date(voiceConv.lastMessageTime),
+          metadata: {},
+        } as ChatMessage);
+      }
+
+      console.log(
+        `Adding voice conversation: threadId=${voiceConv.threadId}, lastMessageTime=${voiceConv.lastMessageTime}, hasNotes=${!!voiceConv.notes}`,
       );
 
-      if (userMessages.length > 0) {
-        allConversations.push({
-          thread: {
-            id: voiceConv.threadId,
-            lastMessageAt: voiceConv.lastMessageTime,
-          } as ChatThread & { lastMessageAt: number },
-          messages: userMessages,
-          sessionType: "voice",
-          lastMessageTime: voiceConv.lastMessageTime,
-        });
-      }
+      allConversations.push({
+        thread: {
+          id: voiceConv.threadId,
+          lastMessageAt: voiceConv.lastMessageTime,
+        } as ChatThread & { lastMessageAt: number },
+        messages: mockMessages,
+        sessionType: "voice",
+        lastMessageTime: voiceConv.lastMessageTime,
+      });
     }
 
     if (allConversations.length === 0) {
@@ -208,26 +235,23 @@ export async function checkUserHistoryAction(
     // Sort by most recent message across both chat and voice
     allConversations.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
 
-    // Debug logging to track conversation ordering
-    console.log("checkUserHistoryAction - Conversation timeline:");
-    console.log(`Total conversations found: ${allConversations.length}`);
+    console.log("=== FINAL SORTED CONVERSATIONS ===");
+    console.log(
+      `Total conversations after sorting: ${allConversations.length}`,
+    );
     allConversations.slice(0, 5).forEach((conv, index) => {
-      const lastUserMessage = conv.messages
-        .filter((m) => m.role === "user")
-        .slice(-1)[0];
-      const messageText =
-        lastUserMessage?.parts
-          .find((p) => p.type === "text")
-          ?.text?.substring(0, 50) || "No text";
-
-      // Also log the actual timestamp for debugging
       const timestamp = new Date(conv.lastMessageTime);
       console.log(
-        `${index + 1}. ${conv.sessionType} - ${timestamp.toISOString()} (${conv.lastMessageTime}) - "${messageText}..."`,
+        `${index + 1}. ${conv.sessionType} - ${timestamp.toISOString()} (${conv.lastMessageTime}) - threadId: ${conv.thread.id}`,
       );
     });
 
     const mostRecentConversation = allConversations[0];
+    console.log(`=== MOST RECENT CONVERSATION ===`);
+    console.log(`Session type: ${mostRecentConversation.sessionType}`);
+    console.log(`Thread ID: ${mostRecentConversation.thread.id}`);
+    console.log(`Last message time: ${mostRecentConversation.lastMessageTime}`);
+    console.log(`Messages count: ${mostRecentConversation.messages.length}`);
 
     // Get last 2-3 user messages for better context
     const userMessages = mostRecentConversation.messages
