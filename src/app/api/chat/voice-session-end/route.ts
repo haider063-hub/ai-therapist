@@ -12,13 +12,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { threadId, messages, userAudioDuration, botAudioDuration } =
-      await request.json().catch(() => ({
+    console.log("=== VOICE SESSION END API CALLED ===");
+    console.log("Request method:", request.method);
+    console.log(
+      "Request headers:",
+      Object.fromEntries(request.headers.entries()),
+    );
+
+    let requestBody;
+    try {
+      requestBody = await request.json();
+      console.log("Request body parsed successfully:", requestBody);
+    } catch (parseError) {
+      console.error("Failed to parse request body:", parseError);
+      console.log("Raw request body:", await request.text());
+      requestBody = {
         threadId: null,
         messages: null,
         userAudioDuration: 0,
         botAudioDuration: 0,
-      }));
+      };
+    }
+
+    const { threadId, messages, userAudioDuration, botAudioDuration } =
+      requestBody;
+    console.log("=== EXTRACTED PARAMETERS ===");
+    console.log("Thread ID:", threadId);
+    console.log("Messages:", messages);
+    console.log("User Audio Duration:", userAudioDuration);
+    console.log("Bot Audio Duration:", botAudioDuration);
 
     // Deduct credits based on actual audio duration if provided
     if (userAudioDuration > 0 || botAudioDuration > 0) {
@@ -67,7 +89,13 @@ export async function POST(request: NextRequest) {
       console.log(`Session type: voice`);
 
       moodTrackingService
-        .trackConversationMood(session.user.id, threadId, messages, "voice")
+        .trackConversationMood(
+          session.user.id,
+          threadId,
+          messages,
+          "voice",
+          new Date(),
+        )
         .then(() => {
           console.log("Voice mood tracking completed successfully");
         })

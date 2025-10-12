@@ -471,6 +471,7 @@ You are now analyzing an image that the user has uploaded. Please:
               thread!.id,
               conversationMessages,
               "chat",
+              new Date(),
             )
             .catch((err) => logger.error("Mood tracking failed:", err));
         } catch (error) {

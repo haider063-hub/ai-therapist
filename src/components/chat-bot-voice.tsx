@@ -28,12 +28,12 @@ import { useShallow } from "zustand/shallow";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { fetcher } from "lib/utils";
+import { fetcher, generateUUID } from "lib/utils";
 
 export function ChatBotVoice() {
   const t = useTranslations("Chat");
   const router = useRouter();
-  const [appStoreMutate, voiceChat, currentThreadId] = appStore(
+  const [appStoreMutate, voiceChat, _currentThreadId] = appStore(
     useShallow((state) => [
       state.mutate,
       state.voiceChat,
@@ -45,6 +45,9 @@ export function ChatBotVoice() {
 
   const [isClosing, setIsClosing] = useState(false);
   const startAudio = useRef<HTMLAudioElement>(null);
+
+  // Generate and maintain a voice-specific thread ID
+  const [voiceThreadId, setVoiceThreadId] = useState<string | null>(null);
 
   // Fetch credit status
   const { data: creditStatus, mutate: mutateCredits } = useSWR(
@@ -97,7 +100,7 @@ export function ChatBotVoice() {
     stopListening,
   } = OpenAIVoiceChat({
     toolMentions,
-    currentThreadId: currentThreadId || undefined,
+    currentThreadId: voiceThreadId || undefined,
     selectedTherapist,
     ...voiceChat.options.providerOptions,
   });
@@ -106,43 +109,27 @@ export function ChatBotVoice() {
     if (!startAudio.current) {
       startAudio.current = new Audio("/sounds/start_voice.ogg");
     }
+
+    // Generate a new voice thread ID if we don't have one
+    if (!voiceThreadId) {
+      const newVoiceThreadId = generateUUID();
+      setVoiceThreadId(newVoiceThreadId);
+      console.log(
+        "🎤 Generated new voice thread ID for chat-bot-voice:",
+        newVoiceThreadId,
+      );
+    }
+
     start().then(() => {
       startAudio.current?.play().catch(() => {});
     });
-  }, [start]);
+  }, [start, voiceThreadId]);
 
   const endVoiceChat = useCallback(async () => {
     setIsClosing(true);
     await safe(() => stop());
 
-    // Track voice session end if there were any messages
-    if (messages.length > 0) {
-      try {
-        // Extract conversation messages for mood tracking
-        const conversationMessages = messages
-          .map((m) => {
-            const textPart = m.parts.find((p) => p.type === "text");
-            return {
-              role: m.role,
-              content: textPart ? (textPart as any).text || "" : "",
-            };
-          })
-          .filter((m) => m.content.trim().length > 0);
-
-        await fetch("/api/chat/voice-session-end", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            threadId: currentThreadId,
-            messages: conversationMessages,
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to track voice session:", error);
-      }
-    }
+    // Note: Session end tracking is handled by the main voice-chat page to avoid duplicate calls
 
     setIsClosing(false);
     appStoreMutate({
@@ -151,7 +138,7 @@ export function ChatBotVoice() {
         isOpen: false,
       },
     });
-  }, [stop, appStoreMutate, voiceChat, messages, currentThreadId]);
+  }, [stop, appStoreMutate, voiceChat]);
 
   const handleBackButton = useCallback(() => {
     if (!isActive) {
@@ -232,55 +219,7 @@ export function ChatBotVoice() {
     }
   }, [voiceChat.isOpen, isActive, stop]);
 
-  // Track session end when voice chat becomes inactive (for mood tracking)
-  useEffect(() => {
-    if (!isActive && messages.length > 0 && currentThreadId) {
-      console.log("🔄 Voice chat became inactive, tracking for mood analysis");
-
-      // Extract conversation messages for mood tracking
-      const conversationMessages = messages
-        .map((m) => {
-          const textPart = m.parts.find((p) => p.type === "text");
-          return {
-            role: m.role,
-            content: textPart ? (textPart as any).text || "" : "",
-          };
-        })
-        .filter((m) => m.content.trim().length > 0);
-
-      // Send session end for mood tracking (non-blocking)
-      fetch("/api/chat/voice-session-end", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          threadId: currentThreadId,
-          messages: conversationMessages,
-          userAudioDuration: 0,
-          botAudioDuration: 0,
-        }),
-      })
-        .then((response) => {
-          if (response.ok) {
-            console.log(
-              "✅ Voice session end tracked successfully from chat-bot-voice",
-            );
-          } else {
-            console.error(
-              "❌ Failed to track voice session end from chat-bot-voice:",
-              response.status,
-            );
-          }
-        })
-        .catch((error) => {
-          console.error(
-            "❌ Error tracking voice session end from chat-bot-voice:",
-            error,
-          );
-        });
-    }
-  }, [isActive, messages, currentThreadId]);
+  // Note: Session end tracking is handled by the main voice-chat page to avoid duplicate calls
 
   useEffect(() => {
     if (error && isActive) {
@@ -290,36 +229,7 @@ export function ChatBotVoice() {
   }, [error]);
 
   // Handle session cleanup when user closes window/tab or navigates away
-  useEffect(() => {
-    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
-      if (isActive && messages.length > 0) {
-        // End the session and deduct credits
-        e.preventDefault();
-
-        // Extract conversation messages for mood tracking
-        const conversationMessages = messages
-          .map((m) => {
-            const textPart = m.parts.find((p) => p.type === "text");
-            return {
-              role: m.role,
-              content: textPart ? (textPart as any).text || "" : "",
-            };
-          })
-          .filter((m) => m.content.trim().length > 0);
-
-        // Use sendBeacon for reliable request on page unload
-        const data = JSON.stringify({
-          threadId: currentThreadId,
-          messages: conversationMessages,
-        });
-
-        navigator.sendBeacon("/api/chat/voice-session-end", data);
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [isActive, messages, currentThreadId]);
+  // Note: beforeunload handler is managed by the main voice-chat page to avoid duplicate calls
 
   return (
     <>

@@ -34,7 +34,7 @@ import { useShallow } from "zustand/shallow";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import useSWR from "swr";
-import { fetcher } from "lib/utils";
+import { fetcher, generateUUID } from "lib/utils";
 
 export default function VoiceChatPage() {
   const t = useTranslations("Chat");
@@ -51,6 +51,9 @@ export default function VoiceChatPage() {
   const sessionStartTime = useRef<number | null>(null);
   const lastCreditDeductionTime = useRef<number | null>(null);
   const creditDeductionInterval = useRef<NodeJS.Timeout | null>(null);
+
+  // Generate and maintain a voice-specific thread ID
+  const [voiceThreadId, setVoiceThreadId] = useState<string | null>(null);
 
   // Credit checking state
   const [canUseVoice, setCanUseVoice] = useState(true);
@@ -236,7 +239,7 @@ export default function VoiceChatPage() {
     stopListening,
   } = OpenAIVoiceChat({
     toolMentions,
-    currentThreadId: currentThreadId || undefined,
+    currentThreadId: voiceThreadId || undefined,
     selectedTherapist,
     selectedLanguage, // Pass selected language for initial greeting
     ...voiceChat.options.providerOptions,
@@ -246,15 +249,55 @@ export default function VoiceChatPage() {
     if (!startAudio.current) {
       startAudio.current = new Audio("/sounds/start_voice.ogg");
     }
+
+    // Generate a new voice thread ID if we don't have one
+    if (!voiceThreadId) {
+      const newVoiceThreadId = generateUUID();
+      setVoiceThreadId(newVoiceThreadId);
+      console.log("🎤 Generated new voice thread ID:", newVoiceThreadId);
+    }
+
     start().then(() => {
       startAudio.current?.play().catch(() => {});
     });
-  }, [start]);
+  }, [start, voiceThreadId]);
 
   // Track session start and setup credit deduction when session becomes active
+  // Log when messages change
+  useEffect(() => {
+    console.log("📝 Messages updated:", {
+      messageCount: messages.length,
+      threadId: voiceThreadId,
+      isActive,
+    });
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      const textPart = lastMessage.parts.find((p) => p.type === "text");
+      console.log("📝 Last message:", {
+        role: lastMessage.role,
+        content: textPart
+          ? (textPart as any).text?.substring(0, 50) + "..."
+          : "No text",
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }, [messages, voiceThreadId, isActive]);
+
   useEffect(() => {
     if (isActive && !sessionStartTime.current) {
       console.log("✅ Voice session active, starting credit tracking...");
+
+      // Generate a new voice thread ID if we don't have one
+      if (!voiceThreadId) {
+        const newVoiceThreadId = generateUUID();
+        setVoiceThreadId(newVoiceThreadId);
+        console.log("🎤 Generated new voice thread ID:", newVoiceThreadId);
+      }
+
+      console.log("🎤 Voice session started:", {
+        threadId: voiceThreadId,
+        timestamp: new Date().toISOString(),
+      });
       // Start tracking session time
       sessionStartTime.current = Date.now();
       lastCreditDeductionTime.current = Date.now();
@@ -318,7 +361,7 @@ export default function VoiceChatPage() {
       sessionStartTime.current = null;
       lastCreditDeductionTime.current = null;
     }
-  }, [isActive, currentThreadId]);
+  }, [isActive, voiceThreadId]);
 
   const endVoiceChat = useCallback(async () => {
     setIsClosing(true);
@@ -344,7 +387,7 @@ export default function VoiceChatPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            threadId: currentThreadId,
+            threadId: voiceThreadId,
             userAudioDuration: remainingSeconds / 2,
             botAudioDuration: remainingSeconds / 2,
           }),
@@ -375,7 +418,7 @@ export default function VoiceChatPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            threadId: currentThreadId,
+            threadId: voiceThreadId,
             messages: conversationMessages,
             userAudioDuration: 0, // Credits already deducted in real-time
             botAudioDuration: 0, // Credits already deducted in real-time
@@ -399,7 +442,7 @@ export default function VoiceChatPage() {
 
     setIsClosing(false);
     router.push("/");
-  }, [stop, router, messages, currentThreadId]);
+  }, [stop, router, messages, voiceThreadId]);
 
   // Cleanup interval when session ends
   useEffect(() => {
@@ -411,7 +454,13 @@ export default function VoiceChatPage() {
 
   // Track session end when session becomes inactive (for mood tracking)
   useEffect(() => {
-    if (!isActive && messages.length > 0 && currentThreadId) {
+    console.log("🔍 Session state check:", {
+      isActive,
+      messagesLength: messages.length,
+      voiceThreadId,
+    });
+
+    if (!isActive && messages.length > 0 && voiceThreadId) {
       console.log("🔄 Session became inactive, tracking for mood analysis");
 
       // Extract conversation messages for mood tracking
@@ -426,17 +475,22 @@ export default function VoiceChatPage() {
         .filter((m) => m.content.trim().length > 0);
 
       // Send session end for mood tracking (non-blocking)
+      const requestData = {
+        threadId: voiceThreadId,
+        messages: conversationMessages,
+        userAudioDuration: 0, // Credits already deducted in real-time
+        botAudioDuration: 0, // Credits already deducted in real-time
+      };
+
+      console.log("=== SENDING VOICE SESSION END REQUEST ===");
+      console.log("Request data:", JSON.stringify(requestData, null, 2));
+
       fetch("/api/chat/voice-session-end", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          threadId: currentThreadId,
-          messages: conversationMessages,
-          userAudioDuration: 0, // Credits already deducted in real-time
-          botAudioDuration: 0, // Credits already deducted in real-time
-        }),
+        body: JSON.stringify(requestData),
       })
         .then((response) => {
           if (response.ok) {
@@ -452,7 +506,7 @@ export default function VoiceChatPage() {
           console.error("❌ Error tracking voice session end:", error);
         });
     }
-  }, [isActive, messages, currentThreadId]);
+  }, [isActive, messages, voiceThreadId]);
 
   // Handle session cleanup when user closes window/tab or navigates away
   useEffect(() => {

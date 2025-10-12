@@ -4,6 +4,7 @@ import { generateUUID } from "lib/utils";
 import { customModelProvider } from "lib/ai/models";
 import { generateText } from "ai";
 import logger from "logger";
+import { eq } from "drizzle-orm";
 
 interface MoodAnalysisResult {
   moodScore: number; // 1-10
@@ -78,6 +79,7 @@ Return ONLY valid JSON in this format:
     threadId: string,
     sessionType: "chat" | "voice",
     moodAnalysis: MoodAnalysisResult,
+    conversationEndTime?: Date,
   ): Promise<void> {
     try {
       const today = new Date().toISOString().split("T")[0];
@@ -90,7 +92,7 @@ Return ONLY valid JSON in this format:
       console.log(`Sentiment: ${moodAnalysis.sentiment}`);
       console.log(`Notes: ${moodAnalysis.notes?.substring(0, 100)}...`);
 
-      await pgDb.insert(MoodTrackingSchema).values({
+      const moodTrackingData = {
         id: generateUUID(),
         userId,
         date: today,
@@ -99,8 +101,26 @@ Return ONLY valid JSON in this format:
         threadId,
         sessionType,
         notes: moodAnalysis.notes || null,
-        createdAt: new Date(),
-      });
+        createdAt: conversationEndTime || new Date(),
+      };
+
+      console.log("=== DATABASE INSERT DATA ===");
+      console.log(JSON.stringify(moodTrackingData, null, 2));
+
+      const result = await pgDb
+        .insert(MoodTrackingSchema)
+        .values(moodTrackingData);
+      console.log("=== DATABASE INSERT RESULT ===");
+      console.log("Insert result:", result);
+
+      // Verify the insert by querying the database
+      const verification = await pgDb
+        .select()
+        .from(MoodTrackingSchema)
+        .where(eq(MoodTrackingSchema.id, moodTrackingData.id));
+
+      console.log("=== DATABASE VERIFICATION ===");
+      console.log("Verification query result:", verification);
 
       console.log("Mood tracking saved successfully to database");
       logger.info(
@@ -121,6 +141,7 @@ Return ONLY valid JSON in this format:
     threadId: string,
     messages: Array<{ role: string; content: string }>,
     sessionType: "chat" | "voice",
+    conversationEndTime?: Date,
   ): Promise<void> {
     try {
       console.log("=== TRACKING CONVERSATION MOOD ===");
@@ -128,6 +149,19 @@ Return ONLY valid JSON in this format:
       console.log(`Thread ID: ${threadId}`);
       console.log(`Session Type: ${sessionType}`);
       console.log(`Total messages: ${messages.length}`);
+
+      // Test database connection first
+      try {
+        console.log("=== TESTING DATABASE CONNECTION ===");
+        const testQuery = await pgDb.select().from(MoodTrackingSchema).limit(1);
+        console.log(
+          "Database connection test successful, existing records:",
+          testQuery.length,
+        );
+      } catch (dbError) {
+        console.error("Database connection test failed:", dbError);
+        throw dbError;
+      }
 
       // Extract user messages for mood analysis
       const userMessages = messages
@@ -156,6 +190,7 @@ Return ONLY valid JSON in this format:
           threadId,
           sessionType,
           moodAnalysis,
+          conversationEndTime,
         );
       } else {
         console.log("Mood analysis failed - no analysis returned");
