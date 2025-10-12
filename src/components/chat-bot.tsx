@@ -364,6 +364,9 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
               ref={containerRef}
               onScroll={handleScroll}
             >
+              {/* Spacer div to prevent messages from going behind the header */}
+              <div className="h-16 flex-shrink-0" />
+
               {messages.map((message, index) => {
                 const isLastMessage = messages.length - 1 === index;
                 return (
