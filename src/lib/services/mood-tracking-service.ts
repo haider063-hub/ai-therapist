@@ -95,9 +95,7 @@ Return ONLY valid JSON in this format:
         createdAt: conversationEndTime || new Date(),
       };
 
-      const _result = await pgDb
-        .insert(MoodTrackingSchema)
-        .values(moodTrackingData);
+      await pgDb.insert(MoodTrackingSchema).values(moodTrackingData);
 
       logger.info(
         `Mood tracked for user ${userId}: ${moodAnalysis.moodScore}/10 (${moodAnalysis.sentiment})`,
