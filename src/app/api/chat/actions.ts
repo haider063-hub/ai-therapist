@@ -154,12 +154,11 @@ export async function checkUserHistoryAction(
 
     // Add chat conversations
     for (const chatConv of previousChatThreadsWithMessages) {
-      const lastMsgTime =
-        chatConv.messages[chatConv.messages.length - 1]?.createdAt?.getTime() ||
-        0;
+      // Use the lastMessageAt that's already calculated by the database query
+      // This is more reliable than recalculating from messages
       allConversations.push({
         ...chatConv,
-        lastMessageTime: lastMsgTime,
+        lastMessageTime: chatConv.thread.lastMessageAt,
       });
     }
 
@@ -194,7 +193,8 @@ export async function checkUserHistoryAction(
 
     // Debug logging to track conversation ordering
     console.log("checkUserHistoryAction - Conversation timeline:");
-    allConversations.slice(0, 3).forEach((conv, index) => {
+    console.log(`Total conversations found: ${allConversations.length}`);
+    allConversations.slice(0, 5).forEach((conv, index) => {
       const lastUserMessage = conv.messages
         .filter((m) => m.role === "user")
         .slice(-1)[0];
@@ -202,8 +202,11 @@ export async function checkUserHistoryAction(
         lastUserMessage?.parts
           .find((p) => p.type === "text")
           ?.text?.substring(0, 50) || "No text";
+
+      // Also log the actual timestamp for debugging
+      const timestamp = new Date(conv.lastMessageTime);
       console.log(
-        `${index + 1}. ${conv.sessionType} - ${new Date(conv.lastMessageTime).toISOString()} - "${messageText}..."`,
+        `${index + 1}. ${conv.sessionType} - ${timestamp.toISOString()} (${conv.lastMessageTime}) - "${messageText}..."`,
       );
     });
 
