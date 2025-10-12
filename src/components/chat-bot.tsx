@@ -156,9 +156,16 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
       prepareSendMessagesRequest: ({ messages, body, id }) => {
         const lastMessage = messages.at(-1)!;
 
+        // Debug logging to track thread ID issues
+        console.log("ChatBot - prepareSendMessagesRequest:", {
+          threadIdProp: threadId,
+          useChatId: id,
+          usingThreadId: threadId,
+        });
+
         const requestBody: ChatApiSchemaRequestBody = {
           ...body,
-          id,
+          id: threadId, // Use the threadId prop instead of the id from useChat
           chatModel:
             (body as { model: ChatModel })?.model ?? latestRef.current.model,
           toolChoice: latestRef.current.toolChoice,
