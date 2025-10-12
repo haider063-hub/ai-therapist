@@ -154,11 +154,28 @@ export async function checkUserHistoryAction(
 
     // Add chat conversations
     for (const chatConv of previousChatThreadsWithMessages) {
-      // Use the lastMessageAt that's already calculated by the database query
-      // This is more reliable than recalculating from messages
+      // Debug: Check what lastMessageAt contains
+      console.log(
+        `Chat thread ${chatConv.thread.id}: lastMessageAt = ${chatConv.thread.lastMessageAt}`,
+      );
+
+      // If lastMessageAt is 0 (Unix epoch), calculate from actual messages
+      let lastMessageTime = chatConv.thread.lastMessageAt;
+      if (lastMessageTime === 0 && chatConv.messages.length > 0) {
+        // Get the actual latest message timestamp
+        const sortedMessages = [...chatConv.messages].sort(
+          (a, b) =>
+            (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0),
+        );
+        lastMessageTime = sortedMessages[0]?.createdAt?.getTime() || 0;
+        console.log(
+          `Chat thread ${chatConv.thread.id}: calculated lastMessageTime = ${lastMessageTime}`,
+        );
+      }
+
       allConversations.push({
         ...chatConv,
-        lastMessageTime: chatConv.thread.lastMessageAt,
+        lastMessageTime: lastMessageTime,
       });
     }
 
