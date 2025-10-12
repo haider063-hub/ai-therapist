@@ -55,7 +55,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
   // Credit checking state
   const [canUseChat, setCanUseChat] = useState(true);
   const [chatCredits, setChatCredits] = useState(0);
-  const [subscriptionType, setSubscriptionType] = useState("free_trial");
+  const [_subscriptionType, setSubscriptionType] = useState("free_trial");
 
   const [
     appStoreMutate,
@@ -420,29 +420,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
             "w-full z-10",
           )}
         >
-          {/* Low Credits Warning Banner */}
-          {subscriptionType === "free_trial" &&
-            chatCredits > 0 &&
-            chatCredits < 20 && (
-              <div className="max-w-3xl mx-auto mb-2 px-4">
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      ⚠️ Low chat credits:{" "}
-                      <span className="font-bold">{chatCredits}</span> remaining
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-xs"
-                      onClick={() => router.push("/subscription")}
-                    >
-                      Upgrade
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Low Credits Warning Banner - Removed: Only show when credits are completely exhausted */}
 
           {/* Out of Credits Warning Banner */}
           {!canUseChat && chatCredits === 0 && (

@@ -908,28 +908,7 @@ export default function VoiceChatPage() {
       <div
         className={`relative w-full p-6 flex ${isActive ? "flex-row" : "flex-col"} items-center justify-center gap-4 z-10`}
       >
-        {/* Low Credits Warning Banner */}
-        {!isActive && voiceCreditsTotal > 0 && voiceCreditsTotal < 100 && (
-          <div className="max-w-md mx-auto mb-2">
-            <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg px-4 py-3">
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                  ⚠️ Low voice credits:{" "}
-                  <span className="font-bold">{voiceCreditsTotal}</span>{" "}
-                  remaining
-                </p>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="text-xs"
-                  onClick={() => router.push("/subscription")}
-                >
-                  Get More
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Low Credits Warning Banner - Removed: Only show when credits are completely exhausted */}
 
         {/* Out of Credits Warning Banner */}
         {!isActive && !canUseVoice && voiceCreditsTotal === 0 && (
