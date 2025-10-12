@@ -383,9 +383,6 @@ export const pgChatRepository = {
   ): Promise<
     Array<{ threadId: string; lastMessageTime: number; notes?: string }>
   > {
-    console.log(`=== DATABASE QUERY: selectVoiceConversationsByUserId ===`);
-    console.log(`Querying for userId: ${userId}`);
-
     // Get voice conversations directly from mood tracking with their timestamps
     const voiceConversations = await pgDb
       .select({

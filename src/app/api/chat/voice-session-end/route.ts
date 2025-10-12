@@ -12,20 +12,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("=== VOICE SESSION END API CALLED ===");
-    console.log("Request method:", request.method);
-    console.log(
-      "Request headers:",
-      Object.fromEntries(request.headers.entries()),
-    );
-
     let requestBody;
     try {
       requestBody = await request.json();
-      console.log("Request body parsed successfully:", requestBody);
     } catch (parseError) {
       console.error("Failed to parse request body:", parseError);
-      console.log("Raw request body:", await request.text());
       requestBody = {
         threadId: null,
         messages: null,
@@ -36,11 +27,6 @@ export async function POST(request: NextRequest) {
 
     const { threadId, messages, userAudioDuration, botAudioDuration } =
       requestBody;
-    console.log("=== EXTRACTED PARAMETERS ===");
-    console.log("Thread ID:", threadId);
-    console.log("Messages:", messages);
-    console.log("User Audio Duration:", userAudioDuration);
-    console.log("Bot Audio Duration:", botAudioDuration);
 
     // Deduct credits based on actual audio duration if provided
     if (userAudioDuration > 0 || botAudioDuration > 0) {
@@ -82,12 +68,6 @@ export async function POST(request: NextRequest) {
       Array.isArray(messages) &&
       messages.length > 0
     ) {
-      console.log("=== VOICE SESSION END - MOOD TRACKING ===");
-      console.log(`User ID: ${session.user.id}`);
-      console.log(`Thread ID: ${threadId}`);
-      console.log(`Messages count: ${messages.length}`);
-      console.log(`Session type: voice`);
-
       moodTrackingService
         .trackConversationMood(
           session.user.id,
@@ -96,19 +76,9 @@ export async function POST(request: NextRequest) {
           "voice",
           new Date(),
         )
-        .then(() => {
-          console.log("Voice mood tracking completed successfully");
-        })
         .catch((err) => {
-          console.error("Voice mood tracking failed:", err);
           logger.error("Voice mood tracking failed:", err);
         });
-    } else {
-      console.log("=== VOICE SESSION END - NO MOOD TRACKING ===");
-      console.log(`Thread ID: ${threadId}`);
-      console.log(`Messages: ${messages}`);
-      console.log(`Messages is array: ${Array.isArray(messages)}`);
-      console.log(`Messages length: ${messages?.length || 0}`);
     }
 
     return NextResponse.json({ success: true });

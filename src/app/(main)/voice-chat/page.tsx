@@ -254,7 +254,6 @@ export default function VoiceChatPage() {
     if (!voiceThreadId) {
       const newVoiceThreadId = generateUUID();
       setVoiceThreadId(newVoiceThreadId);
-      console.log("🎤 Generated new voice thread ID:", newVoiceThreadId);
     }
 
     start().then(() => {
@@ -264,62 +263,30 @@ export default function VoiceChatPage() {
 
   // Track session start and setup credit deduction when session becomes active
   // Log when messages change
-  useEffect(() => {
-    console.log("📝 Messages updated:", {
-      messageCount: messages.length,
-      threadId: voiceThreadId,
-      isActive,
-    });
-    if (messages.length > 0) {
-      const lastMessage = messages[messages.length - 1];
-      const textPart = lastMessage.parts.find((p) => p.type === "text");
-      console.log("📝 Last message:", {
-        role: lastMessage.role,
-        content: textPart
-          ? (textPart as any).text?.substring(0, 50) + "..."
-          : "No text",
-        timestamp: new Date().toISOString(),
-      });
-    }
-  }, [messages, voiceThreadId, isActive]);
+  useEffect(() => {}, [messages, voiceThreadId, isActive]);
 
   useEffect(() => {
     if (isActive && !sessionStartTime.current) {
-      console.log("✅ Voice session active, starting credit tracking...");
-
       // Generate a new voice thread ID if we don't have one
       if (!voiceThreadId) {
         const newVoiceThreadId = generateUUID();
         setVoiceThreadId(newVoiceThreadId);
-        console.log("🎤 Generated new voice thread ID:", newVoiceThreadId);
       }
 
-      console.log("🎤 Voice session started:", {
-        threadId: voiceThreadId,
-        timestamp: new Date().toISOString(),
-      });
       // Start tracking session time
       sessionStartTime.current = Date.now();
       lastCreditDeductionTime.current = Date.now();
 
       // Start periodic credit deduction (every 15 seconds)
-      console.log("⏱️ Starting credit deduction interval...");
       creditDeductionInterval.current = setInterval(() => {
-        console.log(
-          "🔍 Interval tick - checking if credit deduction needed...",
-        );
         if (sessionStartTime.current && lastCreditDeductionTime.current) {
           const now = Date.now();
           const timeSinceLastDeduction = Math.floor(
             (now - lastCreditDeductionTime.current) / 1000,
           );
-          console.log(
-            `⏰ Time since last deduction: ${timeSinceLastDeduction} seconds`,
-          );
 
           // Deduct credits every 60 seconds (1 minute) for real-time updates
           if (timeSinceLastDeduction >= 60) {
-            console.log("💰 60 seconds elapsed, deducting credits now...");
             // Deduct credits in real-time
             fetch("/api/chat/voice-credit-deduct-duration", {
               method: "POST",
@@ -333,12 +300,8 @@ export default function VoiceChatPage() {
               .then((res) => res.json())
               .then((data) => {
                 if (data.success) {
-                  console.log(
-                    `💰 Real-time deduction: ${data.creditsUsed} credits for ${data.minutesUsed} minute(s). Remaining: ${data.remainingCredits}`,
-                  );
                   // Trigger UI update
                   window.dispatchEvent(new Event("credits-updated"));
-                  console.log("📢 Dispatched credits-updated event");
                   // Update last deduction time
                   lastCreditDeductionTime.current = now;
                 } else {
@@ -355,7 +318,6 @@ export default function VoiceChatPage() {
 
     // Cleanup when session ends
     if (!isActive && creditDeductionInterval.current) {
-      console.log("🛑 Session ended, stopping credit deduction interval");
       clearInterval(creditDeductionInterval.current);
       creditDeductionInterval.current = null;
       sessionStartTime.current = null;
@@ -418,9 +380,6 @@ export default function VoiceChatPage() {
           userAudioDuration: 0, // Credits already deducted in real-time
           botAudioDuration: 0, // Credits already deducted in real-time
         };
-
-        console.log("=== SENDING VOICE SESSION END REQUEST (endVoiceChat) ===");
-        console.log("Request data:", JSON.stringify(requestData, null, 2));
 
         const response = await fetch("/api/chat/voice-session-end", {
           method: "POST",
@@ -932,7 +891,7 @@ export default function VoiceChatPage() {
 
         {/* Text above the button */}
         {!isActive && (
-          <p className="text-white text-lg mb-2">
+          <p className="text-white text-lg mb-2 -mt-16">
             {canUseVoice ? "Start voice chat?" : "Out of credits"}
           </p>
         )}

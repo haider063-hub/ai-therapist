@@ -84,14 +84,6 @@ Return ONLY valid JSON in this format:
     try {
       const today = new Date().toISOString().split("T")[0];
 
-      console.log("=== SAVING MOOD TRACKING ===");
-      console.log(`User ID: ${userId}`);
-      console.log(`Thread ID: ${threadId}`);
-      console.log(`Session Type: ${sessionType}`);
-      console.log(`Mood Score: ${moodAnalysis.moodScore}`);
-      console.log(`Sentiment: ${moodAnalysis.sentiment}`);
-      console.log(`Notes: ${moodAnalysis.notes?.substring(0, 100)}...`);
-
       const moodTrackingData = {
         id: generateUUID(),
         userId,
@@ -104,25 +96,10 @@ Return ONLY valid JSON in this format:
         createdAt: conversationEndTime || new Date(),
       };
 
-      console.log("=== DATABASE INSERT DATA ===");
-      console.log(JSON.stringify(moodTrackingData, null, 2));
-
-      const result = await pgDb
+      const _result = await pgDb
         .insert(MoodTrackingSchema)
         .values(moodTrackingData);
-      console.log("=== DATABASE INSERT RESULT ===");
-      console.log("Insert result:", result);
 
-      // Verify the insert by querying the database
-      const verification = await pgDb
-        .select()
-        .from(MoodTrackingSchema)
-        .where(eq(MoodTrackingSchema.id, moodTrackingData.id));
-
-      console.log("=== DATABASE VERIFICATION ===");
-      console.log("Verification query result:", verification);
-
-      console.log("Mood tracking saved successfully to database");
       logger.info(
         `Mood tracked for user ${userId}: ${moodAnalysis.moodScore}/10 (${moodAnalysis.sentiment})`,
       );
@@ -144,47 +121,20 @@ Return ONLY valid JSON in this format:
     conversationEndTime?: Date,
   ): Promise<void> {
     try {
-      console.log("=== TRACKING CONVERSATION MOOD ===");
-      console.log(`User ID: ${userId}`);
-      console.log(`Thread ID: ${threadId}`);
-      console.log(`Session Type: ${sessionType}`);
-      console.log(`Total messages: ${messages.length}`);
-
-      // Test database connection first
-      try {
-        console.log("=== TESTING DATABASE CONNECTION ===");
-        const testQuery = await pgDb.select().from(MoodTrackingSchema).limit(1);
-        console.log(
-          "Database connection test successful, existing records:",
-          testQuery.length,
-        );
-      } catch (dbError) {
-        console.error("Database connection test failed:", dbError);
-        throw dbError;
-      }
-
       // Extract user messages for mood analysis
       const userMessages = messages
         .filter((m) => m.role === "user")
         .map((m) => m.content)
         .filter((content) => content && content.trim().length > 0);
 
-      console.log(`User messages extracted: ${userMessages.length}`);
-      userMessages.forEach((msg, index) => {
-        console.log(`User message ${index + 1}: "${msg.substring(0, 50)}..."`);
-      });
-
       if (userMessages.length === 0) {
-        console.log("No user messages to analyze - returning");
         return; // No user messages to analyze
       }
 
       // Analyze the mood
-      console.log("Analyzing mood...");
       const moodAnalysis = await this.analyzeMood(userMessages);
 
       if (moodAnalysis) {
-        console.log("Mood analysis successful, saving...");
         await this.saveMoodTracking(
           userId,
           threadId,
@@ -192,8 +142,6 @@ Return ONLY valid JSON in this format:
           moodAnalysis,
           conversationEndTime,
         );
-      } else {
-        console.log("Mood analysis failed - no analysis returned");
       }
     } catch (error) {
       console.error("Error tracking conversation mood:", error);
