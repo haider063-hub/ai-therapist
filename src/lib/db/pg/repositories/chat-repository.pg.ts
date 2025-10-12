@@ -429,22 +429,12 @@ export const pgChatRepository = {
           lastMessageTime: lastMessageTime,
           notes: voiceConv.notes || undefined,
         });
-      } else if (voiceConv.threadId) {
-        console.log(`Skipping duplicate threadId: ${voiceConv.threadId}`);
       }
     }
 
     const result = Array.from(threadMap.values()).sort(
       (a, b) => b.lastMessageTime - a.lastMessageTime,
     );
-
-    console.log(`Final result: ${result.length} unique voice conversations`);
-    result.forEach((conv, index) => {
-      const timestamp = new Date(conv.lastMessageTime);
-      console.log(
-        `Result ${index + 1}: threadId=${conv.threadId}, lastMessageTime=${conv.lastMessageTime} (${timestamp.toISOString()})`,
-      );
-    });
 
     return result;
   },

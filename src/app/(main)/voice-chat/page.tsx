@@ -212,9 +212,6 @@ export default function VoiceChatPage() {
   // Listen for credit updates
   useEffect(() => {
     const handleCreditsUpdate = () => {
-      console.log(
-        "🔄 Credits updated event received, refreshing credit display...",
-      );
       mutateCredits();
       // Remove visual animation to prevent green border flash
     };
@@ -526,10 +523,6 @@ export default function VoiceChatPage() {
                         },
                       );
                       if (response.ok) {
-                        console.log(
-                          "✅ Saved preferred language to database:",
-                          value,
-                        );
                       }
                     } catch (error) {
                       console.error("Error saving preferred language:", error);
@@ -762,10 +755,6 @@ export default function VoiceChatPage() {
                         },
                       );
                       if (response.ok) {
-                        console.log(
-                          "✅ Saved preferred language to database:",
-                          value,
-                        );
                       }
                     } catch (error) {
                       console.error("Error saving preferred language:", error);
@@ -875,7 +864,7 @@ export default function VoiceChatPage() {
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-red-800 dark:text-red-200 font-medium">
-                  ❌ Out of voice credits
+                  Out of voice credits
                 </p>
                 <Button
                   size="sm"

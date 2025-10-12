@@ -148,14 +148,14 @@ export default function PromptInput({
   const handleImageButtonClick = () => {
     if (disabled) {
       // Show credits exhausted message
-      toast.error(
+      toast.warning(
         "Out of credits - Please upgrade to continue using image upload",
       );
       return;
     }
     if (!imageUploadStats?.canUpload) {
       // Show upgrade toast for users without permission
-      toast.error(
+      toast.warning(
         imageUploadStats?.reason ||
           "Image upload is only available for Chat Only and Premium plans",
       );

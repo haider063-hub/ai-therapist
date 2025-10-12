@@ -50,8 +50,6 @@ export async function generateTitleFromUserMessageAction({
 }
 
 export async function selectThreadWithMessagesAction(threadId: string) {
-  console.log("selectThreadWithMessagesAction called with threadId:", threadId);
-
   try {
     const session = await getSession();
     if (!session) {
@@ -69,13 +67,6 @@ export async function selectThreadWithMessagesAction(threadId: string) {
     }
 
     const messages = await chatRepository.selectMessagesByThreadId(threadId);
-
-    console.log("selectThreadWithMessagesAction returning:", {
-      threadId,
-      threadTitle: thread.title,
-      messageCount: messages.length,
-      messages: messages,
-    });
 
     return { ...thread, messages: messages ?? [] };
   } catch (error) {
@@ -164,10 +155,6 @@ export async function checkUserHistoryAction(
         );
         lastMessageTime = sortedMessages[0]?.createdAt?.getTime() || 0;
       }
-
-      console.log(
-        `Chat thread ${chatConv.thread.id}: lastMessageTime=${lastMessageTime}, messages=${chatConv.messages.length}`,
-      );
 
       allConversations.push({
         ...chatConv,
@@ -448,8 +435,6 @@ Examples (note the brevity):
 }
 
 export async function deleteThreadAction(threadId: string) {
-  console.log("deleteThreadAction called with threadId:", threadId);
-
   const session = await getSession();
   if (!session) {
     throw new Error("Unauthorized");
@@ -458,16 +443,13 @@ export async function deleteThreadAction(threadId: string) {
   // First verify the user owns this thread
   const thread = await chatRepository.selectThread(threadId);
   if (!thread) {
-    console.log("Thread not found:", threadId);
     return;
   }
 
   if (thread.userId !== session.user.id) {
-    console.log("User does not own this thread:", threadId);
     throw new Error("Unauthorized to delete this thread");
   }
 
-  console.log("User owns thread, proceeding with deletion");
   await chatRepository.deleteThread(threadId);
 }
 
