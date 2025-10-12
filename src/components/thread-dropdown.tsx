@@ -90,7 +90,7 @@ export function ThreadDropdown({
       .ifOk(() => onDeleted?.())
       .ifOk(() => {
         if (currentThreadId === threadId) {
-          push.current("/");
+          push.current("/chat");
         }
         mutate("/api/thread");
       })

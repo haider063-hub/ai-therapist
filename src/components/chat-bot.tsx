@@ -491,7 +491,7 @@ function DeleteThreadPopup({
       .watch(() => setIsDeleting(false))
       .ifOk(() => {
         toast.success(t("Chat.Thread.threadDeleted"));
-        router.push("/");
+        router.push("/chat");
       })
       .ifFail(() => toast.error(t("Chat.Thread.failedToDeleteThread")))
       .watch(() => onClose());

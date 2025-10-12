@@ -147,7 +147,7 @@ export function AppSidebarThreads() {
       loading: t("deletingAllChats"),
       success: () => {
         mutate("/api/thread");
-        router.push("/");
+        router.push("/chat");
         return t("allChatsDeleted");
       },
       error: t("failedToDeleteAllChats"),

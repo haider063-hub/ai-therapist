@@ -53,7 +53,10 @@ export function ChatSidebar({ user }: ChatSidebarProps) {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    onClick={() => router.push("/chat")}
+                    onClick={() => {
+                      router.push("/chat");
+                      router.refresh();
+                    }}
                     className="font-semibold"
                   >
                     <WriteIcon className="size-4" />

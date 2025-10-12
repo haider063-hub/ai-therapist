@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Sidebar,
@@ -18,10 +17,11 @@ import {
   CreditCard as CreditCardIcon,
   LayoutDashboard,
   Shield,
+  MessageSquare,
 } from "lucide-react";
-import { WriteIcon } from "ui/write-icon";
 import { BasicUser } from "app-types/user";
 import { getIsUserAdmin } from "@/lib/user/utils";
+import { Button } from "ui/button";
 
 interface VoiceSidebarProps {
   user?: BasicUser;
@@ -29,39 +29,7 @@ interface VoiceSidebarProps {
 
 export function VoiceSidebar({ user }: VoiceSidebarProps) {
   const router = useRouter();
-  const [canUseChat, setCanUseChat] = useState(true);
   const isAdmin = getIsUserAdmin(user);
-
-  // Fetch chat status for context-aware button
-  useEffect(() => {
-    const fetchChatStatus = async () => {
-      try {
-        const response = await fetch("/api/stripe/get-subscription-status");
-        if (response.ok) {
-          const data = await response.json();
-          setCanUseChat(data.features.canUseChat);
-        }
-      } catch (error) {
-        console.error("Failed to fetch chat status:", error);
-      }
-    };
-
-    fetchChatStatus();
-
-    // Listen for credit updates
-    const handleCreditUpdate = () => fetchChatStatus();
-    window.addEventListener("credits-updated", handleCreditUpdate);
-    return () =>
-      window.removeEventListener("credits-updated", handleCreditUpdate);
-  }, []);
-
-  const handleStartChatSession = () => {
-    if (canUseChat) {
-      router.push("/chat");
-    } else {
-      router.push("/subscription");
-    }
-  };
 
   return (
     <Sidebar
@@ -83,17 +51,6 @@ export function VoiceSidebar({ user }: VoiceSidebarProps) {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={handleStartChatSession}
-                    disabled={!canUseChat}
-                    className={`font-semibold ${!canUseChat ? "opacity-50 cursor-not-allowed" : ""}`}
-                  >
-                    <WriteIcon className="size-4" />
-                    {canUseChat ? "Start Chat Session" : "Out of Credits"}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-
                 {isAdmin && (
                   <SidebarMenuItem>
                     <SidebarMenuButton
@@ -132,6 +89,18 @@ export function VoiceSidebar({ user }: VoiceSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="flex flex-col items-stretch space-y-2">
+        {/* Chat with EchoNest Button */}
+        <Button
+          className="w-full bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:via-green-600 hover:to-teal-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-300 font-semibold justify-start"
+          onClick={() => {
+            router.push("/chat");
+            router.refresh();
+          }}
+        >
+          <MessageSquare className="h-4 w-4 mr-2" />
+          Chat with EchoNest
+        </Button>
+
         <AppSidebarUser user={user} />
       </SidebarFooter>
     </Sidebar>

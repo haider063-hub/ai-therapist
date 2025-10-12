@@ -177,6 +177,9 @@ export async function POST(request: Request) {
     }
 
     if (thread!.userId !== session.user.id) {
+      logger.error(
+        `Thread ownership mismatch - thread.userId: ${thread!.userId}, session.user.id: ${session.user.id}, threadId: ${id}`,
+      );
       return new Response("Forbidden", { status: 403 });
     }
 

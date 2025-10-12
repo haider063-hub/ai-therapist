@@ -733,8 +733,8 @@ export default function VoiceChatPage() {
 
           {/* Bottom Row: Action Buttons - Only if not active */}
           {!isActive && (
-            <div className="flex gap-2 w-full">
-              {/* Language Selector */}
+            <div className="flex flex-col gap-2 w-full">
+              {/* First Row: Language Selector */}
               {selectedTherapist && availableLanguages.length > 1 && (
                 <Select
                   key={`mobile-${selectedLanguage}`}
@@ -764,7 +764,7 @@ export default function VoiceChatPage() {
                   }}
                   disabled={false}
                 >
-                  <SelectTrigger className="flex-1 h-8 px-3 py-2 text-xs border border-input bg-background whitespace-nowrap min-h-[36px]">
+                  <SelectTrigger className="w-full h-8 px-3 py-2 text-xs border border-input bg-background whitespace-nowrap min-h-[36px]">
                     <Languages className="h-3.5 w-3.5 mr-1" />
                     <SelectValue placeholder="Language" />
                   </SelectTrigger>
@@ -782,7 +782,7 @@ export default function VoiceChatPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className={`h-8 px-3 py-2 text-xs font-normal whitespace-nowrap min-h-[36px] ${selectedTherapist && availableLanguages.length > 1 ? "flex-1" : "w-full"}`}
+                className="w-full h-8 px-3 py-2 text-xs font-normal whitespace-nowrap min-h-[36px]"
                 onClick={() => router.push("/therapists")}
               >
                 <User className="h-3.5 w-3.5 mr-1" />
