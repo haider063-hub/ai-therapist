@@ -235,7 +235,7 @@ export function ChatBotVoice() {
     <>
       <Drawer dismissible={false} open={voiceChat.isOpen} direction="top">
         <DrawerPortal>
-          <DrawerContent className="max-h-[100vh]! h-full border-none! rounded-none! flex flex-col bg-card z-[100]">
+          <DrawerContent className="max-h-[100dvh]! h-full border-none! rounded-none! flex flex-col bg-card z-[100]">
             <DrawerTitle className="sr-only">Voice Therapy Session</DrawerTitle>
             <div className="w-full h-full flex flex-col ">
               {/* Mobile: Header with Credits on Right, Desktop: Horizontal Layout */}
