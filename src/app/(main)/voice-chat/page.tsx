@@ -412,17 +412,22 @@ export default function VoiceChatPage() {
           .filter((m) => m.content.trim().length > 0);
 
         // Send session end for mood tracking (credits already deducted in real-time)
+        const requestData = {
+          threadId: voiceThreadId,
+          messages: conversationMessages,
+          userAudioDuration: 0, // Credits already deducted in real-time
+          botAudioDuration: 0, // Credits already deducted in real-time
+        };
+
+        console.log("=== SENDING VOICE SESSION END REQUEST (endVoiceChat) ===");
+        console.log("Request data:", JSON.stringify(requestData, null, 2));
+
         const response = await fetch("/api/chat/voice-session-end", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            threadId: voiceThreadId,
-            messages: conversationMessages,
-            userAudioDuration: 0, // Credits already deducted in real-time
-            botAudioDuration: 0, // Credits already deducted in real-time
-          }),
+          body: JSON.stringify(requestData),
         });
 
         // Trigger final credit display refresh
@@ -452,61 +457,7 @@ export default function VoiceChatPage() {
     }
   }, [isActive]);
 
-  // Track session end when session becomes inactive (for mood tracking)
-  useEffect(() => {
-    console.log("🔍 Session state check:", {
-      isActive,
-      messagesLength: messages.length,
-      voiceThreadId,
-    });
-
-    if (!isActive && messages.length > 0 && voiceThreadId) {
-      console.log("🔄 Session became inactive, tracking for mood analysis");
-
-      // Extract conversation messages for mood tracking
-      const conversationMessages = messages
-        .map((m) => {
-          const textPart = m.parts.find((p) => p.type === "text");
-          return {
-            role: m.role,
-            content: textPart ? (textPart as any).text || "" : "",
-          };
-        })
-        .filter((m) => m.content.trim().length > 0);
-
-      // Send session end for mood tracking (non-blocking)
-      const requestData = {
-        threadId: voiceThreadId,
-        messages: conversationMessages,
-        userAudioDuration: 0, // Credits already deducted in real-time
-        botAudioDuration: 0, // Credits already deducted in real-time
-      };
-
-      console.log("=== SENDING VOICE SESSION END REQUEST ===");
-      console.log("Request data:", JSON.stringify(requestData, null, 2));
-
-      fetch("/api/chat/voice-session-end", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      })
-        .then((response) => {
-          if (response.ok) {
-            console.log("✅ Voice session end tracked successfully");
-          } else {
-            console.error(
-              "❌ Failed to track voice session end:",
-              response.status,
-            );
-          }
-        })
-        .catch((error) => {
-          console.error("❌ Error tracking voice session end:", error);
-        });
-    }
-  }, [isActive, messages, voiceThreadId]);
+  // Note: Session end tracking is handled by the endVoiceChat function to avoid duplicate calls
 
   // Handle session cleanup when user closes window/tab or navigates away
   useEffect(() => {
@@ -531,7 +482,7 @@ export default function VoiceChatPage() {
 
         // Send remaining time for final credit deduction
         const data = JSON.stringify({
-          threadId: currentThreadId,
+          threadId: voiceThreadId,
           messages: conversationMessages,
           userAudioDuration: remainingSeconds / 2,
           botAudioDuration: remainingSeconds / 2,
