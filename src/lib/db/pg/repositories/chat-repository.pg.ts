@@ -380,11 +380,11 @@ export const pgChatRepository = {
 
   async selectVoiceConversationsByUserId(
     userId: string,
-  ): Promise<Array<{ threadId: string; createdAt: Date }>> {
-    const voiceConversations = await pgDb
+  ): Promise<Array<{ threadId: string; lastMessageTime: number }>> {
+    // Get voice conversation thread IDs from mood tracking
+    const voiceThreadIds = await pgDb
       .select({
         threadId: MoodTrackingSchema.threadId,
-        createdAt: MoodTrackingSchema.createdAt,
       })
       .from(MoodTrackingSchema)
       .where(
@@ -394,19 +394,36 @@ export const pgChatRepository = {
           sql`${MoodTrackingSchema.threadId} IS NOT NULL`,
         ),
       )
-      .orderBy(desc(MoodTrackingSchema.createdAt));
+      .groupBy(MoodTrackingSchema.threadId);
 
-    // Remove duplicates and return unique thread IDs with their latest creation time
-    const uniqueThreads = new Map<string, Date>();
-    for (const conv of voiceConversations) {
-      if (conv.threadId && !uniqueThreads.has(conv.threadId)) {
-        uniqueThreads.set(conv.threadId, conv.createdAt);
+    // For each voice thread, get the actual last message timestamp
+    const voiceConversationsWithTimestamps: Array<{
+      threadId: string;
+      lastMessageTime: number;
+    }> = [];
+    for (const { threadId } of voiceThreadIds) {
+      if (threadId) {
+        const messages = await pgDb
+          .select({
+            createdAt: ChatMessageSchema.createdAt,
+          })
+          .from(ChatMessageSchema)
+          .where(eq(ChatMessageSchema.threadId, threadId))
+          .orderBy(desc(ChatMessageSchema.createdAt))
+          .limit(1);
+
+        if (messages.length > 0) {
+          voiceConversationsWithTimestamps.push({
+            threadId,
+            lastMessageTime: messages[0].createdAt.getTime(),
+          });
+        }
       }
     }
 
-    return Array.from(uniqueThreads.entries()).map(([threadId, createdAt]) => ({
-      threadId,
-      createdAt,
-    }));
+    // Sort by most recent message time
+    return voiceConversationsWithTimestamps.sort(
+      (a, b) => b.lastMessageTime - a.lastMessageTime,
+    );
   },
 };

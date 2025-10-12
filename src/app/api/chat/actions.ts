@@ -163,7 +163,7 @@ export async function checkUserHistoryAction(
       });
     }
 
-    // Add voice conversations
+    // Add voice conversations (already sorted by most recent message time)
     for (const voiceConv of voiceConversations) {
       const messages = await chatRepository.selectMessagesByThreadId(
         voiceConv.threadId,
@@ -173,16 +173,14 @@ export async function checkUserHistoryAction(
       );
 
       if (userMessages.length > 0) {
-        const lastMsgTime =
-          userMessages[userMessages.length - 1]?.createdAt?.getTime() || 0;
         allConversations.push({
           thread: {
             id: voiceConv.threadId,
-            lastMessageAt: lastMsgTime,
+            lastMessageAt: voiceConv.lastMessageTime,
           } as ChatThread & { lastMessageAt: number },
           messages: userMessages,
           sessionType: "voice",
-          lastMessageTime: lastMsgTime,
+          lastMessageTime: voiceConv.lastMessageTime,
         });
       }
     }
@@ -193,6 +191,21 @@ export async function checkUserHistoryAction(
 
     // Sort by most recent message across both chat and voice
     allConversations.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
+
+    // Debug logging to track conversation ordering
+    console.log("checkUserHistoryAction - Conversation timeline:");
+    allConversations.slice(0, 3).forEach((conv, index) => {
+      const lastUserMessage = conv.messages
+        .filter((m) => m.role === "user")
+        .slice(-1)[0];
+      const messageText =
+        lastUserMessage?.parts
+          .find((p) => p.type === "text")
+          ?.text?.substring(0, 50) || "No text";
+      console.log(
+        `${index + 1}. ${conv.sessionType} - ${new Date(conv.lastMessageTime).toISOString()} - "${messageText}..."`,
+      );
+    });
 
     const mostRecentConversation = allConversations[0];
 
