@@ -854,7 +854,7 @@ export default function VoiceChatPage() {
         )}
       </div>
       <div
-        className={`relative w-full p-6 flex ${isActive ? "flex-row" : "flex-col"} items-center justify-start gap-4 z-10 pb-24`}
+        className={`relative w-full p-6 flex ${isActive ? "flex-row" : "flex-col"} items-center justify-center gap-4 z-10 pb-24`}
       >
         {/* Low Credits Warning Banner - Removed: Only show when credits are completely exhausted */}
 
