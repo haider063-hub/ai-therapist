@@ -32,15 +32,6 @@ export default async function ChatThreadPage({ params }: ChatThreadPageProps) {
     metadata: msg.metadata,
   }));
 
-  console.log(
-    "ChatThreadPage - threadId:",
-    id,
-    "userId:",
-    session.user.id,
-    "thread.userId:",
-    thread.userId,
-  );
-
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-hidden">

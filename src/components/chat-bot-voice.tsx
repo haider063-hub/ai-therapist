@@ -114,10 +114,6 @@ export function ChatBotVoice() {
     if (!voiceThreadId) {
       const newVoiceThreadId = generateUUID();
       setVoiceThreadId(newVoiceThreadId);
-      console.log(
-        "🎤 Generated new voice thread ID for chat-bot-voice:",
-        newVoiceThreadId,
-      );
     }
 
     start().then(() => {

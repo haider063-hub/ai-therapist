@@ -400,30 +400,15 @@ export const pgChatRepository = {
       )
       .orderBy(desc(MoodTrackingSchema.createdAt));
 
-    console.log(
-      `Raw voice conversations from DB: ${voiceConversations.length}`,
-    );
-    voiceConversations.forEach((conv, index) => {
-      console.log(
-        `Raw ${index + 1}: threadId=${conv.threadId}, createdAt=${conv.createdAt?.toISOString()}, notes="${conv.notes?.substring(0, 30)}..."`,
-      );
-    });
-
     // Group by threadId and get the most recent entry for each thread
     const threadMap = new Map<
       string,
       { threadId: string; lastMessageTime: number; notes?: string }
     >();
 
-    console.log(
-      `Processing ${voiceConversations.length} voice conversations...`,
-    );
     for (const voiceConv of voiceConversations) {
       if (voiceConv.threadId && !threadMap.has(voiceConv.threadId)) {
         const lastMessageTime = voiceConv.createdAt.getTime();
-        console.log(
-          `Adding to map: threadId=${voiceConv.threadId}, lastMessageTime=${lastMessageTime}, notes="${voiceConv.notes?.substring(0, 30)}..."`,
-        );
         threadMap.set(voiceConv.threadId, {
           threadId: voiceConv.threadId,
           lastMessageTime: lastMessageTime,

@@ -161,16 +161,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
           console.error(
             "ChatBot - Empty threadId detected, generating new one",
           );
-          const newThreadId = generateUUID();
-          console.log("ChatBot - Generated new threadId:", newThreadId);
         }
-
-        // Debug logging to track thread ID issues
-        console.log("ChatBot - prepareSendMessagesRequest:", {
-          threadIdProp: threadId,
-          useChatId: id,
-          usingThreadId: threadId,
-        });
 
         const requestBody: ChatApiSchemaRequestBody = {
           ...body,
@@ -409,7 +400,8 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
               )}
 
               {error && <ErrorMessage error={error} />}
-              <div className="min-w-0 min-h-52" />
+              <div className="min-w-0 min-h-30" />
+              {/* <div className="min-w-0 min-h-52" /> */}
             </div>
           </>
         )}
