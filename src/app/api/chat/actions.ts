@@ -133,7 +133,21 @@ export async function checkUserHistoryAction(
 
     // Get voice conversation history from mood tracking
     const voiceConversations =
-      await chatRepository.selectVoiceConversationsByUserId(session.user.id);
+      await chatRepository.selectVoiceConversationsByUserId(
+        session.user.id,
+        currentThreadId,
+      );
+
+    // Debug logging for voice conversations
+    console.log(
+      "🔍 Debug - Voice conversations found:",
+      voiceConversations.map((conv) => ({
+        threadId: conv.threadId,
+        lastMessageTime: new Date(conv.lastMessageTime).toISOString(),
+        notes: conv.notes?.substring(0, 50) + "...",
+      })),
+    );
+    console.log("🔍 Debug - Excluding threadId:", currentThreadId);
 
     // Combine chat and voice conversations
     const allConversations: Array<{
@@ -203,6 +217,17 @@ export async function checkUserHistoryAction(
 
     // Sort by most recent message across both chat and voice
     allConversations.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
+
+    // Debug logging to see what conversations are found
+    console.log(
+      "🔍 Debug - All conversations found:",
+      allConversations.map((conv) => ({
+        threadId: conv.thread.id,
+        sessionType: conv.sessionType,
+        lastMessageTime: new Date(conv.lastMessageTime).toISOString(),
+        hasMessages: conv.messages.length > 0,
+      })),
+    );
 
     const mostRecentConversation = allConversations[0];
 

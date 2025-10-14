@@ -5,7 +5,7 @@ import {
   UserSchema,
   MoodTrackingSchema,
 } from "../schema.pg";
-import { eq, and, desc, gte, sql } from "drizzle-orm";
+import { eq, and, desc, gte, sql, ne } from "drizzle-orm";
 import type { ChatThread, ChatMessage } from "app-types/chat";
 import { UIMessage } from "ai";
 import { ChatMetadata } from "app-types/chat";
@@ -380,9 +380,16 @@ export const pgChatRepository = {
 
   async selectVoiceConversationsByUserId(
     userId: string,
+    excludeThreadId?: string,
   ): Promise<
     Array<{ threadId: string; lastMessageTime: number; notes?: string }>
   > {
+    // Debug logging
+    console.log("🔍 Debug - selectVoiceConversationsByUserId called with:", {
+      userId,
+      excludeThreadId,
+    });
+
     // Get voice conversations directly from mood tracking with their timestamps
     const voiceConversations = await pgDb
       .select({
@@ -396,9 +403,23 @@ export const pgChatRepository = {
           eq(MoodTrackingSchema.userId, userId),
           eq(MoodTrackingSchema.sessionType, "voice"),
           sql`${MoodTrackingSchema.threadId} IS NOT NULL`,
+          ...(excludeThreadId
+            ? [ne(MoodTrackingSchema.threadId, excludeThreadId)]
+            : []),
         ),
       )
       .orderBy(desc(MoodTrackingSchema.createdAt));
+
+    // Debug logging for raw voice conversations
+    console.log(
+      "🔍 Debug - Raw voice conversations from DB:",
+      voiceConversations.map((conv, index) => ({
+        index: index + 1,
+        threadId: conv.threadId,
+        createdAt: conv.createdAt?.toISOString(),
+        notes: conv.notes?.substring(0, 30) + "...",
+      })),
+    );
 
     // Group by threadId and get the most recent entry for each thread
     const threadMap = new Map<
