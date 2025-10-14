@@ -808,7 +808,8 @@ export default function VoiceChatPage() {
                 {error.message.includes("Insufficient credits") ? (
                   <div className="space-y-4">
                     <p>
-                      You've run out of voice credits to start a new session.
+                      You&apos;ve run out of voice credits to start a new
+                      session.
                     </p>
                     <div className="flex justify-center">
                       <Button
@@ -894,7 +895,7 @@ export default function VoiceChatPage() {
                   </div>
                   <p className="text-sm text-white/80">
                     {voiceCreditsTotal === 0
-                      ? "You've used all your voice credits. Upgrade your plan to continue your therapy sessions."
+                      ? "You&apos;ve used all your voice credits. Upgrade your plan to continue your therapy sessions."
                       : `You have ${voiceCreditsTotal} voice credits remaining. Consider upgrading your plan for unlimited access.`}
                   </p>
                   <div className="flex justify-center">
