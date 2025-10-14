@@ -17,11 +17,10 @@ import {
   CreditCard as CreditCardIcon,
   LayoutDashboard,
   Shield,
-  MessageSquare,
+  User,
 } from "lucide-react";
 import { BasicUser } from "app-types/user";
 import { getIsUserAdmin } from "@/lib/user/utils";
-import { Button } from "ui/button";
 
 interface VoiceSidebarProps {
   user?: BasicUser;
@@ -82,6 +81,16 @@ export function VoiceSidebar({ user }: VoiceSidebarProps) {
                     Dashboard
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => router.push("/therapists")}
+                    className="font-semibold"
+                  >
+                    <User className="size-4" />
+                    Therapists
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -89,18 +98,6 @@ export function VoiceSidebar({ user }: VoiceSidebarProps) {
       </SidebarContent>
 
       <SidebarFooter className="flex flex-col items-stretch space-y-2">
-        {/* Chat with EchoNest Button */}
-        <Button
-          className="w-full bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:via-green-600 hover:to-teal-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-300 font-semibold justify-start"
-          onClick={() => {
-            router.push("/chat");
-            router.refresh();
-          }}
-        >
-          <MessageSquare className="h-4 w-4 mr-2" />
-          Chat with EchoNest
-        </Button>
-
         <AppSidebarUser user={user} />
       </SidebarFooter>
     </Sidebar>

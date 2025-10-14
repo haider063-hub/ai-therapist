@@ -78,7 +78,7 @@ export async function checkDatabaseConnection(): Promise<boolean> {
     await client.query("SELECT 1");
     client.release();
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 }

@@ -79,7 +79,7 @@ Return ONLY valid JSON in this format:
     threadId: string,
     sessionType: "chat" | "voice",
     moodAnalysis: MoodAnalysisResult,
-    conversationEndTime?: Date,
+    _conversationEndTime?: Date,
   ): Promise<void> {
     try {
       const today = new Date().toISOString().split("T")[0];

@@ -11,7 +11,7 @@ import {
   TriangleAlertIcon,
   Coins,
   Languages,
-  User,
+  MessageSquare,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { safe } from "ts-safe";
@@ -473,10 +473,14 @@ export default function VoiceChatPage() {
           {/* Sidebar Toggle Button */}
           <SidebarTrigger className="flex-shrink-0 text-white hover:text-white/80" />
 
-          {/* Therapist Info */}
+          {/* Therapist Info - Clickable */}
           <div className="flex items-center gap-2 flex-1">
             {selectedTherapist ? (
-              <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 p-2 h-auto hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => router.push("/therapists")}
+              >
                 <Avatar className="h-8 w-8 rounded-full bg-white">
                   <AvatarImage
                     src={selectedTherapist.avatar}
@@ -488,7 +492,7 @@ export default function VoiceChatPage() {
                       selectedTherapist.name.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
-                <div className="flex flex-col">
+                <div className="flex flex-col text-left">
                   <div className="text-sm font-semibold text-white">
                     {selectedTherapist.name}
                   </div>
@@ -497,7 +501,7 @@ export default function VoiceChatPage() {
                     {selectedTherapist.language}
                   </div>
                 </div>
-              </div>
+              </Button>
             ) : (
               <div className="text-sm font-medium text-white">
                 Voice Therapy Session
@@ -547,16 +551,13 @@ export default function VoiceChatPage() {
                   </SelectContent>
                 </Select>
               )}
-
-              {/* Change Therapist Button */}
+              {/* Chat with EchoNest Button */}
               <Button
-                variant="outline"
-                size="sm"
-                className="h-8 px-3 py-2 text-xs font-normal whitespace-nowrap min-w-[120px] min-h-[36px] border-gray-300 bg-white text-black"
-                onClick={() => router.push("/therapists")}
+                className="px-2 sm:px-3 py-1.5 sm:py-2 h-auto text-xs sm:text-sm font-medium bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:via-green-600 hover:to-teal-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-300"
+                onClick={() => router.push("/chat")}
               >
-                <User className="h-3.5 w-3.5 mr-1 text-black" />
-                {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
+                <MessageSquare className="h-3 sm:h-4 w-3 sm:w-4 mr-1 sm:mr-2" />
+                <span className="font-normal">Chat with EchoNest</span>
               </Button>
             </div>
           )}
@@ -643,7 +644,11 @@ export default function VoiceChatPage() {
             <SidebarTrigger className="flex-shrink-0 text-white hover:text-white/80" />
 
             {selectedTherapist && (
-              <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2 flex-1 min-w-0 p-2 h-auto hover:bg-white/10 rounded-lg transition-colors"
+                onClick={() => router.push("/therapists")}
+              >
                 <Avatar className="h-7 w-7 rounded-full bg-white flex-shrink-0">
                   <AvatarImage
                     src={selectedTherapist.avatar}
@@ -658,7 +663,7 @@ export default function VoiceChatPage() {
                 <span className="text-sm font-normal truncate text-white">
                   {selectedTherapist.name}
                 </span>
-              </div>
+              </Button>
             )}
 
             {showBreakdown ? (
@@ -740,7 +745,16 @@ export default function VoiceChatPage() {
           {/* Bottom Row: Action Buttons - Only if not active */}
           {!isActive && (
             <div className="flex flex-col gap-2 w-full">
-              {/* First Row: Language Selector */}
+              {/* Chat with EchoNest Button */}
+              <Button
+                className="w-full px-3 py-2 h-9 text-sm font-medium bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 hover:from-emerald-600 hover:via-green-600 hover:to-teal-600 text-white border-0 shadow-md hover:shadow-lg transition-all duration-300"
+                onClick={() => router.push("/chat")}
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                <span className="font-normal">Chat with EchoNest</span>
+              </Button>
+
+              {/* Language Selector */}
               {selectedTherapist && availableLanguages.length > 1 && (
                 <Select
                   key={`mobile-${selectedLanguage}`}
@@ -779,17 +793,6 @@ export default function VoiceChatPage() {
                   </SelectContent>
                 </Select>
               )}
-
-              {/* Change Therapist Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full h-8 px-3 py-2 text-xs font-normal whitespace-nowrap min-h-[36px]"
-                onClick={() => router.push("/therapists")}
-              >
-                <User className="h-3.5 w-3.5 mr-1" />
-                {selectedTherapist ? "Change Therapist" : "Setup Therapist"}
-              </Button>
             </div>
           )}
         </div>
