@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "auth/server";
-import { pgDb } from "lib/db/pg/db.pg";
+import { pgDb, executeWithRetry } from "lib/db/pg/db.pg";
 import { UserSchema } from "lib/db/pg/schema.pg";
 import { eq } from "drizzle-orm";
+import { getCurrentUTCTime } from "lib/utils/timezone-utils";
 import logger from "logger";
+
+// Helper function to get UTC timestamp for database storage
+function getUTCTimestamp(): Date {
+  return new Date(getCurrentUTCTime());
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,14 +27,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Update user's selected therapist
-    await pgDb
-      .update(UserSchema)
-      .set({
-        selectedTherapistId: therapistId,
-        updatedAt: new Date(),
-      })
-      .where(eq(UserSchema.id, session.user.id));
+    // Update user's selected therapist with retry logic
+    await executeWithRetry(async () => {
+      await pgDb
+        .update(UserSchema)
+        .set({
+          selectedTherapistId: therapistId,
+          updatedAt: getUTCTimestamp(),
+        })
+        .where(eq(UserSchema.id, session.user.id));
+    });
 
     logger.info(`User ${session.user.id} selected therapist: ${therapistId}`);
 
@@ -49,10 +57,12 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const [user] = await pgDb
-      .select({ selectedTherapistId: UserSchema.selectedTherapistId })
-      .from(UserSchema)
-      .where(eq(UserSchema.id, session.user.id));
+    const [user] = await executeWithRetry(async () => {
+      return await pgDb
+        .select({ selectedTherapistId: UserSchema.selectedTherapistId })
+        .from(UserSchema)
+        .where(eq(UserSchema.id, session.user.id));
+    });
 
     return NextResponse.json({
       selectedTherapistId: user?.selectedTherapistId || null,

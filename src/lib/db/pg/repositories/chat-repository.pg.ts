@@ -9,6 +9,15 @@ import { eq, and, desc, gte, sql, ne } from "drizzle-orm";
 import type { ChatThread, ChatMessage } from "app-types/chat";
 import { UIMessage } from "ai";
 import { ChatMetadata } from "app-types/chat";
+import {
+  getCurrentLocalTime,
+  getCurrentUTCTime,
+} from "lib/utils/timezone-utils";
+
+// Helper function to get UTC timestamp for database storage
+function getUTCTimestamp(): Date {
+  return new Date(getCurrentUTCTime());
+}
 
 export const pgChatRepository = {
   async insertThread(
@@ -22,8 +31,8 @@ export const pgChatRepository = {
         title: thread.title,
         model: thread.model,
         archived: thread.archived || false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: getUTCTimestamp(),
+        updatedAt: getUTCTimestamp(),
       })
       .returning();
     return {
@@ -140,7 +149,7 @@ export const pgChatRepository = {
       .update(ChatThreadSchema)
       .set({
         ...thread,
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(ChatThreadSchema.id, id))
       .returning();
@@ -191,7 +200,7 @@ export const pgChatRepository = {
           title: thread.title,
           model: thread.model,
           archived: thread.archived,
-          updatedAt: new Date(),
+          updatedAt: getUTCTimestamp(),
         })
         .where(eq(ChatThreadSchema.id, thread.id))
         .returning();
@@ -210,8 +219,8 @@ export const pgChatRepository = {
           title: thread.title || "",
           model: thread.model,
           archived: thread.archived || false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: getCurrentLocalTime(),
+          updatedAt: getUTCTimestamp(),
         })
         .returning();
 
@@ -249,7 +258,7 @@ export const pgChatRepository = {
 
     const result = await pgDb.execute(sql`
       INSERT INTO chat_message (id, thread_id, role, parts, metadata, created_at, updated_at)
-      VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
+      VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${getUTCTimestamp()}, ${getUTCTimestamp()})
       RETURNING id, thread_id as "threadId", role, parts, metadata, created_at as "createdAt", updated_at as "updatedAt"
     `);
 
@@ -282,11 +291,11 @@ export const pgChatRepository = {
 
     const result = await pgDb.execute(sql`
       INSERT INTO chat_message (id, thread_id, role, parts, metadata, created_at, updated_at)
-      VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${new Date()}, ${new Date()})
+      VALUES (${message.id}, ${message.threadId}, ${message.role}, ${partsJson}::jsonb, ${metadataJson}::jsonb, ${getUTCTimestamp()}, ${getUTCTimestamp()})
       ON CONFLICT (id) DO UPDATE SET
         parts = ${partsJson}::jsonb,
         metadata = ${metadataJson}::jsonb,
-        updated_at = ${new Date()}
+        updated_at = ${getUTCTimestamp()}
       RETURNING id, thread_id as "threadId", role, parts, metadata, created_at as "createdAt", updated_at as "updatedAt"
     `);
 
@@ -331,7 +340,7 @@ export const pgChatRepository = {
   async insertMessages(
     messages: Omit<ChatMessage, "createdAt" | "updatedAt">[],
   ): Promise<ChatMessage[]> {
-    const now = new Date();
+    const now = getUTCTimestamp();
     const messagesWithTimestamps = messages.map((msg) => ({
       id: msg.id,
       threadId: msg.threadId,
@@ -362,7 +371,7 @@ export const pgChatRepository = {
       .update(UserSchema)
       .set({
         totalChatSessions: sql`${UserSchema.totalChatSessions} + 1`,
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(UserSchema.id, userId));
   },
@@ -373,7 +382,7 @@ export const pgChatRepository = {
       .update(UserSchema)
       .set({
         totalVoiceSessions: sql`${UserSchema.totalVoiceSessions} + 1`,
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(UserSchema.id, userId));
   },
@@ -384,12 +393,6 @@ export const pgChatRepository = {
   ): Promise<
     Array<{ threadId: string; lastMessageTime: number; notes?: string }>
   > {
-    // Debug logging
-    console.log("🔍 Debug - selectVoiceConversationsByUserId called with:", {
-      userId,
-      excludeThreadId,
-    });
-
     // Get voice conversations directly from mood tracking with their timestamps
     const voiceConversations = await pgDb
       .select({
@@ -409,17 +412,6 @@ export const pgChatRepository = {
         ),
       )
       .orderBy(desc(MoodTrackingSchema.createdAt));
-
-    // Debug logging for raw voice conversations
-    console.log(
-      "🔍 Debug - Raw voice conversations from DB:",
-      voiceConversations.map((conv, index) => ({
-        index: index + 1,
-        threadId: conv.threadId,
-        createdAt: conv.createdAt?.toISOString(),
-        notes: conv.notes?.substring(0, 30) + "...",
-      })),
-    );
 
     // Group by threadId and get the most recent entry for each thread
     const threadMap = new Map<

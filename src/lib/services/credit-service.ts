@@ -1,6 +1,12 @@
 import { subscriptionRepository } from "../db/pg/repositories/subscription-repository.pg";
 import { CREDIT_COSTS, SUBSCRIPTION_PLANS } from "../stripe/server";
+import { getCurrentUTCTime } from "lib/utils/timezone-utils";
 import logger from "logger";
+
+// Helper function to get UTC timestamp for database storage
+function getUTCTimestamp(): string {
+  return getCurrentUTCTime();
+}
 
 // Helper functions for plan type checks
 export const isUnlimitedChatPlan = (subscriptionType: string): boolean => {
@@ -185,7 +191,7 @@ export class CreditService {
         creditsUsed: creditsToDeduct,
         threadId: threadId || null,
         metadata: {
-          timestamp: new Date().toISOString(),
+          timestamp: getUTCTimestamp(),
           featureType,
         },
       });
@@ -281,7 +287,7 @@ export class CreditService {
         creditsUsed: creditsToDeduct,
         threadId: threadId || null,
         metadata: {
-          timestamp: new Date().toISOString(),
+          timestamp: getUTCTimestamp(),
           userAudioDuration,
           botAudioDuration,
           totalSeconds,
@@ -334,7 +340,7 @@ export class CreditService {
         status: "succeeded",
         metadata: {
           source,
-          timestamp: new Date().toISOString(),
+          timestamp: getUTCTimestamp(),
         },
       });
 

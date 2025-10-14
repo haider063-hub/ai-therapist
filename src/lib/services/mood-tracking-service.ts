@@ -1,8 +1,9 @@
-import { pgDb } from "lib/db/pg/db.pg";
-import { MoodTrackingSchema } from "lib/db/pg/schema.pg";
+import { pgDb, executeWithRetry } from "lib/db/pg/db.pg";
 import { generateUUID } from "lib/utils";
 import { customModelProvider } from "lib/ai/models";
 import { generateText } from "ai";
+import { getCurrentUTCTime } from "lib/utils/timezone-utils";
+import { sql } from "drizzle-orm";
 import logger from "logger";
 
 interface MoodAnalysisResult {
@@ -83,6 +84,10 @@ Return ONLY valid JSON in this format:
     try {
       const today = new Date().toISOString().split("T")[0];
 
+      // Use EXACT same UTC method as chat messages for consistency
+      const utcTimestamp = getCurrentUTCTime(); // Same as chat messages
+      const finalTimestamp = new Date(utcTimestamp);
+
       const moodTrackingData = {
         id: generateUUID(),
         userId,
@@ -92,14 +97,31 @@ Return ONLY valid JSON in this format:
         threadId,
         sessionType,
         notes: moodAnalysis.notes || null,
-        createdAt: conversationEndTime || new Date(),
+        createdAt: finalTimestamp, // Store as UTC Date object (same as chat)
       };
 
-      await pgDb.insert(MoodTrackingSchema).values(moodTrackingData);
-
-      logger.info(
-        `Mood tracked for user ${userId}: ${moodAnalysis.moodScore}/10 (${moodAnalysis.sentiment})`,
-      );
+      // Use raw SQL like chat messages to ensure consistent timestamp handling
+      try {
+        await executeWithRetry(
+          () =>
+            pgDb.execute(sql`
+            INSERT INTO mood_tracking (id, user_id, date, mood_score, sentiment, thread_id, session_type, notes, created_at)
+            VALUES (${moodTrackingData.id}, ${moodTrackingData.userId}, ${moodTrackingData.date}, ${moodTrackingData.moodScore}, ${moodTrackingData.sentiment}, ${moodTrackingData.threadId}, ${moodTrackingData.sessionType}, ${moodTrackingData.notes}, ${new Date(utcTimestamp)})
+          `),
+          3, // maxRetries
+          1000, // delay
+        );
+        logger.info(
+          `Mood tracked for user ${userId}: ${moodAnalysis.moodScore}/10 (${moodAnalysis.sentiment})`,
+        );
+      } catch (error: any) {
+        console.error(
+          `❌ Failed to save mood tracking after all retries:`,
+          error,
+        );
+        logger.error(`Failed to save mood tracking after all retries:`, error);
+        // Don't throw - mood tracking should not break the main flow
+      }
     } catch (error) {
       console.error("Error saving mood tracking:", error);
       logger.error("Error saving mood tracking:", error);

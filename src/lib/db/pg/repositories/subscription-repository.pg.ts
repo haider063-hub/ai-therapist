@@ -1,5 +1,12 @@
 import { eq, and, desc, sql } from "drizzle-orm";
 import { pgDb } from "../db.pg";
+import { getCurrentUTCTime } from "lib/utils/timezone-utils";
+
+// Helper function to get UTC timestamp for database storage
+function getUTCTimestamp(): Date {
+  return new Date(getCurrentUTCTime());
+}
+
 import {
   UserSchema,
   TransactionSchema,
@@ -31,7 +38,7 @@ export const subscriptionRepository = {
       .update(UserSchema)
       .set({
         ...data,
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(UserSchema.id, userId))
       .returning();
@@ -64,7 +71,7 @@ export const subscriptionRepository = {
       if (
         currentUser.subscriptionType !== "free_trial" &&
         currentUser.subscriptionEndDate &&
-        new Date() > currentUser.subscriptionEndDate
+        getUTCTimestamp() > currentUser.subscriptionEndDate
       ) {
         throw new Error(
           "Your subscription has expired. Please renew your subscription to continue.",
@@ -110,7 +117,7 @@ export const subscriptionRepository = {
             .set({
               voiceCreditsUsedThisMonth: usedThisMonth + planUsage,
               voiceCreditsFromTopup: topupCredits - topupUsage,
-              updatedAt: new Date(),
+              updatedAt: getUTCTimestamp(),
             })
             .where(eq(UserSchema.id, userId))
             .returning();
@@ -151,7 +158,7 @@ export const subscriptionRepository = {
               voiceCredits: newFreeCredits,
               voiceCreditsFromTopup: newTopupCredits,
               credits: currentUser.credits - amount,
-              updatedAt: new Date(),
+              updatedAt: getUTCTimestamp(),
             })
             .where(eq(UserSchema.id, userId))
             .returning();
@@ -195,7 +202,7 @@ export const subscriptionRepository = {
             .set({
               voiceCreditsUsedThisMonth: usedThisMonth + planUsage,
               voiceCreditsFromTopup: topupCredits - topupUsage,
-              updatedAt: new Date(),
+              updatedAt: getUTCTimestamp(),
             })
             .where(eq(UserSchema.id, userId))
             .returning();
@@ -227,7 +234,7 @@ export const subscriptionRepository = {
               chatCredits: newFreeCredits,
               chatCreditsFromTopup: newTopupCredits,
               credits: currentUser.credits - amount,
-              updatedAt: new Date(),
+              updatedAt: getUTCTimestamp(),
             })
             .where(eq(UserSchema.id, userId))
             .returning();
@@ -267,7 +274,7 @@ export const subscriptionRepository = {
             chatCredits: newFreeCredits,
             chatCreditsFromTopup: newTopupCredits,
             credits: currentUser.credits - amount, // Keep legacy field in sync
-            updatedAt: new Date(),
+            updatedAt: getUTCTimestamp(),
           })
           .where(eq(UserSchema.id, userId))
           .returning();
@@ -302,7 +309,7 @@ export const subscriptionRepository = {
             voiceCredits: newFreeCredits,
             voiceCreditsFromTopup: newTopupCredits,
             credits: currentUser.credits - amount, // Keep legacy field in sync
-            updatedAt: new Date(),
+            updatedAt: getUTCTimestamp(),
           })
           .where(eq(UserSchema.id, userId))
           .returning();
@@ -317,7 +324,7 @@ export const subscriptionRepository = {
       .update(UserSchema)
       .set({
         credits: sql`${UserSchema.credits} + ${amount}`,
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(UserSchema.id, userId))
       .returning();
@@ -334,7 +341,7 @@ export const subscriptionRepository = {
       .set({
         chatCreditsFromTopup: sql`${UserSchema.chatCreditsFromTopup} + ${amount}`,
         credits: sql`${UserSchema.credits} + ${amount}`, // Keep legacy field in sync
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(UserSchema.id, userId))
       .returning();
@@ -351,7 +358,7 @@ export const subscriptionRepository = {
       .set({
         voiceCreditsFromTopup: sql`${UserSchema.voiceCreditsFromTopup} + ${amount}`,
         credits: sql`${UserSchema.credits} + ${amount}`, // Keep legacy field in sync
-        updatedAt: new Date(),
+        updatedAt: getUTCTimestamp(),
       })
       .where(eq(UserSchema.id, userId))
       .returning();
@@ -382,8 +389,8 @@ export const subscriptionRepository = {
       .values({
         ...transaction,
         id: crypto.randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: getUTCTimestamp(),
+        updatedAt: getUTCTimestamp(),
       })
       .returning();
 
@@ -425,7 +432,7 @@ export const subscriptionRepository = {
       .values({
         ...log,
         id: crypto.randomUUID(),
-        timestamp: new Date(),
+        timestamp: getUTCTimestamp(),
       })
       .returning();
 
@@ -482,8 +489,8 @@ export const subscriptionRepository = {
       .values({
         ...plan,
         id: crypto.randomUUID(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        createdAt: getUTCTimestamp(),
+        updatedAt: getUTCTimestamp(),
       })
       .returning();
 
@@ -512,7 +519,7 @@ export const subscriptionRepository = {
     if (
       user.subscriptionType !== "free_trial" &&
       user.subscriptionEndDate &&
-      new Date() > user.subscriptionEndDate &&
+      getUTCTimestamp() > user.subscriptionEndDate &&
       user.subscriptionStatus === "active"
     ) {
       // Subscription expired - should have been handled by Stripe webhooks
@@ -661,7 +668,7 @@ export const subscriptionRepository = {
     }
 
     // Reset monthly counter if needed
-    const now = new Date();
+    const now = getUTCTimestamp();
     const resetDate = new Date(user.imageUsageResetDate);
     const monthsSinceReset =
       (now.getFullYear() - resetDate.getFullYear()) * 12 +
@@ -703,7 +710,7 @@ export const subscriptionRepository = {
   },
 
   async incrementImageUsage(userId: string): Promise<void> {
-    const now = new Date();
+    const now = getUTCTimestamp();
     await pgDb
       .update(UserSchema)
       .set({

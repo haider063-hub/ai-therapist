@@ -12,6 +12,7 @@ import { customModelProvider, isToolCallUnsupportedModel } from "lib/ai/models";
 
 import { chatRepository } from "lib/db/repository";
 import globalLogger from "logger";
+import { getCurrentLocalTime } from "lib/utils/timezone-utils";
 import {
   buildUserSystemPrompt,
   buildToolCallUnsupportedModelSystemPrompt,
@@ -471,7 +472,7 @@ You are now analyzing an image that the user has uploaded. Please:
               thread!.id,
               conversationMessages,
               "chat",
-              new Date(),
+              getCurrentLocalTime(),
             )
             .catch((err) => logger.error("Mood tracking failed:", err));
         } catch (error) {

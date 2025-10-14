@@ -25,7 +25,7 @@ import { useToRef } from "@/hooks/use-latest";
 import { Button } from "ui/button";
 import { deleteThreadAction } from "@/app/api/chat/actions";
 import { useRouter } from "next/navigation";
-import { ArrowDown, Loader } from "lucide-react";
+import { ArrowDown, Loader, Coins } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -56,6 +56,7 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
   const [canUseChat, setCanUseChat] = useState(true);
   const [chatCredits, setChatCredits] = useState(0);
   const [_subscriptionType, setSubscriptionType] = useState("free_trial");
+  const [creditsLoaded, setCreditsLoaded] = useState(false);
 
   const [
     appStoreMutate,
@@ -97,8 +98,10 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
           setCanUseChat(data.features.canUseChat);
           setSubscriptionType(data.user.subscriptionType);
         }
+        setCreditsLoaded(true);
       } catch (error) {
         console.error("Failed to fetch credit status:", error);
+        setCreditsLoaded(true); // Set loaded even on error to prevent infinite loading
       }
     };
 
@@ -412,23 +415,33 @@ export default function ChatBot({ threadId, initialMessages }: Props) {
             "w-full z-10",
           )}
         >
-          {/* Low Credits Warning Banner - Removed: Only show when credits are completely exhausted */}
-
-          {/* Out of Credits Warning Banner */}
-          {!canUseChat && chatCredits === 0 && (
-            <div className="max-w-3xl mx-auto mb-2 px-4">
-              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-red-800 dark:text-red-200 font-medium">
-                    ❌ Out of chat credits
+          {/* Low Credits Warning Banner */}
+          {creditsLoaded && (!canUseChat || chatCredits <= 5) && (
+            <div className="w-full max-w-3xl mx-auto mb-6 px-4">
+              <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-300/30 rounded-xl px-6 py-4 backdrop-blur-sm">
+                <div className="text-center space-y-4">
+                  <div className="flex items-center justify-center gap-2">
+                    <Coins className="h-5 w-5 text-yellow-400" />
+                    <p className="text-lg font-semibold text-white">
+                      {chatCredits === 0
+                        ? "Out of Chat Credits"
+                        : "Low Chat Credits"}
+                    </p>
+                  </div>
+                  <p className="text-sm text-white/80">
+                    {chatCredits === 0
+                      ? "You've used all your chat credits. Upgrade your plan to continue your therapy sessions."
+                      : `You have ${chatCredits} chat credits remaining. Consider upgrading your plan for unlimited access.`}
                   </p>
-                  <Button
-                    size="sm"
-                    className="text-xs bg-red-600 hover:bg-red-700"
-                    onClick={() => router.push("/subscription")}
-                  >
-                    Upgrade Now
-                  </Button>
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={() => router.push("/subscription")}
+                      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Coins className="h-4 w-4 mr-2" />
+                      {chatCredits === 0 ? "Upgrade Plan" : "Get More Credits"}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
