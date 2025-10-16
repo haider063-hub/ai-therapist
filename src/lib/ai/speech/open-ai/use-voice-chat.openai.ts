@@ -336,37 +336,8 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
             completed: true,
           });
 
-          // Deduct credits only when user actually speaks AND session is active
-          if (
-            isActive && // CRITICAL: Only deduct if session is still active
-            transcript &&
-            transcript.trim().length > 0 &&
-            transcript !== "...speaking"
-          ) {
-            fetch("/api/chat/voice-credit-deduct", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                threadId: props?.currentThreadId,
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.success) {
-                  // Trigger UI update
-                  window.dispatchEvent(new Event("credits-updated"));
-                } else {
-                  console.error("❌ Credit deduction failed:", data);
-                }
-              })
-              .catch((err) => {
-                console.error("❌ Failed to deduct credits:", err);
-              });
-          } else if (!isActive) {
-            console.log(
-              "🔒 Session ended - credit deduction blocked for security",
-            );
-          }
+          // Credit deduction now handled by duration-based system in voice-chat page
+          // This ensures fair billing based on actual speech time (user + bot)
           break;
         }
         case "response.audio_transcript.delta": {
