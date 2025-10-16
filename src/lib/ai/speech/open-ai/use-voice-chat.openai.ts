@@ -336,7 +336,32 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
             completed: true,
           });
 
-          // Credit deduction removed - now handled at session end (50 credits per session)
+          // Deduct credits only when user actually speaks (not just for staying on page)
+          if (
+            transcript &&
+            transcript.trim().length > 0 &&
+            transcript !== "...speaking"
+          ) {
+            fetch("/api/chat/voice-credit-deduct", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                threadId: props?.currentThreadId,
+              }),
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                if (data.success) {
+                  // Trigger UI update
+                  window.dispatchEvent(new Event("credits-updated"));
+                } else {
+                  console.error("❌ Credit deduction failed:", data);
+                }
+              })
+              .catch((err) => {
+                console.error("❌ Failed to deduct credits:", err);
+              });
+          }
           break;
         }
         case "response.audio_transcript.delta": {

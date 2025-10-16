@@ -277,43 +277,9 @@ export default function VoiceChatPage() {
       sessionStartTime.current = Date.now();
       lastCreditDeductionTime.current = Date.now();
 
-      // Start periodic credit deduction (every 15 seconds)
-      creditDeductionInterval.current = setInterval(() => {
-        if (sessionStartTime.current && lastCreditDeductionTime.current) {
-          const now = Date.now();
-          const timeSinceLastDeduction = Math.floor(
-            (now - lastCreditDeductionTime.current) / 1000,
-          );
-
-          // Deduct credits every 60 seconds (1 minute) for real-time updates
-          if (timeSinceLastDeduction >= 60) {
-            // Deduct credits in real-time
-            fetch("/api/chat/voice-credit-deduct-duration", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                threadId: currentThreadId,
-                userAudioDuration: timeSinceLastDeduction / 2,
-                botAudioDuration: timeSinceLastDeduction / 2,
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (data.success) {
-                  // Trigger UI update
-                  window.dispatchEvent(new Event("credits-updated"));
-                  // Update last deduction time
-                  lastCreditDeductionTime.current = now;
-                } else {
-                  console.error("❌ Credit deduction failed:", data);
-                }
-              })
-              .catch((err) => {
-                console.error("❌ Failed to deduct credits:", err);
-              });
-          }
-        }
-      }, 15000); // Check every 15 seconds (but only deduct if >= 60 seconds elapsed)
+      // REMOVED: Periodic credit deduction interval
+      // Credits will now only be deducted when there's actual voice activity
+      // This prevents charging users for just staying on the page
     }
 
     // Cleanup when session ends
@@ -336,28 +302,8 @@ export default function VoiceChatPage() {
 
     await safe(() => stop());
 
-    // Calculate remaining time since last deduction
-    const now = Date.now();
-    const remainingSeconds = lastCreditDeductionTime.current
-      ? Math.floor((now - lastCreditDeductionTime.current) / 1000)
-      : 0;
-
-    // Deduct credits for remaining time (even if less than 30 seconds)
-    if (remainingSeconds > 0) {
-      try {
-        await fetch("/api/chat/voice-credit-deduct-duration", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            threadId: voiceThreadId,
-            userAudioDuration: remainingSeconds / 2,
-            botAudioDuration: remainingSeconds / 2,
-          }),
-        });
-      } catch (error) {
-        console.error("Failed to deduct final credits:", error);
-      }
-    }
+    // Credits are now deducted per actual speech, not by time duration
+    // No need to calculate remaining time or deduct additional credits
 
     // Track voice session end if there were any messages
     if (messages.length > 0) {
@@ -373,12 +319,12 @@ export default function VoiceChatPage() {
           })
           .filter((m) => m.content.trim().length > 0);
 
-        // Send session end for mood tracking (credits already deducted in real-time)
+        // Send session end for mood tracking (credits already deducted per speech)
         const requestData = {
           threadId: voiceThreadId,
           messages: conversationMessages,
-          userAudioDuration: 0, // Credits already deducted in real-time
-          botAudioDuration: 0, // Credits already deducted in real-time
+          userAudioDuration: 0, // Credits already deducted per actual speech
+          botAudioDuration: 0, // Credits already deducted per actual speech
           sessionEndTime: new Date().toISOString(), // Pass the actual session end time (UTC)
         };
 
@@ -425,11 +371,6 @@ export default function VoiceChatPage() {
       if (isActive && messages.length > 0) {
         e.preventDefault();
 
-        // Calculate remaining time since last deduction
-        const remainingSeconds = lastCreditDeductionTime.current
-          ? Math.floor((Date.now() - lastCreditDeductionTime.current) / 1000)
-          : 0;
-
         const conversationMessages = messages
           .map((m) => {
             const textPart = m.parts.find((p) => p.type === "text");
@@ -440,12 +381,12 @@ export default function VoiceChatPage() {
           })
           .filter((m) => m.content.trim().length > 0);
 
-        // Send remaining time for final credit deduction
+        // Send session end data (credits already deducted per actual speech)
         const data = JSON.stringify({
           threadId: voiceThreadId,
           messages: conversationMessages,
-          userAudioDuration: remainingSeconds / 2,
-          botAudioDuration: remainingSeconds / 2,
+          userAudioDuration: 0, // Credits already deducted per actual speech
+          botAudioDuration: 0, // Credits already deducted per actual speech
         });
 
         navigator.sendBeacon("/api/chat/voice-session-end", data);
