@@ -88,6 +88,19 @@ Return ONLY valid JSON in this format:
       const utcTimestamp = getCurrentUTCTime(); // Same as chat messages
       const finalTimestamp = new Date(utcTimestamp);
 
+      console.log(
+        "🔍 [DEBUG] Mood tracking save - User:",
+        userId,
+        "Thread:",
+        threadId,
+        "Session:",
+        sessionType,
+        "UTC Time:",
+        utcTimestamp,
+        "Final Timestamp:",
+        finalTimestamp.toISOString(),
+      );
+
       const moodTrackingData = {
         id: generateUUID(),
         userId,

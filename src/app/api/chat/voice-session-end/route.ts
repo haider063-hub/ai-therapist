@@ -120,6 +120,13 @@ export async function POST(request: NextRequest) {
 
       // Track mood with better error handling
       try {
+        console.log(
+          "🔍 [DEBUG] Tracking voice conversation mood - Thread:",
+          threadId,
+          "Time:",
+          actualSessionEndTime.toISOString(),
+        );
+
         await moodTrackingService.trackConversationMood(
           session.user.id,
           threadId,
@@ -127,6 +134,8 @@ export async function POST(request: NextRequest) {
           "voice",
           actualSessionEndTime,
         );
+
+        console.log("🔍 [DEBUG] Voice conversation mood tracking completed");
       } catch (err) {
         console.error("❌ Voice mood tracking failed:", err);
         logger.error("Voice mood tracking failed:", err);

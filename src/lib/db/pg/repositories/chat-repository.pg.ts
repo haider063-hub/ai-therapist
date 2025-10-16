@@ -434,6 +434,13 @@ export const pgChatRepository = {
       (a, b) => b.lastMessageTime - a.lastMessageTime,
     );
 
+    console.log("🔍 [DEBUG] Voice conversations retrieved:", result.length);
+    result.forEach((conv, index) => {
+      console.log(
+        `🔍 [DEBUG] Voice ${index + 1}: Thread ${conv.threadId}, Time: ${new Date(conv.lastMessageTime).toISOString()}, Notes: ${conv.notes?.substring(0, 50)}...`,
+      );
+    });
+
     return result;
   },
 };

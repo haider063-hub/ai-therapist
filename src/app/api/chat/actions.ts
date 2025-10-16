@@ -98,10 +98,17 @@ export async function checkUserHistoryAction(
   }
 
   try {
+    console.log(
+      "🔍 [DEBUG] Starting conversation history check for user:",
+      session.user.id,
+    );
+    console.log("🔍 [DEBUG] Current thread ID (to exclude):", currentThreadId);
+
     // Get all user threads (chat conversations)
     const allThreads = await chatRepository.selectThreadsByUserId(
       session.user.id,
     );
+    console.log("🔍 [DEBUG] Found chat threads:", allThreads.length);
 
     // Filter to find previous chat threads with actual messages
     const previousChatThreadsWithMessages: Array<{
@@ -113,6 +120,7 @@ export async function checkUserHistoryAction(
     for (const thread of allThreads) {
       // Skip current thread
       if (currentThreadId && thread.id === currentThreadId) {
+        console.log("🔍 [DEBUG] Skipping current thread:", thread.id);
         continue;
       }
 
@@ -123,6 +131,26 @@ export async function checkUserHistoryAction(
       );
 
       if (userMessages.length > 0) {
+        // Get the latest message timestamp for debugging
+        const latestMessage = userMessages.sort(
+          (a, b) =>
+            (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0),
+        )[0];
+
+        const latestMessageText =
+          latestMessage?.parts?.find((p) => p.type === "text")?.text ||
+          "No text content";
+        console.log(
+          "🔍 [DEBUG] Chat thread:",
+          thread.id,
+          "Messages:",
+          userMessages.length,
+          "Latest:",
+          latestMessage?.createdAt?.toISOString(),
+          "Content:",
+          latestMessageText.substring(0, 50) + "...",
+        );
+
         previousChatThreadsWithMessages.push({
           thread,
           messages: userMessages,
@@ -137,6 +165,22 @@ export async function checkUserHistoryAction(
         session.user.id,
         currentThreadId,
       );
+    console.log(
+      "🔍 [DEBUG] Found voice conversations:",
+      voiceConversations.length,
+    );
+
+    // Log voice conversations with details
+    for (const voiceConv of voiceConversations) {
+      console.log(
+        "🔍 [DEBUG] Voice conversation:",
+        voiceConv.threadId,
+        "Time:",
+        new Date(voiceConv.lastMessageTime).toISOString(),
+        "Notes:",
+        voiceConv.notes?.substring(0, 50) + "...",
+      );
+    }
 
     // Combine chat and voice conversations
     const allConversations: Array<{
@@ -158,6 +202,13 @@ export async function checkUserHistoryAction(
         );
         lastMessageTime = sortedMessages[0]?.createdAt?.getTime() || 0;
       }
+
+      console.log(
+        "🔍 [DEBUG] Adding chat conversation:",
+        chatConv.thread.id,
+        "Last message time:",
+        new Date(lastMessageTime).toISOString(),
+      );
 
       allConversations.push({
         ...chatConv,
@@ -189,6 +240,15 @@ export async function checkUserHistoryAction(
         } as ChatMessage);
       }
 
+      console.log(
+        "🔍 [DEBUG] Adding voice conversation:",
+        voiceConv.threadId,
+        "Last message time:",
+        new Date(voiceConv.lastMessageTime).toISOString(),
+        "Notes:",
+        voiceConv.notes?.substring(0, 50) + "...",
+      );
+
       allConversations.push({
         thread: {
           id: voiceConv.threadId,
@@ -201,13 +261,44 @@ export async function checkUserHistoryAction(
     }
 
     if (allConversations.length === 0) {
+      console.log("🔍 [DEBUG] No conversations found - new user");
       return { isReturningUser: false };
     }
 
     // Sort by most recent message across both chat and voice
     allConversations.sort((a, b) => b.lastMessageTime - a.lastMessageTime);
 
+    console.log("🔍 [DEBUG] All conversations sorted by time:");
+    allConversations.forEach((conv, index) => {
+      console.log(
+        `🔍 [DEBUG] ${index + 1}. ${conv.sessionType.toUpperCase()} - Thread: ${conv.thread.id} - Time: ${new Date(conv.lastMessageTime).toISOString()}`,
+      );
+      if (conv.sessionType === "voice" && conv.messages[0]) {
+        const voiceText =
+          conv.messages[0].parts.find((p) => p.type === "text")?.text ||
+          "No text content";
+        console.log(`🔍 [DEBUG]    Content: ${voiceText}`);
+      } else if (conv.sessionType === "chat" && conv.messages.length > 0) {
+        const latestChatMessage = conv.messages.sort(
+          (a, b) =>
+            (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0),
+        )[0];
+        const chatText =
+          latestChatMessage.parts.find((p) => p.type === "text")?.text ||
+          "No text content";
+        console.log(`🔍 [DEBUG]    Content: ${chatText}`);
+      }
+    });
+
     const mostRecentConversation = allConversations[0];
+    console.log(
+      "🔍 [DEBUG] Most recent conversation:",
+      mostRecentConversation.sessionType,
+      "Thread:",
+      mostRecentConversation.thread.id,
+      "Time:",
+      new Date(mostRecentConversation.lastMessageTime).toISOString(),
+    );
 
     // Get last 2-3 user messages for better context
     const userMessages = mostRecentConversation.messages
@@ -219,6 +310,12 @@ export async function checkUserHistoryAction(
       })
       .filter((text) => text.length > 0);
 
+    console.log("🔍 [DEBUG] User messages for greeting:", userMessages);
+    console.log(
+      "🔍 [DEBUG] Session type for greeting:",
+      mostRecentConversation.sessionType,
+    );
+
     return {
       isReturningUser: userMessages.length > 0,
       lastMessages: userMessages,
@@ -226,6 +323,7 @@ export async function checkUserHistoryAction(
     };
   } catch (error) {
     logger.error("Error checking user history:", error);
+    console.error("🔍 [DEBUG] Error in conversation history check:", error);
     return null;
   }
 }
@@ -357,6 +455,12 @@ export async function generateReturningUserHeaderGreetingAction(
     throw new Error("Unauthorized");
   }
 
+  console.log(
+    "🎯 [DEBUG] Generating header greeting for session type:",
+    lastSessionType,
+  );
+  console.log("🎯 [DEBUG] Last messages for greeting:", lastMessages);
+
   // Use default OpenAI model for header greetings
   const model = customModelProvider.getModel({
     provider: "openai",
@@ -364,6 +468,7 @@ export async function generateReturningUserHeaderGreetingAction(
   });
 
   if (lastMessages.length === 0) {
+    console.log("🎯 [DEBUG] No messages found - treating as new user");
     // No previous conversation context - treat as new user
     return generateNewUserHeaderGreetingAction();
   }
@@ -372,6 +477,8 @@ export async function generateReturningUserHeaderGreetingAction(
     lastSessionType === "voice"
       ? "Their last conversation was via voice therapy"
       : "Their last conversation was via text chat";
+
+  console.log("🎯 [DEBUG] Session type context:", sessionTypeContext);
 
   const systemPrompt = `You are Econest, a professional AI therapist.
 Generate a warm, empathetic greeting for a returning user.
@@ -400,12 +507,18 @@ Examples (note the brevity):
 
   const context = `User's last conversation message(s):\n${lastMessages.map((msg, i) => `Message ${i + 1}: ${msg}`).join("\n\n")}\n\nIMPORTANT: Generate a SHORT greeting (max 1.5 lines, around 15-20 words) that references what they discussed above. Be specific but concise.`;
 
+  console.log("🎯 [DEBUG] Context sent to AI:", context);
+
   let greeting = "";
   let attempts = 0;
   const maxAttempts = 3;
 
   // Try up to 3 times to get a greeting that properly references the last chat
   while (attempts < maxAttempts) {
+    console.log(
+      `🎯 [DEBUG] Greeting generation attempt ${attempts + 1}/${maxAttempts}`,
+    );
+
     const { text } = await generateText({
       model,
       system: systemPrompt,
@@ -416,10 +529,17 @@ Examples (note the brevity):
     });
 
     greeting = text.trim();
+    console.log(
+      `🎯 [DEBUG] Generated greeting (attempt ${attempts + 1}):`,
+      greeting,
+    );
 
     // Validate that the greeting references the last conversation
     if (validateGreetingReferencesLastChat(greeting, lastMessages)) {
+      console.log("🎯 [DEBUG] Greeting validation passed!");
       break;
+    } else {
+      console.log("🎯 [DEBUG] Greeting validation failed - trying again");
     }
 
     attempts++;
@@ -432,8 +552,10 @@ Examples (note the brevity):
   ) {
     const lastTopic = lastMessages[0].slice(0, 80); // Get first 80 chars
     greeting = `Welcome back. Last time you shared about ${lastTopic}. How are you feeling today?`;
+    console.log("🎯 [DEBUG] Using fallback greeting:", greeting);
   }
 
+  console.log("🎯 [DEBUG] Final greeting:", greeting);
   return greeting;
 }
 
