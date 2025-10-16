@@ -58,8 +58,14 @@ export default function CreditDisplay({
 
     window.addEventListener("credits-updated", handleCreditUpdate);
 
+    // Auto-refresh credits every 15 seconds to show updated balances
+    const autoRefreshInterval = setInterval(() => {
+      fetchCreditStatus(true); // Silent refresh every 15 seconds
+    }, 15000); // 15 seconds
+
     return () => {
       window.removeEventListener("credits-updated", handleCreditUpdate);
+      clearInterval(autoRefreshInterval); // Cleanup interval
     };
   }, []);
 

@@ -157,10 +157,15 @@ export default function VoiceChatPage() {
   //   console.log("🔍 Debug - selectedLanguage changed to:", selectedLanguage);
   // }, [selectedLanguage]);
 
-  // Fetch credit status
+  // Fetch credit status with more frequent refresh for voice sessions
   const { data: creditStatus, mutate: mutateCredits } = useSWR(
     "/api/stripe/get-subscription-status",
     fetcher,
+    {
+      refreshInterval: 10000, // Refresh every 10 seconds for voice sessions
+      revalidateOnFocus: true,
+      revalidateOnReconnect: true,
+    },
   );
 
   const totalVoiceCredits = creditStatus?.credits
@@ -310,8 +315,9 @@ export default function VoiceChatPage() {
               .then((res) => res.json())
               .then((data) => {
                 if (data.success) {
-                  // Trigger UI update
-                  window.dispatchEvent(new Event("credits-updated"));
+                  // Trigger immediate UI update
+                  mutateCredits(); // Refresh SWR data immediately
+                  window.dispatchEvent(new Event("credits-updated")); // Trigger global refresh
                   // Update last deduction time
                   lastCreditDeductionTime.current = now;
                 } else {
@@ -359,15 +365,24 @@ export default function VoiceChatPage() {
         const userSpeechTime = remainingSeconds / 2; // Estimate user speech
         const botSpeechTime = remainingSeconds / 2; // Estimate bot speech
 
-        await fetch("/api/chat/voice-credit-deduct-duration", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            threadId: voiceThreadId,
-            userAudioDuration: userSpeechTime,
-            botAudioDuration: botSpeechTime,
-          }),
-        });
+        const finalCreditResponse = await fetch(
+          "/api/chat/voice-credit-deduct-duration",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              threadId: voiceThreadId,
+              userAudioDuration: userSpeechTime,
+              botAudioDuration: botSpeechTime,
+            }),
+          },
+        );
+
+        // Immediately refresh credits after final deduction
+        if (finalCreditResponse.ok) {
+          mutateCredits(); // Refresh SWR data
+          window.dispatchEvent(new Event("credits-updated")); // Trigger global refresh
+        }
       } catch (error) {
         console.error("Failed to deduct final credits:", error);
       }
