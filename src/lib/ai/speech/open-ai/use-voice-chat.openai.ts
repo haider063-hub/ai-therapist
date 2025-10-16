@@ -336,8 +336,9 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
             completed: true,
           });
 
-          // Deduct credits only when user actually speaks (not just for staying on page)
+          // Deduct credits only when user actually speaks AND session is active
           if (
+            isActive && // CRITICAL: Only deduct if session is still active
             transcript &&
             transcript.trim().length > 0 &&
             transcript !== "...speaking"
@@ -361,6 +362,10 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
               .catch((err) => {
                 console.error("❌ Failed to deduct credits:", err);
               });
+          } else if (!isActive) {
+            console.log(
+              "🔒 Session ended - credit deduction blocked for security",
+            );
           }
           break;
         }
@@ -565,6 +570,11 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
 
   const stop = useCallback(async () => {
     try {
+      // SECURITY: Immediately set session as inactive to prevent credit deduction
+      setIsActive(false);
+      setIsListening(false);
+      setIsLoading(false);
+
       if (dataChannel.current) {
         dataChannel.current.close();
         dataChannel.current = null;
@@ -574,10 +584,22 @@ export function useOpenAIVoiceChat(props?: VoiceChatOptions): VoiceChatSession {
         peerConnection.current = null;
       }
       tracks.current = [];
+
+      // Ensure microphone is completely disabled
       stopListening();
-      setIsActive(false);
-      setIsListening(false);
-      setIsLoading(false);
+
+      // Additional cleanup to prevent any residual audio processing
+      if (audioStream.current) {
+        audioStream.current.getTracks().forEach((track) => {
+          track.stop();
+          track.enabled = false;
+        });
+        audioStream.current = null;
+      }
+
+      console.log(
+        "🔒 Voice session completely terminated - no further credit deduction possible",
+      );
     } catch (err) {
       setError(err instanceof Error ? err : new Error(String(err)));
     }
