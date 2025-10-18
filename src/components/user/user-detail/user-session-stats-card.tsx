@@ -7,8 +7,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, Mic, TrendingUp, Calendar } from "lucide-react";
+import {
+  MessageSquare,
+  Mic,
+  TrendingUp,
+  Calendar,
+  RefreshCw,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
 interface UserSessionStatsCardProps {
@@ -31,28 +38,17 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
   const [loading, setLoading] = useState(true);
 
   // Fetch additional session insights
-  useEffect(() => {
-    const fetchInsights = async () => {
-      try {
-        console.log("🔍 [DEBUG] Fetching real session insights...");
-        const response = await fetch("/api/user/session-insights");
-        const data = await response.json();
+  const fetchInsights = async () => {
+    try {
+      console.log("🔍 [DEBUG] Fetching real session insights...");
+      const response = await fetch("/api/user/session-insights");
+      const data = await response.json();
 
-        if (data.insights) {
-          console.log("🔍 [DEBUG] Received session insights:", data.insights);
-          setInsights(data.insights);
-        } else {
-          console.error("❌ No insights data received:", data);
-          // Fallback to default values
-          setInsights({
-            lastChatSession: "Never",
-            lastVoiceSession: "Never",
-            mostActiveDay: "Unknown",
-            averageSessionDuration: 0,
-          });
-        }
-      } catch (error) {
-        console.error("❌ Failed to fetch session insights:", error);
+      if (data.insights) {
+        console.log("🔍 [DEBUG] Received session insights:", data.insights);
+        setInsights(data.insights);
+      } else {
+        console.error("❌ No insights data received:", data);
         // Fallback to default values
         setInsights({
           lastChatSession: "Never",
@@ -60,15 +56,26 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
           mostActiveDay: "Unknown",
           averageSessionDuration: 0,
         });
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("❌ Failed to fetch session insights:", error);
+      // Fallback to default values
+      setInsights({
+        lastChatSession: "Never",
+        lastVoiceSession: "Never",
+        mostActiveDay: "Unknown",
+        averageSessionDuration: 0,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchInsights();
 
-    // Refresh insights every 30 seconds to keep data current
-    const refreshInterval = setInterval(fetchInsights, 30000);
+    // Refresh insights every 10 seconds to keep data current
+    const refreshInterval = setInterval(fetchInsights, 10000);
 
     return () => clearInterval(refreshInterval);
   }, []);
@@ -151,12 +158,27 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
         {/* Recent Activity Section */}
         {!loading && (
           <div className="space-y-3 pt-2 border-t">
-            <h4 className="text-sm font-medium text-muted-foreground">
-              Recent Activity
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-medium text-muted-foreground">
+                Recent Activity
+              </h4>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setLoading(true);
+                  fetchInsights();
+                }}
+                className="h-6 w-6 p-0"
+              >
+                <RefreshCw className="h-3 w-3" />
+              </Button>
+            </div>
 
             {/* Last Sessions */}
-            <div className="grid grid-cols-2 gap-3">
+            <div
+              className={`grid gap-3 ${insights.lastVoiceSession && insights.lastVoiceSession !== "Never" ? "grid-cols-2" : "grid-cols-1"}`}
+            >
               <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
                 <Calendar className="h-4 w-4 text-blue-600" />
                 <div>
@@ -166,17 +188,21 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
-                <Calendar className="h-4 w-4 text-green-600" />
-                <div>
-                  <p className="text-xs font-medium text-green-900">
-                    Last Voice
-                  </p>
-                  <p className="text-xs text-green-700">
-                    {insights.lastVoiceSession || "Never"}
-                  </p>
-                </div>
-              </div>
+              {/* Only show Last Voice if there's actual voice activity */}
+              {insights.lastVoiceSession &&
+                insights.lastVoiceSession !== "Never" && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
+                    <Calendar className="h-4 w-4 text-green-600" />
+                    <div>
+                      <p className="text-xs font-medium text-green-900">
+                        Last Voice
+                      </p>
+                      <p className="text-xs text-green-700">
+                        {insights.lastVoiceSession}
+                      </p>
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
         )}
