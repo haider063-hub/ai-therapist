@@ -114,6 +114,12 @@ const options = {
         return;
       }
 
+      console.log("📧 RESEND_API_KEY found, attempting to send email...");
+      console.log("📧 Email details:", {
+        to: user.email,
+        from: "EchoNest AI Therapy <noreply@staging.echonest.co.uk>",
+      });
+
       const resend = new Resend(process.env.RESEND_API_KEY);
 
       // Use the better email template we created
