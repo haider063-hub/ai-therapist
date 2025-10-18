@@ -13,6 +13,10 @@ An AI-powered therapy chatbot built with Next.js, featuring advanced conversatio
 - ⚡️ **Quick Tool Mentions** (`@`) & Presets
 - 🧭 **Tool Choice Mode** for guided interactions
 - 🛠️ **Default Tools** including web search, code execution, and data visualization
+- 📊 **Session Statistics** with chat and voice session tracking
+- 😊 **Mood Tracking** with AI-powered emotional analysis
+- 💡 **Tips & Encouragement** with daily wellness reminders
+- 👤 **User Dashboard** with personalized therapy insights
 
 ## Quick Start (Local Version) 🚀
 
