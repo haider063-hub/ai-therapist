@@ -129,7 +129,7 @@ const options = {
       console.log("📧 RESEND_API_KEY found, attempting to send email...");
       console.log("📧 Email details:", {
         to: user.email,
-        from: "EchoNest AI Therapy <noreply@staging.echonest.co.uk>",
+        from: "EchoNest AI Therapy <noreply@echonest.co.uk>",
       });
 
       const resend = new Resend(process.env.RESEND_API_KEY);
@@ -140,7 +140,7 @@ const options = {
 
       try {
         const result = await resend.emails.send({
-          from: "EchoNest AI Therapy <noreply@staging.echonest.co.uk>",
+          from: "EchoNest AI Therapy <noreply@echonest.co.uk>",
           to: user.email,
           subject: "EchoNest AI Therapy - Password Reset Request",
           html: `
@@ -238,6 +238,7 @@ const options = {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day (every 1 day the session expiration is updated)
   },
+  trustedOrigins: trustedOrigins,
   advanced: {
     useSecureCookies:
       process.env.NO_HTTPS == "1"
@@ -249,7 +250,6 @@ const options = {
     crossSubDomainCookies: {
       enabled: true,
     },
-    trustedOrigins: trustedOrigins,
   },
   account: {
     accountLinking: {
