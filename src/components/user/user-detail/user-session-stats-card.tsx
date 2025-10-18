@@ -155,57 +155,66 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
           </div>
         )}
 
-        {/* Recent Activity Section */}
-        {!loading && (
-          <div className="space-y-3 pt-2 border-t">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-muted-foreground">
-                Recent Activity
-              </h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setLoading(true);
-                  fetchInsights();
-                }}
-                className="h-6 w-6 p-0"
-              >
-                <RefreshCw className="h-3 w-3" />
-              </Button>
-            </div>
-
-            {/* Last Sessions */}
-            <div
-              className={`grid gap-3 ${insights.lastVoiceSession && insights.lastVoiceSession !== "Never" ? "grid-cols-2" : "grid-cols-1"}`}
-            >
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
-                <Calendar className="h-4 w-4 text-blue-600" />
-                <div>
-                  <p className="text-xs font-medium text-blue-900">Last Chat</p>
-                  <p className="text-xs text-blue-700">
-                    {insights.lastChatSession || "Never"}
-                  </p>
-                </div>
+        {/* Recent Activity Section - Only show if there's actual recent activity */}
+        {!loading &&
+          ((insights.lastChatSession && insights.lastChatSession !== "Never") ||
+            (insights.lastVoiceSession &&
+              insights.lastVoiceSession !== "Never")) && (
+            <div className="space-y-3 pt-2 border-t">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Recent Activity
+                </h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setLoading(true);
+                    fetchInsights();
+                  }}
+                  className="h-6 w-6 p-0"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                </Button>
               </div>
-              {/* Only show Last Voice if there's actual voice activity */}
-              {insights.lastVoiceSession &&
-                insights.lastVoiceSession !== "Never" && (
-                  <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
-                    <Calendar className="h-4 w-4 text-green-600" />
-                    <div>
-                      <p className="text-xs font-medium text-green-900">
-                        Last Voice
-                      </p>
-                      <p className="text-xs text-green-700">
-                        {insights.lastVoiceSession}
-                      </p>
+
+              {/* Last Sessions */}
+              <div
+                className={`grid gap-3 ${insights.lastVoiceSession && insights.lastVoiceSession !== "Never" ? "grid-cols-2" : "grid-cols-1"}`}
+              >
+                {/* Only show Last Chat if there's actual chat activity */}
+                {insights.lastChatSession &&
+                  insights.lastChatSession !== "Never" && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-blue-50 border border-blue-200">
+                      <Calendar className="h-4 w-4 text-blue-600" />
+                      <div>
+                        <p className="text-xs font-medium text-blue-900">
+                          Last Chat
+                        </p>
+                        <p className="text-xs text-blue-700">
+                          {insights.lastChatSession}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                {/* Only show Last Voice if there's actual voice activity */}
+                {insights.lastVoiceSession &&
+                  insights.lastVoiceSession !== "Never" && (
+                    <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
+                      <Calendar className="h-4 w-4 text-green-600" />
+                      <div>
+                        <p className="text-xs font-medium text-green-900">
+                          Last Voice
+                        </p>
+                        <p className="text-xs text-green-700">
+                          {insights.lastVoiceSession}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </CardContent>
     </Card>
   );
