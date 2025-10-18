@@ -60,11 +60,6 @@ BETTER_AUTH_URL=http://localhost:3000
 
 # === AI Providers ===
 OPENAI_API_KEY=your-openai-api-key-here
-CLAUDE_API_KEY=your-claude-api-key-here
-GEMINI_API_KEY=your-gemini-api-key-here
-
-# === Optional Tools ===
-EXA_API_KEY=your-exa-api-key-here
 ```
 
 ## Available Scripts

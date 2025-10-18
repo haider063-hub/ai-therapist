@@ -104,30 +104,26 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
           <div className="space-y-2">
             {/* Daily Tip */}
             <div className="pl-4 pr-2 py-2 rounded-lg bg-green-50 border border-green-200">
-              <p className="text-xs font-medium text-green-900 mb-1">
-                Daily Tip
-              </p>
               <p className="text-xs text-green-800">
+                <span className="font-medium text-green-900">Daily Tip:</span>{" "}
                 Practice deep breathing for 5 minutes daily.
               </p>
             </div>
 
             {/* Motivational Message */}
             <div className="pl-4 pr-2 py-2 rounded-lg bg-blue-50 border border-blue-200">
-              <p className="text-xs font-medium text-blue-900 mb-1">
-                Keep Going!
-              </p>
               <p className="text-xs text-blue-800">
+                <span className="font-medium text-blue-900">Keep Going!</span>{" "}
                 Every session is progress in your mental health journey.
               </p>
             </div>
 
             {/* Wellness Reminder */}
             <div className="pl-4 pr-2 py-2 rounded-lg bg-purple-50 border border-purple-200">
-              <p className="text-xs font-medium text-purple-900 mb-1">
-                Wellness Reminder
-              </p>
               <p className="text-xs text-purple-800">
+                <span className="font-medium text-purple-900">
+                  Wellness Reminder:
+                </span>{" "}
                 Take breaks, stay hydrated, and get enough sleep.
               </p>
             </div>
