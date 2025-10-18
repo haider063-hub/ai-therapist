@@ -34,16 +34,32 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
   useEffect(() => {
     const fetchInsights = async () => {
       try {
-        // This would be replaced with actual API calls
-        // For now, we'll simulate some data
-        setInsights({
-          lastChatSession: "2 days ago",
-          lastVoiceSession: "Yesterday",
-          mostActiveDay: "Tuesday",
-          averageSessionDuration: 18,
-        });
+        console.log("🔍 [DEBUG] Fetching real session insights...");
+        const response = await fetch("/api/user/session-insights");
+        const data = await response.json();
+
+        if (data.insights) {
+          console.log("🔍 [DEBUG] Received session insights:", data.insights);
+          setInsights(data.insights);
+        } else {
+          console.error("❌ No insights data received:", data);
+          // Fallback to default values
+          setInsights({
+            lastChatSession: "Never",
+            lastVoiceSession: "Never",
+            mostActiveDay: "Unknown",
+            averageSessionDuration: 0,
+          });
+        }
       } catch (error) {
-        console.error("Failed to fetch session insights:", error);
+        console.error("❌ Failed to fetch session insights:", error);
+        // Fallback to default values
+        setInsights({
+          lastChatSession: "Never",
+          lastVoiceSession: "Never",
+          mostActiveDay: "Unknown",
+          averageSessionDuration: 0,
+        });
       } finally {
         setLoading(false);
       }
