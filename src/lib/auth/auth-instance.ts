@@ -30,6 +30,18 @@ console.log("BETTER_AUTH_URL:", process.env.BETTER_AUTH_URL);
 console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
 console.log("VERCEL_URL:", process.env.VERCEL_URL);
 
+// Calculate trusted origins
+const trustedOrigins = [
+  process.env.BETTER_AUTH_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    "http://localhost:3000",
+  "http://localhost:3000",
+  "https://staging.echonest.co.uk",
+  "https://echonest.co.uk",
+].filter(Boolean);
+
+console.log("🔒 Trusted Origins:", trustedOrigins);
+
 const options = {
   secret: process.env.BETTER_AUTH_SECRET!,
   plugins: [
@@ -237,6 +249,7 @@ const options = {
     crossSubDomainCookies: {
       enabled: true,
     },
+    trustedOrigins: trustedOrigins,
   },
   account: {
     accountLinking: {
