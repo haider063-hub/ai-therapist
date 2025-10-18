@@ -24,6 +24,12 @@ const {
   socialAuthenticationProviders,
 } = getAuthConfig();
 
+// Log domain configuration for debugging
+console.log("🔧 Auth Domain Configuration:");
+console.log("BETTER_AUTH_URL:", process.env.BETTER_AUTH_URL);
+console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
+console.log("VERCEL_URL:", process.env.VERCEL_URL);
+
 const options = {
   secret: process.env.BETTER_AUTH_SECRET!,
   plugins: [
@@ -39,7 +45,12 @@ const options = {
     }),
     nextCookies(),
   ],
-  baseURL: process.env.BETTER_AUTH_URL || process.env.NEXT_PUBLIC_BASE_URL,
+  baseURL:
+    process.env.BETTER_AUTH_URL ||
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000",
   user: {
     changeEmail: {
       enabled: true,
@@ -93,6 +104,9 @@ const options = {
 
       if (!process.env.RESEND_API_KEY) {
         console.log("=".repeat(60));
+        console.log(
+          "⚠️  RESEND_API_KEY not configured - Password reset email not sent",
+        );
         console.log("Password reset link for", user.email);
         console.log("URL:", url);
         console.log("Token:", token);
@@ -106,11 +120,12 @@ const options = {
       const resetLink = url;
       const name = user.name || "there";
 
-      await resend.emails.send({
-        from: "EchoNest AI Therapy <noreply@echonest.co.uk>",
-        to: user.email,
-        subject: "EchoNest AI Therapy - Password Reset Request",
-        html: `
+      try {
+        const result = await resend.emails.send({
+          from: "EchoNest AI Therapy <noreply@staging.echonest.co.uk>",
+          to: user.email,
+          subject: "EchoNest AI Therapy - Password Reset Request",
+          html: `
           <!DOCTYPE html>
           <html>
           <head>
@@ -176,7 +191,25 @@ const options = {
           </body>
           </html>
         `,
-      });
+        });
+
+        console.log(
+          "✅ Password reset email sent successfully to:",
+          user.email,
+        );
+        console.log("Email ID:", result.data?.id);
+      } catch (error) {
+        console.error("❌ Failed to send password reset email to:", user.email);
+        console.error("Error details:", error);
+
+        // Log the reset link for manual use if email fails
+        console.log("=".repeat(60));
+        console.log("MANUAL RESET LINK (email failed):");
+        console.log("User:", user.email);
+        console.log("Reset URL:", resetLink);
+        console.log("Token:", token);
+        console.log("=".repeat(60));
+      }
     },
   },
   session: {
@@ -194,6 +227,9 @@ const options = {
         : process.env.NODE_ENV === "production",
     database: {
       generateId: () => randomUUID(),
+    },
+    crossSubDomainCookies: {
+      enabled: true,
     },
   },
   account: {

@@ -161,8 +161,13 @@ export const updateUserPasswordAction = validatedActionWithUserManagePermission(
         success: true,
         message: t("passwordUpdatedSuccessfully"),
       };
-    } catch (_error) {
-      console.error("Failed to update user password:", _error);
+    } catch (error) {
+      console.error("Failed to update user password:", error);
+      // Log more detailed error information
+      if (error instanceof Error) {
+        console.error("Error message:", error.message);
+        console.error("Error stack:", error.stack);
+      }
       return {
         success: false,
         message: t("failedToUpdatePassword"),
