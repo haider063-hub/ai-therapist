@@ -180,7 +180,18 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
 
               {/* Last Sessions */}
               <div
-                className={`grid gap-3 ${insights.lastVoiceSession && insights.lastVoiceSession !== "Never" ? "grid-cols-2" : "grid-cols-1"}`}
+                className={`grid gap-3 ${
+                  (
+                    insights.lastChatSession &&
+                      insights.lastChatSession !== "Never"
+                  ) &&
+                  (
+                    insights.lastVoiceSession &&
+                      insights.lastVoiceSession !== "Never"
+                  )
+                    ? "grid-cols-2"
+                    : "grid-cols-1"
+                }`}
               >
                 {/* Only show Last Chat if there's actual chat activity */}
                 {insights.lastChatSession &&
