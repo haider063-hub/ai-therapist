@@ -68,7 +68,20 @@ export function UserWeeklyMoodCard({
                 <div key={day.date} className="space-y-2 sm:space-y-1">
                   {/* Day label and score */}
                   <div className="flex items-center justify-between text-sm sm:text-sm">
-                    <span className="font-medium min-w-[3rem]">{day.day}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium min-w-[2.5rem]">
+                        {day.day}{" "}
+                        <span className="font-normal text-xs">
+                          (
+                          {new Date(day.date).toLocaleDateString("en-US", {
+                            month: "2-digit",
+                            day: "2-digit",
+                            year: "numeric",
+                          })}
+                          )
+                        </span>
+                      </span>
+                    </div>
                     <span className="text-muted-foreground font-mono text-xs">
                       {day.score > 0 ? `${day.score}/10` : "-"}
                     </span>
