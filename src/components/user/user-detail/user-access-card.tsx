@@ -4,12 +4,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "ui/card";
 import { Button } from "ui/button";
 import { Label } from "ui/label";
-import { Shield, Lock, UserCheck, AlertTriangle, Trash2 } from "lucide-react";
+import { Shield, UserCheck, AlertTriangle, Trash2 } from "lucide-react";
 import { BasicUserWithLastLogin } from "app-types/user";
 import { UserRoleBadges } from "./user-role-badges";
 import { UserStatusBadge } from "./user-status-badge";
 import { UserRoleSelector } from "./user-role-selection-dialog";
-import { UpdateUserPasswordDialog } from "./user-update-password-dialog";
 import { UserDeleteDialog } from "./user-delete-dialog";
 import { useProfileTranslations } from "@/hooks/use-profile-translations";
 import { getIsUserAdmin } from "lib/user/utils";
@@ -120,46 +119,6 @@ export function UserAccessCard({
                   {t("userBannedDescription")}
                 </p>
               )}
-            </div>
-          </div>
-
-          {/* Password Section */}
-          <div className="space-y-3">
-            <Label className="text-sm font-medium flex items-center gap-2">
-              <Lock className="h-4 w-4" />
-              {tCommon("security")}
-            </Label>
-
-            <div className="rounded-lg border bg-muted/30 p-3">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">
-                    {tCommon("passwordManagement")}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {userAccountInfo?.hasPassword
-                      ? t("userHasPassword")
-                      : t("userOAuthOnly")}
-                  </p>
-                </div>
-
-                <UpdateUserPasswordDialog
-                  userId={user.id}
-                  view={view}
-                  currentUserId={currentUserId}
-                >
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    disabled={disabled || !userAccountInfo?.hasPassword}
-                    className="h-8 text-xs !bg-black !text-white hover:!bg-gray-800"
-                    data-testid="update-password-button"
-                  >
-                    <Lock className="w-3 h-3 mr-1 text-white" />
-                    {t("updatePassword")}
-                  </Button>
-                </UpdateUserPasswordDialog>
-              </div>
             </div>
           </div>
 
