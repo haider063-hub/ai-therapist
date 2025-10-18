@@ -132,53 +132,35 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
             </div>
 
             {/* Motivational Messages */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {/* Daily Tip */}
-              <div className="p-3 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">
-                <div className="flex items-start gap-2">
-                  <span className="text-green-600 text-sm">💡</span>
-                  <div>
-                    <p className="text-xs font-medium text-green-900 mb-1">
-                      Daily Therapy Tip
-                    </p>
-                    <p className="text-xs text-green-800">
-                      Practice deep breathing for 5 minutes daily. It helps
-                      reduce stress and improves mental clarity.
-                    </p>
-                  </div>
-                </div>
+              <div className="p-2 rounded-lg bg-green-50 border border-green-200">
+                <p className="text-xs font-medium text-green-900 mb-1">
+                  Daily Tip
+                </p>
+                <p className="text-xs text-green-800">
+                  Practice deep breathing for 5 minutes daily.
+                </p>
               </div>
 
               {/* Motivational Message */}
-              <div className="p-3 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200">
-                <div className="flex items-start gap-2">
-                  <span className="text-blue-600 text-sm">🌟</span>
-                  <div>
-                    <p className="text-xs font-medium text-blue-900 mb-1">
-                      You're Doing Great!
-                    </p>
-                    <p className="text-xs text-blue-800">
-                      Every therapy session is a step forward in your mental
-                      health journey. Keep going!
-                    </p>
-                  </div>
-                </div>
+              <div className="p-2 rounded-lg bg-blue-50 border border-blue-200">
+                <p className="text-xs font-medium text-blue-900 mb-1">
+                  Keep Going!
+                </p>
+                <p className="text-xs text-blue-800">
+                  Every session is progress in your mental health journey.
+                </p>
               </div>
 
               {/* Wellness Reminder */}
-              <div className="p-3 rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200">
-                <div className="flex items-start gap-2">
-                  <span className="text-purple-600 text-sm">🌸</span>
-                  <div>
-                    <p className="text-xs font-medium text-purple-900 mb-1">
-                      Wellness Reminder
-                    </p>
-                    <p className="text-xs text-purple-800">
-                      Remember to take breaks, stay hydrated, and get enough
-                      sleep. Your mental health matters!
-                    </p>
-                  </div>
-                </div>
+              <div className="p-2 rounded-lg bg-purple-50 border border-purple-200">
+                <p className="text-xs font-medium text-purple-900 mb-1">
+                  Wellness Reminder
+                </p>
+                <p className="text-xs text-purple-800">
+                  Take breaks, stay hydrated, and get enough sleep.
+                </p>
               </div>
             </div>
           </div>
