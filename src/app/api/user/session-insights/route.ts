@@ -6,7 +6,7 @@ import {
   ChatMessageSchema,
   MoodTrackingSchema,
 } from "lib/db/pg/schema.pg";
-import { sql, eq, desc, max } from "drizzle-orm";
+import { sql, eq, desc } from "drizzle-orm";
 
 export async function GET(_request: NextRequest) {
   try {
@@ -20,20 +20,19 @@ export async function GET(_request: NextRequest) {
       session.user.id,
     );
 
-    // Get last chat session
+    // Get last chat session - find the most recent message across all user's threads
     const lastChatSession = await pgDb
       .select({
-        threadId: ChatThreadSchema.id,
-        lastMessageAt: max(ChatMessageSchema.createdAt),
+        threadId: ChatMessageSchema.threadId,
+        lastMessageAt: ChatMessageSchema.createdAt,
       })
-      .from(ChatThreadSchema)
-      .leftJoin(
-        ChatMessageSchema,
-        eq(ChatThreadSchema.id, ChatMessageSchema.threadId),
+      .from(ChatMessageSchema)
+      .innerJoin(
+        ChatThreadSchema,
+        eq(ChatMessageSchema.threadId, ChatThreadSchema.id),
       )
       .where(eq(ChatThreadSchema.userId, session.user.id))
-      .groupBy(ChatThreadSchema.id)
-      .orderBy(desc(max(ChatMessageSchema.createdAt)))
+      .orderBy(desc(ChatMessageSchema.createdAt))
       .limit(1);
 
     // Get last voice session from mood tracking
@@ -41,6 +40,7 @@ export async function GET(_request: NextRequest) {
       .select({
         threadId: MoodTrackingSchema.threadId,
         createdAt: MoodTrackingSchema.createdAt,
+        moodScore: MoodTrackingSchema.moodScore,
       })
       .from(MoodTrackingSchema)
       .where(
@@ -48,6 +48,37 @@ export async function GET(_request: NextRequest) {
       )
       .orderBy(desc(MoodTrackingSchema.createdAt))
       .limit(1);
+
+    console.log("🔍 [DEBUG] Last chat session query result:", lastChatSession);
+    console.log(
+      "🔍 [DEBUG] Last voice session query result:",
+      lastVoiceSession,
+    );
+
+    // If no voice session found in mood tracking, try to find from chat threads
+    let lastVoiceSessionFallback: Array<{
+      threadId: string;
+      createdAt: Date;
+    }> | null = null;
+    if (lastVoiceSession.length === 0) {
+      console.log(
+        "🔍 [DEBUG] No voice session in mood tracking, checking chat threads...",
+      );
+      lastVoiceSessionFallback = await pgDb
+        .select({
+          threadId: ChatThreadSchema.id,
+          createdAt: ChatThreadSchema.createdAt,
+        })
+        .from(ChatThreadSchema)
+        .where(eq(ChatThreadSchema.userId, session.user.id))
+        .orderBy(desc(ChatThreadSchema.createdAt))
+        .limit(1);
+
+      console.log(
+        "🔍 [DEBUG] Voice session fallback result:",
+        lastVoiceSessionFallback,
+      );
+    }
 
     // Helper function to format time ago
     const formatTimeAgo = (date: Date | null): string => {
@@ -77,7 +108,11 @@ export async function GET(_request: NextRequest) {
         lastChatSession.length > 0 ? lastChatSession[0].lastMessageAt : null,
       ),
       lastVoiceSession: formatTimeAgo(
-        lastVoiceSession.length > 0 ? lastVoiceSession[0].createdAt : null,
+        lastVoiceSession.length > 0
+          ? lastVoiceSession[0].createdAt
+          : lastVoiceSessionFallback && lastVoiceSessionFallback.length > 0
+            ? lastVoiceSessionFallback[0].createdAt
+            : null,
       ),
       mostActiveDay: "Tuesday", // TODO: Calculate from actual data
       averageSessionDuration: 18, // TODO: Calculate from actual data

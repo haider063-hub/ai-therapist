@@ -66,6 +66,11 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
     };
 
     fetchInsights();
+
+    // Refresh insights every 30 seconds to keep data current
+    const refreshInterval = setInterval(fetchInsights, 30000);
+
+    return () => clearInterval(refreshInterval);
   }, []);
 
   return (
