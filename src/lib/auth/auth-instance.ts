@@ -30,6 +30,16 @@ console.log("BETTER_AUTH_URL:", process.env.BETTER_AUTH_URL);
 console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
 console.log("VERCEL_URL:", process.env.VERCEL_URL);
 
+// Calculate the final baseURL
+const finalBaseURL =
+  process.env.BETTER_AUTH_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  (process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000");
+
+console.log("🌐 Final BaseURL:", finalBaseURL);
+
 // Calculate trusted origins
 const trustedOrigins = [
   process.env.BETTER_AUTH_URL ||
@@ -57,12 +67,7 @@ const options = {
     }),
     nextCookies(),
   ],
-  baseURL:
-    process.env.BETTER_AUTH_URL ||
-    process.env.NEXT_PUBLIC_BASE_URL ||
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000",
+  baseURL: finalBaseURL,
   user: {
     changeEmail: {
       enabled: true,
