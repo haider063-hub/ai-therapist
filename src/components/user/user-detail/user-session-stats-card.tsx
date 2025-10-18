@@ -7,10 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, Mic, TrendingUp, RefreshCw } from "lucide-react";
+import { MessageSquare, Mic, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
 
 interface UserSessionStatsCardProps {
   stats: {
@@ -21,21 +19,6 @@ interface UserSessionStatsCardProps {
 }
 
 export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
-  const [loading, setLoading] = useState(true);
-
-  // Simple loading simulation for tips refresh
-  const fetchInsights = async () => {
-    setLoading(true);
-    // Simulate loading time for refresh effect
-    setTimeout(() => {
-      setLoading(false);
-    }, 500);
-  };
-
-  useEffect(() => {
-    fetchInsights();
-  }, []);
-
   return (
     <Card>
       <CardHeader>
@@ -112,59 +95,44 @@ export function UserSessionStatsCard({ stats }: UserSessionStatsCardProps) {
         )}
 
         {/* Tips & Encouragement Section */}
-        {!loading && (
-          <div className="space-y-3 pt-2 border-t">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium text-muted-foreground">
-                Tips & Encouragement
-              </h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setLoading(true);
-                  fetchInsights();
-                }}
-                className="h-6 w-6 p-0"
-              >
-                <RefreshCw className="h-3 w-3" />
-              </Button>
+        <div className="space-y-3 pt-2 border-t">
+          <h4 className="text-sm font-medium text-muted-foreground">
+            Tips & Encouragement
+          </h4>
+
+          {/* Motivational Messages */}
+          <div className="space-y-2">
+            {/* Daily Tip */}
+            <div className="p-2 rounded-lg bg-green-50 border border-green-200">
+              <p className="text-xs font-medium text-green-900 mb-1">
+                Daily Tip
+              </p>
+              <p className="text-xs text-green-800">
+                Practice deep breathing for 5 minutes daily.
+              </p>
             </div>
 
-            {/* Motivational Messages */}
-            <div className="space-y-2">
-              {/* Daily Tip */}
-              <div className="p-2 rounded-lg bg-green-50 border border-green-200">
-                <p className="text-xs font-medium text-green-900 mb-1">
-                  Daily Tip
-                </p>
-                <p className="text-xs text-green-800">
-                  Practice deep breathing for 5 minutes daily.
-                </p>
-              </div>
+            {/* Motivational Message */}
+            <div className="p-2 rounded-lg bg-blue-50 border border-blue-200">
+              <p className="text-xs font-medium text-blue-900 mb-1">
+                Keep Going!
+              </p>
+              <p className="text-xs text-blue-800">
+                Every session is progress in your mental health journey.
+              </p>
+            </div>
 
-              {/* Motivational Message */}
-              <div className="p-2 rounded-lg bg-blue-50 border border-blue-200">
-                <p className="text-xs font-medium text-blue-900 mb-1">
-                  Keep Going!
-                </p>
-                <p className="text-xs text-blue-800">
-                  Every session is progress in your mental health journey.
-                </p>
-              </div>
-
-              {/* Wellness Reminder */}
-              <div className="p-2 rounded-lg bg-purple-50 border border-purple-200">
-                <p className="text-xs font-medium text-purple-900 mb-1">
-                  Wellness Reminder
-                </p>
-                <p className="text-xs text-purple-800">
-                  Take breaks, stay hydrated, and get enough sleep.
-                </p>
-              </div>
+            {/* Wellness Reminder */}
+            <div className="p-2 rounded-lg bg-purple-50 border border-purple-200">
+              <p className="text-xs font-medium text-purple-900 mb-1">
+                Wellness Reminder
+              </p>
+              <p className="text-xs text-purple-800">
+                Take breaks, stay hydrated, and get enough sleep.
+              </p>
             </div>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );
