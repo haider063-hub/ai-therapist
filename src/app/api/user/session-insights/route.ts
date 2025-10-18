@@ -21,6 +21,7 @@ export async function GET(_request: NextRequest) {
     );
 
     // Get last chat session - find the most recent message across all user's threads
+    // Exclude any threads that have voice session mood tracking data
     const lastChatSession = await pgDb
       .select({
         threadId: ChatMessageSchema.threadId,
@@ -31,7 +32,13 @@ export async function GET(_request: NextRequest) {
         ChatThreadSchema,
         eq(ChatMessageSchema.threadId, ChatThreadSchema.id),
       )
-      .where(eq(ChatThreadSchema.userId, session.user.id))
+      .leftJoin(
+        MoodTrackingSchema,
+        sql`${ChatMessageSchema.threadId} = ${MoodTrackingSchema.threadId} AND ${MoodTrackingSchema.sessionType} = 'voice'`,
+      )
+      .where(
+        sql`${ChatThreadSchema.userId} = ${session.user.id} AND ${MoodTrackingSchema.threadId} IS NULL`,
+      )
       .orderBy(desc(ChatMessageSchema.createdAt))
       .limit(1);
 
@@ -55,30 +62,11 @@ export async function GET(_request: NextRequest) {
       lastVoiceSession,
     );
 
-    // If no voice session found in mood tracking, try to find from chat threads
-    let lastVoiceSessionFallback: Array<{
-      threadId: string;
-      createdAt: Date;
-    }> | null = null;
-    if (lastVoiceSession.length === 0) {
-      console.log(
-        "🔍 [DEBUG] No voice session in mood tracking, checking chat threads...",
-      );
-      lastVoiceSessionFallback = await pgDb
-        .select({
-          threadId: ChatThreadSchema.id,
-          createdAt: ChatThreadSchema.createdAt,
-        })
-        .from(ChatThreadSchema)
-        .where(eq(ChatThreadSchema.userId, session.user.id))
-        .orderBy(desc(ChatThreadSchema.createdAt))
-        .limit(1);
-
-      console.log(
-        "🔍 [DEBUG] Voice session fallback result:",
-        lastVoiceSessionFallback,
-      );
-    }
+    // Voice sessions should only come from mood tracking data
+    // No fallback needed since voice sessions are tracked differently
+    console.log(
+      "🔍 [DEBUG] Voice session fallback not needed - voice sessions only tracked via mood tracking",
+    );
 
     // Helper function to format time ago
     const formatTimeAgo = (date: Date | null): string => {
@@ -108,11 +96,7 @@ export async function GET(_request: NextRequest) {
         lastChatSession.length > 0 ? lastChatSession[0].lastMessageAt : null,
       ),
       lastVoiceSession: formatTimeAgo(
-        lastVoiceSession.length > 0
-          ? lastVoiceSession[0].createdAt
-          : lastVoiceSessionFallback && lastVoiceSessionFallback.length > 0
-            ? lastVoiceSessionFallback[0].createdAt
-            : null,
+        lastVoiceSession.length > 0 ? lastVoiceSession[0].createdAt : null,
       ),
       mostActiveDay: "Tuesday", // TODO: Calculate from actual data
       averageSessionDuration: 18, // TODO: Calculate from actual data
