@@ -11,14 +11,10 @@ export async function GET(_request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("🔍 [DEBUG] Fetching weekly mood for user:", session.user.id);
-
     // Get mood data for the last 7 days
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0];
-
-    console.log("🔍 [DEBUG] Querying mood data from:", sevenDaysAgoStr);
 
     const moodData = await pgDb
       .select({
@@ -31,8 +27,6 @@ export async function GET(_request: NextRequest) {
       )
       .groupBy(MoodTrackingSchema.date)
       .orderBy(MoodTrackingSchema.date);
-
-    console.log("🔍 [DEBUG] Raw mood data from DB:", moodData);
 
     // Format for last 7 days with day names
     const weeklyData: { day: string; date: string; score: number }[] = [];
@@ -50,8 +44,6 @@ export async function GET(_request: NextRequest) {
         score: dayData ? Math.round(Number(dayData.avgScore)) : 0,
       });
     }
-
-    console.log("🔍 [DEBUG] Formatted weekly data:", weeklyData);
 
     return NextResponse.json({ weeklyMoodData: weeklyData });
   } catch (error) {
