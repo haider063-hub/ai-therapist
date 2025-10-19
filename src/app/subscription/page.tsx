@@ -238,7 +238,138 @@ export default function SubscriptionPage() {
   };
 
   if (loading) {
-    return null; // Let the loading.tsx file handle the skeleton
+    return (
+      <div className="min-h-screen relative">
+        {/* Background */}
+        <div className="echonest-gradient-bg"></div>
+        <div className="container mx-auto p-6 relative z-10">
+          <div className="mb-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="mb-4 text-white hover:text-white/80"
+              disabled
+            >
+              <ArrowLeft className="h-4 w-4 text-white" />
+            </Button>
+            <div className="text-center space-y-2">
+              <div className="h-8 w-80 mx-auto bg-white/20 rounded animate-pulse"></div>
+              <div className="h-5 w-96 mx-auto bg-white/20 rounded animate-pulse"></div>
+            </div>
+          </div>
+
+          {/* Current Status Skeleton - 2 cards side by side */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <Card className="bg-white">
+              <CardHeader>
+                <div className="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-5 w-24 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="h-9 w-full mt-4 bg-gray-200 rounded animate-pulse"></div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-white">
+              <CardHeader>
+                <div className="h-5 w-32 bg-gray-200 rounded animate-pulse"></div>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-24 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-5 w-20 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="h-4 w-20 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-5 w-16 bg-gray-200 rounded animate-pulse"></div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Available Plans Skeleton */}
+          <div className="mb-8">
+            <div className="h-8 w-48 mx-auto mb-6 bg-white/20 rounded animate-pulse"></div>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((index) => (
+                <Card
+                  key={index}
+                  className={`relative bg-white flex flex-col ${index === 2 ? "ring-2 ring-primary" : ""}`}
+                >
+                  {index === 2 && (
+                    <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                      <div className="h-6 w-20 bg-gray-200 rounded-full animate-pulse"></div>
+                    </div>
+                  )}
+                  <CardHeader className="text-center">
+                    <div className="flex justify-center mb-2">
+                      <div className="h-6 w-6 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                    <div className="h-6 w-24 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                    <div className="space-y-1">
+                      <div className="h-8 w-16 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-20 mx-auto bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex flex-col flex-1">
+                    <div className="space-y-2 mb-6 flex-1">
+                      <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-4 w-2/3 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                    <div className="h-10 w-full bg-gray-200 rounded animate-pulse"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Recent Transactions Skeleton */}
+          <div>
+            <div className="h-8 w-56 mx-auto mb-6 bg-white/20 rounded animate-pulse"></div>
+            <Card className="bg-white">
+              <CardContent className="p-4">
+                <div className="space-y-3">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between py-2 border-b last:border-b-0"
+                    >
+                      <div className="space-y-1">
+                        <div className="h-4 w-32 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-24 bg-gray-200 rounded animate-pulse"></div>
+                      </div>
+                      <div className="text-right space-y-1">
+                        <div className="h-4 w-16 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-3 w-20 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!data) {
