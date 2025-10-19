@@ -242,7 +242,7 @@ export default function SubscriptionPage() {
       <div className="min-h-screen relative">
         {/* Background */}
         <div className="echonest-gradient-bg"></div>
-        <div className="container mx-auto p-6 relative z-10 chat-scrollbar">
+        <div className="container mx-auto p-6 relative z-10 overflow-y-auto chat-scrollbar h-screen">
           <div className="mb-8">
             <Button
               variant="ghost"
@@ -387,7 +387,7 @@ export default function SubscriptionPage() {
     <div className="min-h-screen relative">
       {/* Background */}
       <div className="echonest-gradient-bg"></div>
-      <div className="container mx-auto p-6 relative z-10 chat-scrollbar">
+      <div className="container mx-auto p-6 relative z-10 overflow-y-auto chat-scrollbar h-screen">
         <div className="mb-8">
           <Tooltip>
             <TooltipTrigger asChild>

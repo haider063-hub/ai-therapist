@@ -78,7 +78,7 @@ export function GlobalSidebar({ user }: GlobalSidebarProps) {
       />
 
       <SidebarContent className="mt-2 overflow-hidden relative">
-        <div className="flex flex-col overflow-y-auto">
+        <div className="flex flex-col overflow-y-auto chat-scrollbar">
           {/* Main Navigation */}
           <SidebarGroup>
             <SidebarGroupContent>
