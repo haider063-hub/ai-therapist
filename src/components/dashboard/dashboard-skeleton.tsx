@@ -24,8 +24,10 @@ export function DashboardSkeleton() {
               <ArrowLeft className="h-5 w-5 text-white" />
             </Button>
 
-            {/* Dashboard Title Skeleton */}
-            <Skeleton className="h-6 sm:h-7 md:h-8 w-32 bg-white/20" />
+            {/* Dashboard Title */}
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+              Dashboard
+            </h1>
           </div>
         </div>
 
