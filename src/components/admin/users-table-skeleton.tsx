@@ -18,7 +18,7 @@ export function UsersTableSkeleton() {
   return (
     <div className="space-y-4 w-full">
       {/* Search Bar Section */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -27,9 +27,13 @@ export function UsersTableSkeleton() {
             disabled
           />
         </div>
-        {/* User count display skeleton - matches actual format */}
-        <div className="text-sm text-white">
-          <Skeleton className="h-4 w-32 bg-white/20" />
+        <div className="flex items-center gap-4">
+          {/* Clear button skeleton */}
+          <Skeleton className="h-9 w-20" />
+          {/* User count display skeleton - matches actual format */}
+          <div className="text-sm text-white">
+            <Skeleton className="h-4 w-32 bg-white/20" />
+          </div>
         </div>
       </div>
 
