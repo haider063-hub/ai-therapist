@@ -10,7 +10,6 @@ import { Input } from "ui/input";
 import { Search, ChevronRight } from "lucide-react";
 import { Skeleton } from "ui/skeleton";
 import { Avatar, AvatarFallback } from "ui/avatar";
-import { TablePagination } from "ui/table-pagination";
 
 export function UsersTableSkeleton() {
   // Generate 6 skeleton rows to match the current pagination limit
