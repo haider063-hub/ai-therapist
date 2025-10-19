@@ -1,7 +1,6 @@
 import { UserDetailContentSkeleton } from "@/components/user/user-detail/user-detail-content-skeleton";
 import { Button } from "ui/button";
 import { ArrowLeft } from "lucide-react";
-import { Skeleton } from "ui/skeleton";
 
 export function DashboardSkeleton() {
   return (
