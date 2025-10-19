@@ -1,5 +1,5 @@
-import { UserDetailContentSkeleton } from "@/components/user/user-detail/user-detail-content-skeleton";
+import { DashboardSkeleton } from "@/components/dashboard/dashboard-skeleton";
 
 export default function Loading() {
-  return <UserDetailContentSkeleton />;
+  return <DashboardSkeleton />;
 }
