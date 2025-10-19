@@ -56,12 +56,16 @@ export function UserDetail({
   // Fetch weekly mood data
   const [weeklyMoodData, setWeeklyMoodData] = useState<any[]>([]);
   useEffect(() => {
-    if (currentUserId === initialUser.id) {
-      fetch("/api/user/weekly-mood")
-        .then((res) => res.json())
-        .then((data) => setWeeklyMoodData(data.weeklyMoodData || []))
-        .catch(() => setWeeklyMoodData([]));
-    }
+    // Fetch mood data for the user being viewed (either self or admin viewing another user)
+    const moodApiRoute =
+      currentUserId === initialUser.id
+        ? "/api/user/weekly-mood"
+        : `/api/user/weekly-mood/${initialUser.id}`;
+
+    fetch(moodApiRoute)
+      .then((res) => res.json())
+      .then((data) => setWeeklyMoodData(data.weeklyMoodData || []))
+      .catch(() => setWeeklyMoodData([]));
   }, [currentUserId, initialUser.id]);
 
   return (
