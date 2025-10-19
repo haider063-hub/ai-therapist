@@ -10,7 +10,7 @@ import {
 } from "ui/card";
 import { Button } from "ui/button";
 import { Badge } from "ui/badge";
-import { Volume2 } from "lucide-react";
+import { Volume2, Globe } from "lucide-react";
 import { useState } from "react";
 import { appStore } from "@/app/store";
 import { useRouter } from "next/navigation";
@@ -157,7 +157,8 @@ export function TherapistSelection() {
 
               <div className="flex gap-2 flex-wrap justify-center items-center">
                 <span className="text-sm text-white flex items-center gap-2">
-                  🌐 Languages:
+                  <Globe className="h-4 w-4" />
+                  Languages:
                 </span>
                 {languages.map((lang) => (
                   <Button
