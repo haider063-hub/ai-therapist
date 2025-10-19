@@ -176,7 +176,7 @@ export function UsersTable({
           </Link>
         )}
         <div className="text-sm text-white" data-testid="users-total-count">
-          {t("totalCount", { count: total })}
+          Showing {users.length} out of {total} total users
         </div>
       </div>
 

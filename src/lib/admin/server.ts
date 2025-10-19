@@ -8,7 +8,7 @@ import {
 } from "lib/auth/permissions";
 import { pgAdminRepository } from "lib/db/pg/repositories/admin-respository.pg";
 
-export const ADMIN_USER_LIST_LIMIT = 10;
+export const ADMIN_USER_LIST_LIMIT = 6;
 export const DEFAULT_SORT_BY = "createdAt";
 export const DEFAULT_SORT_DIRECTION = "desc";
 

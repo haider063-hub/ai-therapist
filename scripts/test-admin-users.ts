@@ -18,12 +18,12 @@ async function testAdminUsers() {
 
     // Test 2: Test pagination
     console.log("\n2️⃣ Testing pagination...");
-    const page1 = await pgAdminRepository.getUsers({ limit: 5, offset: 0 });
+    const page1 = await pgAdminRepository.getUsers({ limit: 6, offset: 0 });
     console.log(
       `✅ Page 1: ${page1.users.length} users (total: ${page1.total})`,
     );
 
-    const page2 = await pgAdminRepository.getUsers({ limit: 5, offset: 5 });
+    const page2 = await pgAdminRepository.getUsers({ limit: 6, offset: 6 });
     console.log(
       `✅ Page 2: ${page2.users.length} users (total: ${page2.total})`,
     );
@@ -82,7 +82,7 @@ async function testAdminUsers() {
 
     console.log("\n✅ All admin users tests completed successfully!");
     console.log("\n📋 Summary:");
-    console.log("   ✅ Pagination is working (10 users per page)");
+    console.log("   ✅ Pagination is working (6 users per page)");
     console.log("   ✅ Search by email is working");
     console.log("   ✅ Search by name is working");
     console.log("   ✅ Search both name and email is working");

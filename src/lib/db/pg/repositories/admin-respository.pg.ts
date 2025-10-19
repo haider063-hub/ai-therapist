@@ -79,7 +79,7 @@ export const pgAdminRepository = {
       searchValue,
       searchField = "email",
       searchOperator = "contains",
-      limit = 10,
+      limit = 6,
       offset = 0,
       sortDirection = "desc",
     } = query;
