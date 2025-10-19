@@ -59,14 +59,22 @@
       "signIn": "登录",
       "description": "注册您的账户",
       "step1": "通过输入您的邮箱地址开始您的旅程",
-      "step2": "我会在聊天时使用这个名字",
-      "step3": "创建一个强密码来保护您的账户",
+      "step2": "输入发送到您邮箱的验证码",
+      "step3": "我会在聊天时使用这个名字",
+      "step4": "创建一个强密码来保护您的账户",
+      "step5": "完成您的账户设置",
       "signUp": "注册",
       "invalidEmail": "无效的邮箱地址",
       "emailAlreadyExists": "邮箱已存在",
       "nameRequired": "姓名是必需的",
       "passwordRequired": "密码是必需的",
-      "createAccount": "创建账户"
+      "createAccount": "创建账户",
+      "otpRequired": "验证码是必需的",
+      "otpInvalid": "无效的验证码",
+      "otpExpired": "验证码已过期",
+      "otpSent": "验证码已发送到您的邮箱",
+      "verifyCode": "验证码",
+      "resendCode": "重新发送验证码"
     },
     "Intro": {
       "description": "欢迎来到 MCP 聊天机器人。登录以体验我们的 AI 驱动的对话工具。"

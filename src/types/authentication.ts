@@ -5,6 +5,7 @@ export const SocialAuthenticationProviderSchema = z.enum([
   "github",
   "google",
   "microsoft",
+  "apple",
 ]);
 
 export type SocialAuthenticationProvider = z.infer<
@@ -29,10 +30,16 @@ export const MicrosoftConfigSchema = z.object({
   prompt: z.literal("select_account").optional(),
 });
 
+export const AppleConfigSchema = z.object({
+  clientId: z.string().min(1),
+  clientSecret: z.string().min(1),
+});
+
 export const SocialAuthenticationConfigSchema = z.object({
   github: GitHubConfigSchema.optional(),
   google: GoogleConfigSchema.optional(),
   microsoft: MicrosoftConfigSchema.optional(),
+  apple: AppleConfigSchema.optional(),
 });
 
 export const AuthConfigSchema = z.object({
@@ -44,6 +51,7 @@ export const AuthConfigSchema = z.object({
 export type GitHubConfig = z.infer<typeof GitHubConfigSchema>;
 export type GoogleConfig = z.infer<typeof GoogleConfigSchema>;
 export type MicrosoftConfig = z.infer<typeof MicrosoftConfigSchema>;
+export type AppleConfig = z.infer<typeof AppleConfigSchema>;
 export type SocialAuthenticationConfig = z.infer<
   typeof SocialAuthenticationConfigSchema
 >;

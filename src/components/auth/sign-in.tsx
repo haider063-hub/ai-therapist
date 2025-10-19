@@ -155,11 +155,11 @@ export default function SignIn({
             <>
               {emailAndPasswordEnabled && (
                 <div className="flex items-center my-4">
-                  <div className="flex-1 h-px bg-accent"></div>
-                  <span className="px-4 text-sm text-black">
-                    {t("orContinueWith")}
+                  <div className="flex-1 h-px bg-gray-300"></div>
+                  <span className="px-4 text-sm text-gray-500 lowercase">
+                    or
                   </span>
-                  <div className="flex-1 h-px bg-accent"></div>
+                  <div className="flex-1 h-px bg-gray-300"></div>
                 </div>
               )}
               <div className="flex flex-col gap-2 w-full">
@@ -167,10 +167,10 @@ export default function SignIn({
                   <Button
                     variant="outline"
                     onClick={() => handleSocialSignIn("google")}
-                    className="flex-1 w-full px-4 sm:px-0"
+                    className="flex-1 w-full bg-white hover:bg-gray-50 border-gray-300 text-gray-700 font-medium px-4 sm:px-0"
                   >
-                    <GoogleIcon className="size-4 fill-foreground" />
-                    Google
+                    <GoogleIcon className="size-4 mr-2" />
+                    Continue with Google
                   </Button>
                 )}
                 {socialAuthenticationProviders.includes("github") && (

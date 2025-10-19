@@ -77,11 +77,11 @@ export default function SignUpPage({
             <>
               {emailAndPasswordEnabled && (
                 <div className="flex items-center my-4">
-                  <div className="flex-1 h-px bg-accent"></div>
-                  <span className="px-4 text-sm text-black">
-                    {t("Auth.SignIn.orContinueWith")}
+                  <div className="flex-1 h-px bg-gray-300"></div>
+                  <span className="px-4 text-sm text-gray-500 lowercase">
+                    or
                   </span>
-                  <div className="flex-1 h-px bg-accent"></div>
+                  <div className="flex-1 h-px bg-gray-300"></div>
                 </div>
               )}
               <SocialProviders

@@ -58,14 +58,22 @@
       "signIn": "サインイン",
       "description": "アカウントにサインアップ",
       "step1": "メールアドレスを入力して、私たちとの旅を始めましょう",
-      "step2": "チャット時にこの名前を使用します",
-      "step3": "アカウントを保護するための強力なパスワードを作成してください",
+      "step2": "メールに送信された確認コードを入力してください",
+      "step3": "チャット時にこの名前を使用します",
+      "step4": "アカウントを保護するための強力なパスワードを作成してください",
+      "step5": "アカウント設定を完了してください",
       "signUp": "サインアップ",
       "invalidEmail": "無効なメールアドレス",
       "emailAlreadyExists": "メールアドレスが既に存在します",
       "nameRequired": "名前が必要です",
       "passwordRequired": "パスワードが必要です",
-      "createAccount": "アカウントを作成"
+      "createAccount": "アカウントを作成",
+      "otpRequired": "確認コードが必要です",
+      "otpInvalid": "無効な確認コード",
+      "otpExpired": "確認コードの有効期限が切れています",
+      "otpSent": "確認コードがメールに送信されました",
+      "verifyCode": "コードを確認",
+      "resendCode": "コードを再送信"
     },
     "Intro": {
       "description": "EchoNest AI Therapy へようこそ。AIを活用した会話ツールを体験するためにサインインしてください。"

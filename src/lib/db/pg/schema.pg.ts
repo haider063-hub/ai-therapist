@@ -128,6 +128,17 @@ export const VerificationSchema = pgTable("verification", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// OTP Verification table for email verification during signup
+export const OtpVerificationSchema = pgTable("otp_verification", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull(),
+  otpCode: text("otp_code").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  isUsed: boolean("is_used").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Chat Thread table
 export const ChatThreadSchema = pgTable("chat_thread", {
   id: text("id").primaryKey().notNull(),
@@ -265,6 +276,7 @@ export type UserEntity = typeof UserSchema.$inferSelect;
 export type SessionEntity = typeof SessionSchema.$inferSelect;
 export type AccountEntity = typeof AccountSchema.$inferSelect;
 export type VerificationEntity = typeof VerificationSchema.$inferSelect;
+export type OtpVerificationEntity = typeof OtpVerificationSchema.$inferSelect;
 export type ChatThreadEntity = typeof ChatThreadSchema.$inferSelect;
 export type ChatMessageEntity = typeof ChatMessageSchema.$inferSelect;
 export type MoodTrackingEntity = typeof MoodTrackingSchema.$inferSelect;

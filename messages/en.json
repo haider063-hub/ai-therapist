@@ -202,14 +202,22 @@
       "signUpInstructionsEmailAndSocial": "Either click \"Email\" or use a provider to sign up",
       "signUpSocialOnly": "Use a provider to sign up",
       "step1": "Start your journey with us by entering your email address",
-      "step2": "I'll use this name when we chat",
-      "step3": "Create a strong password to secure your account",
+      "step2": "Enter the verification code sent to your email",
+      "step3": "I'll use this name when we chat",
+      "step4": "Create a strong password to secure your account",
+      "step5": "Complete your account setup",
       "signUp": "Sign Up",
       "invalidEmail": "Invalid email address",
       "emailAlreadyExists": "Email already exists",
       "nameRequired": "Name is required",
       "passwordRequired": "Password is required",
-      "createAccount": "Create account"
+      "createAccount": "Create account",
+      "otpRequired": "Verification code is required",
+      "otpInvalid": "Invalid verification code",
+      "otpExpired": "Verification code has expired",
+      "otpSent": "Verification code sent to your email",
+      "verifyCode": "Verify Code",
+      "resendCode": "Resend Code"
     },
     "Intro": {
       "description": "Welcome to EchoNest AI Therapy. Sign in to experience our AI-powered conversational tools."

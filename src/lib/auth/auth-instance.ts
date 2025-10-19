@@ -11,6 +11,7 @@ import {
   SessionSchema,
   UserSchema,
   VerificationSchema,
+  OtpVerificationSchema,
 } from "lib/db/pg/schema.pg";
 import { getAuthConfig } from "./config";
 import logger from "logger";
@@ -24,11 +25,7 @@ const {
   socialAuthenticationProviders,
 } = getAuthConfig();
 
-// Log domain configuration for debugging
-console.log("🔧 Auth Domain Configuration:");
-console.log("BETTER_AUTH_URL:", process.env.BETTER_AUTH_URL);
-console.log("NEXT_PUBLIC_BASE_URL:", process.env.NEXT_PUBLIC_BASE_URL);
-console.log("VERCEL_URL:", process.env.VERCEL_URL);
+// Auth configuration setup
 
 // Calculate the final baseURL
 const finalBaseURL =
@@ -38,7 +35,7 @@ const finalBaseURL =
     ? `https://${process.env.VERCEL_URL}`
     : "http://localhost:3000");
 
-console.log("🌐 Final BaseURL:", finalBaseURL);
+// Final baseURL calculated
 
 // Calculate trusted origins
 const trustedOrigins = [
@@ -50,7 +47,7 @@ const trustedOrigins = [
   "https://echonest.co.uk",
 ].filter(Boolean);
 
-console.log("🔒 Trusted Origins:", trustedOrigins);
+// Trusted origins configured
 
 const options = {
   secret: process.env.BETTER_AUTH_SECRET!,
@@ -83,6 +80,7 @@ const options = {
       session: SessionSchema,
       account: AccountSchema,
       verification: VerificationSchema,
+      otpVerification: OtpVerificationSchema,
     },
   }),
   databaseHooks: {
@@ -120,22 +118,9 @@ const options = {
       const { Resend } = await import("resend");
 
       if (!process.env.RESEND_API_KEY) {
-        console.log("=".repeat(60));
-        console.log(
-          "⚠️  RESEND_API_KEY not configured - Password reset email not sent",
-        );
-        console.log("Password reset link for", user.email);
-        console.log("URL:", url);
-        console.log("Token:", token);
-        console.log("=".repeat(60));
+        // Password reset email not configured
         return;
       }
-
-      console.log("📧 RESEND_API_KEY found, attempting to send email...");
-      console.log("📧 Email details:", {
-        to: user.email,
-        from: "EchoNest AI Therapy <noreply@echonest.co.uk>",
-      });
 
       const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -144,7 +129,7 @@ const options = {
       const name = user.name || "there";
 
       try {
-        const result = await resend.emails.send({
+        await resend.emails.send({
           from: "EchoNest AI Therapy <noreply@echonest.co.uk>",
           to: user.email,
           subject: "EchoNest AI Therapy - Password Reset Request",
@@ -216,22 +201,10 @@ const options = {
         `,
         });
 
-        console.log(
-          "✅ Password reset email sent successfully to:",
-          user.email,
-        );
-        console.log("Email ID:", result.data?.id);
+        // Password reset email sent successfully
       } catch (error) {
-        console.error("❌ Failed to send password reset email to:", user.email);
-        console.error("Error details:", error);
-
-        // Log the reset link for manual use if email fails
-        console.log("=".repeat(60));
-        console.log("MANUAL RESET LINK (email failed):");
-        console.log("User:", user.email);
-        console.log("Reset URL:", resetLink);
-        console.log("Token:", token);
-        console.log("=".repeat(60));
+        console.error("Failed to send password reset email:", error);
+        // Email sending failed - user can still use the reset link
       }
     },
   },
@@ -265,7 +238,14 @@ const options = {
       ).filter((key) => socialAuthenticationProviders[key]),
     },
   },
-  socialProviders: socialAuthenticationProviders,
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+      prompt: "select_account",
+      accessType: "offline",
+    },
+  },
 } satisfies BetterAuthOptions;
 
 export const auth = betterAuth({

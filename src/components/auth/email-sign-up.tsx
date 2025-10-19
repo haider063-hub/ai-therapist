@@ -18,9 +18,15 @@ import { ChevronLeft, Loader } from "lucide-react";
 import { toast } from "sonner";
 import { safe } from "ts-safe";
 import { UserZodSchema } from "app-types/user";
-import { existsByEmailAction, signUpAction } from "@/app/api/auth/actions";
+import {
+  existsByEmailAction,
+  signUpAction,
+  sendOtpAction,
+  verifyOtpAction,
+} from "@/app/api/auth/actions";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { OtpInput } from "@/components/ui/otp-input";
 
 export default function EmailSignUp({
   isFirstUser,
@@ -35,12 +41,16 @@ export default function EmailSignUp({
     email: "",
     name: "",
     password: "",
+    otpCode: "",
   });
+  const [otpResetKey, setOtpResetKey] = useState(0);
 
   const steps = [
     t("Auth.SignUp.step1"),
     t("Auth.SignUp.step2"),
     t("Auth.SignUp.step3"),
+    t("Auth.SignUp.step4"),
+    t("Auth.SignUp.step5"),
   ];
 
   const safeProcessWithLoading = function <T>(fn: () => Promise<T>) {
@@ -65,7 +75,43 @@ export default function EmailSignUp({
       toast.error(t("Auth.SignUp.emailAlreadyExists"));
       return;
     }
-    setStep(2);
+
+    // Send OTP after email validation
+    const otpResult = await safeProcessWithLoading(() =>
+      sendOtpAction(formData.email),
+    ).unwrap();
+
+    if (otpResult?.success) {
+      toast.success(otpResult.message);
+      setStep(2);
+    } else {
+      toast.error(otpResult?.message || "Failed to send verification code");
+    }
+  };
+
+  const successOtpStep = async (otpCode?: string) => {
+    const codeToVerify = otpCode || formData.otpCode;
+
+    if (!codeToVerify || codeToVerify.length !== 6) {
+      toast.error("Please enter a valid 6-digit verification code");
+      return;
+    }
+
+    const otpResult = await safeProcessWithLoading(() =>
+      verifyOtpAction(formData.email, codeToVerify),
+    ).unwrap();
+
+    if (otpResult?.success) {
+      toast.success("Email verified successfully!");
+      setStep(3);
+    } else {
+      toast.error(
+        otpResult?.message || "Invalid verification code. Please try again.",
+      );
+      // Clear the OTP input on error
+      setFormData({ otpCode: "" });
+      setOtpResetKey((prev) => prev + 1);
+    }
   };
 
   const successNameStep = () => {
@@ -74,7 +120,7 @@ export default function EmailSignUp({
       toast.error(t("Auth.SignUp.nameRequired"));
       return;
     }
-    setStep(3);
+    setStep(4);
   };
 
   const successPasswordStep = async () => {
@@ -126,7 +172,7 @@ export default function EmailSignUp({
               <div className="h-2 w-full relative bg-gray-200">
                 <div
                   style={{
-                    width: `${(step / 3) * 100}%`,
+                    width: `${(step / 5) * 100}%`,
                   }}
                   className="h-full bg-black transition-all duration-300"
                 ></div>
@@ -163,6 +209,49 @@ export default function EmailSignUp({
               </div>
             )}
             {step === 2 && (
+              <div className={cn("flex flex-col gap-4")}>
+                <Label className="text-black text-center">
+                  Verification Code
+                </Label>
+                <OtpInput
+                  key={otpResetKey} // Reset when key changes
+                  length={6}
+                  onComplete={(otp) => {
+                    setFormData({ otpCode: otp });
+                    // Auto-verify immediately when all 6 digits are entered
+                    successOtpStep(otp);
+                  }}
+                  disabled={isLoading}
+                  className="justify-center"
+                />
+                {isLoading && (
+                  <div className="flex justify-center mt-2">
+                    <div className="text-xs text-gray-500">
+                      Verifying code...
+                    </div>
+                  </div>
+                )}
+                <p className="text-xs text-gray-600 text-center">
+                  Enter the 6-digit code sent to {formData.email}
+                </p>
+                <div className="flex justify-center mt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFormData({ otpCode: "" });
+                      setOtpResetKey((prev) => prev + 1); // Reset OTP input
+                      successEmailStep();
+                    }}
+                    disabled={isLoading}
+                    className="text-xs"
+                  >
+                    Resend Code
+                  </Button>
+                </div>
+              </div>
+            )}
+            {step === 3 && (
               <div className={cn("flex flex-col gap-2")}>
                 <Label htmlFor="name" className="text-black">
                   Full Name
@@ -188,7 +277,7 @@ export default function EmailSignUp({
                 />
               </div>
             )}
-            {step === 3 && (
+            {step === 4 && (
               <div className={cn("flex flex-col gap-2")}>
                 <div className="flex items-center">
                   <Label htmlFor="password" className="text-black">
@@ -215,7 +304,6 @@ export default function EmailSignUp({
                 />
               </div>
             )}
-            <p className="text-black text-xs mb-6">{steps[step - 1]}</p>
             <div className="flex flex-row-reverse gap-2">
               <Button
                 tabIndex={0}
@@ -224,11 +312,12 @@ export default function EmailSignUp({
                 style={{ backgroundColor: "black", color: "white" }}
                 onClick={() => {
                   if (step === 1) successEmailStep();
-                  if (step === 2) successNameStep();
-                  if (step === 3) successPasswordStep();
+                  if (step === 2) successOtpStep();
+                  if (step === 3) successNameStep();
+                  if (step === 4) successPasswordStep();
                 }}
               >
-                {step === 3 ? t("Auth.SignUp.createAccount") : t("Common.next")}
+                {step === 4 ? t("Auth.SignUp.createAccount") : t("Common.next")}
                 {isLoading && <Loader className="size-4 ml-2" />}
               </Button>
               <Button

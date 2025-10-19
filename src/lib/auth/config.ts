@@ -2,9 +2,11 @@ import {
   GitHubConfigSchema,
   GoogleConfigSchema,
   MicrosoftConfigSchema,
+  AppleConfigSchema,
   GitHubConfig,
   GoogleConfig,
   MicrosoftConfig,
+  AppleConfig,
   AuthConfig,
   AuthConfigSchema,
 } from "app-types/authentication";
@@ -27,6 +29,7 @@ function parseSocialAuthConfigs() {
     github?: GitHubConfig;
     google?: GoogleConfig;
     microsoft?: MicrosoftConfig;
+    apple?: AppleConfig;
   } = {};
 
   if (process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET) {
@@ -86,6 +89,21 @@ function parseSocialAuthConfigs() {
         "Do not pass MICROSOFT_CLIENT_SECRET to the client",
         configs,
         configs.microsoft.clientSecret,
+      );
+    }
+  }
+
+  if (process.env.APPLE_CLIENT_ID && process.env.APPLE_CLIENT_SECRET) {
+    const appleResult = AppleConfigSchema.safeParse({
+      clientId: process.env.APPLE_CLIENT_ID,
+      clientSecret: process.env.APPLE_CLIENT_SECRET,
+    });
+    if (appleResult.success) {
+      configs.apple = appleResult.data;
+      experimental_taintUniqueValue(
+        "Do not pass APPLE_CLIENT_SECRET to the client",
+        configs,
+        configs.apple.clientSecret,
       );
     }
   }

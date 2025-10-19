@@ -58,14 +58,22 @@
       "signIn": "Se connecter",
       "description": "Inscrivez-vous à votre compte",
       "step1": "Commencez votre parcours avec nous en saisissant votre adresse e-mail",
-      "step2": "J'utiliserai ce nom quand nous discuterons",
-      "step3": "Créez un mot de passe fort pour sécuriser votre compte",
+      "step2": "Entrez le code de vérification envoyé à votre e-mail",
+      "step3": "J'utiliserai ce nom quand nous discuterons",
+      "step4": "Créez un mot de passe fort pour sécuriser votre compte",
+      "step5": "Terminez la configuration de votre compte",
       "signUp": "S'inscrire",
       "invalidEmail": "Adresse e-mail invalide",
       "emailAlreadyExists": "L'e-mail existe déjà",
       "nameRequired": "Le nom est requis",
       "passwordRequired": "Le mot de passe est requis",
-      "createAccount": "Créer un compte"
+      "createAccount": "Créer un compte",
+      "otpRequired": "Le code de vérification est requis",
+      "otpInvalid": "Code de vérification invalide",
+      "otpExpired": "Le code de vérification a expiré",
+      "otpSent": "Code de vérification envoyé à votre e-mail",
+      "verifyCode": "Vérifier le code",
+      "resendCode": "Renvoyer le code"
     },
     "Intro": {
       "description": "Bienvenue sur EchoNest AI Therapy. Connectez-vous pour découvrir nos outils de conversation alimentés par l'IA."

@@ -5,6 +5,7 @@ import { BasicUser, UserZodSchema } from "app-types/user";
 import { userRepository } from "lib/db/repository";
 import { ActionState } from "lib/action-utils";
 import { headers } from "next/headers";
+import { OtpService } from "lib/services/otp-service";
 
 export async function existsByEmailAction(email: string) {
   const exists = await userRepository.existsByEmail(email);
@@ -45,6 +46,33 @@ export async function signUpAction(data: {
     return {
       success: false,
       message: error instanceof Error ? error.message : "Failed to sign up",
+    };
+  }
+}
+
+export async function sendOtpAction(email: string): Promise<ActionState> {
+  try {
+    const result = await OtpService.generateAndSendOtp(email);
+    return result;
+  } catch (_error) {
+    return {
+      success: false,
+      message: "Failed to send verification code",
+    };
+  }
+}
+
+export async function verifyOtpAction(
+  email: string,
+  otpCode: string,
+): Promise<ActionState> {
+  try {
+    const result = await OtpService.verifyOtp(email, otpCode);
+    return result;
+  } catch (_error) {
+    return {
+      success: false,
+      message: "Failed to verify code",
     };
   }
 }
