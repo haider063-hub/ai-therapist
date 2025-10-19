@@ -44,7 +44,7 @@ export default async function UserListPage({ searchParams }: PageProps) {
 
   const result = await getAdminUsers({
     searchValue: params.query,
-    searchField: "email",
+    searchField: "both", // Search both name and email
     searchOperator: "contains",
     limit,
     offset,

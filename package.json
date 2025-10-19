@@ -22,6 +22,7 @@
     "test:otp": "tsx scripts/test-otp.ts",
     "test:auth": "tsx scripts/test-auth-flow.ts",
     "test:oauth": "tsx scripts/test-oauth-callback.ts",
+    "test:admin": "tsx scripts/test-admin-users.ts",
     "lint": "next lint && biome lint",
     "lint:fix": "next lint --fix && biome lint --write --unsafe || true",
     "format": "biome format --write || true",

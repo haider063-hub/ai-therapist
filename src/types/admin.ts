@@ -2,7 +2,7 @@ import type { User } from "./user";
 
 export interface AdminUsersQuery {
   searchValue?: string;
-  searchField?: "name" | "email";
+  searchField?: "name" | "email" | "both";
   searchOperator?: "contains" | "starts_with" | "ends_with";
   limit?: number;
   offset?: number;
