@@ -10,12 +10,12 @@ interface UserDetailLayoutProps {
 
 export default function UserDetailLayout({ children }: UserDetailLayoutProps) {
   return (
-    <div className="relative w-full min-h-screen">
+    <div className="relative w-full h-screen">
       {/* EchoNest Background */}
       <div className="echonest-gradient-bg"></div>
 
       {/* Content */}
-      <div className="relative z-10 overflow-y-auto chat-scrollbar p-6">
+      <div className="relative z-10 overflow-y-auto chat-scrollbar p-6 h-full">
         {/* Back Button */}
         <div className="mb-6">
           <Tooltip>

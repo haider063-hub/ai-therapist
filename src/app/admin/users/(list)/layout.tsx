@@ -13,7 +13,7 @@ export default async function UsersLayout({ children }: UsersLayoutProps) {
   const t = await getTranslations("Admin.Users");
 
   return (
-    <div className="relative w-full flex flex-col min-h-screen">
+    <div className="relative w-full flex flex-col h-screen">
       {/* EchoNest Background */}
       <div className="echonest-gradient-bg"></div>
 
