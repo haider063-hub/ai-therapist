@@ -252,10 +252,10 @@ export function UserAccessCard({
                       <Button
                         variant="destructive"
                         size="sm"
-                        className="h-8 text-xs !bg-black !text-white hover:!bg-gray-800"
+                        className="h-8 text-xs"
                         data-testid="delete-user-button"
                       >
-                        <Trash2 className="w-3 h-3 mr-1 text-white" />
+                        <Trash2 className="w-3 h-3 mr-1" />
                         {t("deleteUser")}
                       </Button>
                     </UserDeleteDialog>
