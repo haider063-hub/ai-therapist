@@ -135,7 +135,7 @@ export function UsersTable({
 
   return (
     <div className="space-y-4 w-full">
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <div className="relative flex-1 max-w-sm">
           <Form action={baseUrl} ref={formRef}>
             {page !== 1 && <input type="hidden" name="page" value={1} />}
@@ -164,19 +164,21 @@ export function UsersTable({
             />
           </Form>
         </div>
-        {(query ||
-          sortBy !== DEFAULT_SORT_BY ||
-          sortDirection !== DEFAULT_SORT_DIRECTION) && (
-          <Link
-            href={baseUrl}
-            className={cn("shrink-0", buttonVariants({ variant: "outline" }))}
-          >
-            <X className="h-4 w-4 mr-1" />
-            {t("clear")}
-          </Link>
-        )}
-        <div className="text-sm text-white" data-testid="users-total-count">
-          Showing {users.length} out of {total} total users
+        <div className="flex items-center gap-4">
+          {(query ||
+            sortBy !== DEFAULT_SORT_BY ||
+            sortDirection !== DEFAULT_SORT_DIRECTION) && (
+            <Link
+              href={baseUrl}
+              className={cn("shrink-0", buttonVariants({ variant: "outline" }))}
+            >
+              <X className="h-4 w-4 mr-1" />
+              {t("clear")}
+            </Link>
+          )}
+          <div className="text-sm text-white" data-testid="users-total-count">
+            Showing {users.length} out of {total} total users
+          </div>
         </div>
       </div>
 
