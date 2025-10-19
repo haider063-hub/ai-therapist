@@ -152,7 +152,7 @@ export function TherapistSelection() {
                 placeholder="Search by name, language, or specialization..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-white text-black border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white font-normal"
+                className="w-full max-w-2xl px-4 py-2 rounded-lg border bg-white text-black border-black focus:border-black focus:ring-2 focus:ring-blue-200 focus:bg-white font-normal placeholder:font-normal"
               />
 
               <div className="flex gap-2 flex-wrap justify-center items-center">
