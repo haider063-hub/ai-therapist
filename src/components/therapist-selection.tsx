@@ -129,7 +129,7 @@ export function TherapistSelection() {
   return (
     <div className="min-h-screen relative">
       <div className="echonest-gradient-bg"></div>
-      <div className="relative z-10">
+      <div className="relative z-10 chat-scrollbar">
         <TherapistSelectionHeader />
         <div className="flex-1 p-4 sm:p-6 md:p-8">
           <div className="max-w-7xl mx-auto space-y-6">

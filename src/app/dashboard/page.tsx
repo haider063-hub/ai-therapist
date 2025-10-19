@@ -15,7 +15,7 @@ export default function DashboardPage() {
         <DashboardHeaderClient />
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 chat-scrollbar">
           <div className="w-full">
             <Suspense fallback={<UserDetailContentSkeleton />}>
               <UserDetailContent view="user" />
