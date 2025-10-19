@@ -7,7 +7,6 @@
 
 import { pgDb } from "../src/lib/db/pg/db.pg";
 import { UserSchema } from "../src/lib/db/pg/schema.pg";
-import { eq } from "drizzle-orm";
 
 async function testCallbackHandler() {
   console.log("🧪 Testing OAuth Callback Handler Logic...\n");
