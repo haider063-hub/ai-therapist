@@ -31,7 +31,10 @@ export default function SignUpPage({
   const handleSocialSignIn = (provider: SocialAuthenticationProvider) => {
     startTransition(async () => {
       try {
-        await authClient.signIn.social({ provider });
+        await authClient.signIn.social({
+          provider,
+          callbackURL: "/api/auth/callback-handler",
+        });
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Unknown error");
       }

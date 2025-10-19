@@ -70,9 +70,14 @@ export default function SignIn({
   };
 
   const handleSocialSignIn = (provider: SocialAuthenticationProvider) => {
-    authClient.signIn.social({ provider }).catch((e) => {
-      toast.error(e.error);
-    });
+    authClient.signIn
+      .social({
+        provider,
+        callbackURL: "/api/auth/callback-handler",
+      })
+      .catch((e) => {
+        toast.error(e.error);
+      });
   };
   return (
     <div className="w-full h-full flex flex-col px-4 sm:p-4 md:p-8 justify-center">
