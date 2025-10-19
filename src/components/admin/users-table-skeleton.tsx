@@ -10,10 +10,11 @@ import { Input } from "ui/input";
 import { Search, ChevronRight } from "lucide-react";
 import { Skeleton } from "ui/skeleton";
 import { Avatar, AvatarFallback } from "ui/avatar";
+import { TablePagination } from "ui/table-pagination";
 
 export function UsersTableSkeleton() {
-  // Generate reasonable number of skeleton rows
-  const skeletonRows = Array.from({ length: 8 }, (_, i) => i);
+  // Generate 6 skeleton rows to match the current pagination limit
+  const skeletonRows = Array.from({ length: 6 }, (_, i) => i);
 
   return (
     <div className="space-y-4 w-full">
@@ -27,14 +28,14 @@ export function UsersTableSkeleton() {
             disabled
           />
         </div>
-        {/* Total count skeleton */}
-        <div className="text-sm text-muted-foreground">
-          <Skeleton className="h-4 w-16" />
+        {/* User count display skeleton - matches actual format */}
+        <div className="text-sm text-white">
+          <Skeleton className="h-4 w-32 bg-white/20" />
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="rounded-lg border bg-card w-full overflow-x-auto">
+      {/* Table Section - matches actual styling */}
+      <div className="rounded-lg border bg-white/95 backdrop-blur-sm shadow-lg w-full overflow-x-auto p-2">
         <Table data-testid="users-table-skeleton" className="w-full">
           <TableHeader>
             <TableRow className="hover:bg-transparent">
@@ -104,17 +105,14 @@ export function UsersTableSkeleton() {
         </Table>
       </div>
 
-      {/* Pagination Section */}
-      <div className="flex items-center justify-between">
+      {/* Pagination Section - matches actual TablePagination component */}
+      <div className="flex justify-center">
         <div className="flex items-center space-x-2">
           <Skeleton className="h-9 w-20" />
           <Skeleton className="h-9 w-9" />
           <Skeleton className="h-9 w-9" />
           <Skeleton className="h-9 w-9" />
           <Skeleton className="h-9 w-20" />
-        </div>
-        <div className="text-sm text-muted-foreground">
-          <Skeleton className="h-4 w-32" />
         </div>
       </div>
     </div>
