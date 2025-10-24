@@ -66,7 +66,7 @@ export const UserSchema = pgTable("user", {
   gender: text("gender"), // male, female, non-binary, prefer_not_to_say, other
   country: text("country"), // Full country name from dropdown
   religion: text("religion"), // christianity, islam, hinduism, buddhism, judaism, atheist, spiritual, other
-  therapyNeeds: text("therapy_needs"), // JSON array: ["stress", "anxiety", "depression", etc.]
+  therapyNeeds: text("therapy_needs"), // Single string value: "stress", "anxiety", "depression", etc.
   preferredTherapyStyle: text("preferred_therapy_style"), // cbt, mindfulness, supportive, other
   specificConcerns: text("specific_concerns"), // Open text field for detailed concerns
   profileLastUpdated: timestamp("profile_last_updated"),
