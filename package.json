@@ -156,7 +156,10 @@
     "vitest": "^3.2.4"
   },
   "lint-staged": {
-    "*.{js,json,mjs,ts,yaml,tsx,css}": ["npm run format", "npm run lint:fix"]
+    "*.{js,json,mjs,ts,yaml,tsx,css}": [
+      "npm run format",
+      "npm run lint:fix"
+    ]
   },
   "engines": {
     "node": ">=18"
