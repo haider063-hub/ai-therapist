@@ -14,10 +14,12 @@ export default async function UserDetailPage({ params }: PageProps) {
     await requireAdminPermission();
   } catch (_error) {
     unauthorized();
+    return; // Add return to prevent further execution
   }
   const session = await getSession();
   if (!session) {
     redirect("/login");
+    return; // Add return to prevent further execution
   }
   const [user, userAccountInfo] = await Promise.all([
     getUser(id),

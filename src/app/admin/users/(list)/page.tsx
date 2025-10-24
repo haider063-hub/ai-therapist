@@ -29,10 +29,12 @@ export default async function UserListPage({ searchParams }: PageProps) {
     await requireAdminPermission();
   } catch (_error) {
     unauthorized();
+    return; // Add return to prevent further execution
   }
   const session = await getSession();
   if (!session) {
     redirect("/login");
+    return; // Add return to prevent further execution
   }
 
   const params = await searchParams;

@@ -37,7 +37,7 @@ export function UserSettingsPopup({
           style={{
             userSelect: "text",
           }}
-          className="max-h-[100dvh]! w-full h-full  rounded-none flex flex-col overflow-hidden p-4 md:p-6"
+          className="max-h-[100vh]! w-full h-full  rounded-none flex flex-col overflow-hidden p-4 md:p-6"
         >
           <div className="flex items-center justify-end">
             <Button
