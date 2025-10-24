@@ -1,6 +1,10 @@
 "use client";
 
-import { THERAPISTS, Therapist } from "@/lib/constants/therapists";
+import {
+  THERAPISTS,
+  Therapist,
+  getRecommendedTherapists,
+} from "@/lib/constants/therapists";
 import {
   Card,
   CardContent,
@@ -11,7 +15,7 @@ import {
 import { Button } from "ui/button";
 import { Badge } from "ui/badge";
 import { Volume2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { appStore } from "@/app/store";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "ui/avatar";
@@ -21,7 +25,54 @@ import { TherapistSelectionHeader } from "./therapist-selection-header";
 export function TherapistSelection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState<string>("All");
+  const [recommendedTherapists, setRecommendedTherapists] = useState<
+    Therapist[]
+  >([]);
   const router = useRouter();
+
+  // Fetch user profile data and generate recommendations
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch("/api/user/details");
+      const data = await response.json();
+
+      if (
+        data.user &&
+        data.user.therapyNeeds &&
+        data.user.preferredTherapyStyle
+      ) {
+        // Generate recommendations based on user profile
+        const recommendations = getRecommendedTherapists(
+          data.user.therapyNeeds,
+          data.user.preferredTherapyStyle,
+        );
+        setRecommendedTherapists(recommendations);
+      } else {
+        // Show some default recommendations to encourage profile completion
+        const defaultRecommendations = THERAPISTS.slice(0, 2);
+        setRecommendedTherapists(defaultRecommendations);
+      }
+    } catch (error) {
+      console.error("Failed to fetch user profile:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  // Listen for profile updates to refresh recommendations
+  useEffect(() => {
+    const handleProfileUpdate = () => {
+      fetchUserProfile();
+    };
+
+    window.addEventListener("profileUpdated", handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener("profileUpdated", handleProfileUpdate);
+    };
+  }, []);
 
   // Extract individual languages from all therapists
   const languages = [
@@ -50,6 +101,14 @@ export function TherapistSelection() {
       therapist.language.includes(selectedLanguage);
 
     return matchesSearch && matchesLanguage;
+  }).sort((a, b) => {
+    // Put recommended therapists first
+    const aIsRecommended = recommendedTherapists.some((rt) => rt.id === a.id);
+    const bIsRecommended = recommendedTherapists.some((rt) => rt.id === b.id);
+
+    if (aIsRecommended && !bIsRecommended) return -1;
+    if (!aIsRecommended && bIsRecommended) return 1;
+    return 0;
   });
 
   const handleSelectTherapist = async (therapist: Therapist) => {
@@ -175,14 +234,20 @@ export function TherapistSelection() {
               </div>
             </div>
 
+            {/* Add more space between language selection and therapist cards */}
+            <div className="mt-8"></div>
+
             {/* Therapist Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch auto-rows-fr mt-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch auto-rows-fr">
               {filteredTherapists.map((therapist) => (
                 <TherapistCard
                   key={therapist.id}
                   therapist={therapist}
                   onSelect={() => handleSelectTherapist(therapist)}
                   onPreview={() => handlePreview(therapist)}
+                  isRecommended={recommendedTherapists.some(
+                    (rt) => rt.id === therapist.id,
+                  )}
                 />
               ))}
             </div>
@@ -205,10 +270,12 @@ function TherapistCard({
   therapist,
   onSelect,
   onPreview,
+  isRecommended = false,
 }: {
   therapist: Therapist;
   onSelect: () => void;
   onPreview: () => void;
+  isRecommended?: boolean;
 }) {
   const getLanguageFlag = (langCode: string) => {
     const flags: Record<string, string> = {
@@ -225,7 +292,19 @@ function TherapistCard({
   };
 
   return (
-    <Card className="transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col bg-white">
+    <Card
+      className={`transition-all duration-200 hover:shadow-lg hover:scale-[1.02] cursor-pointer h-full flex flex-col bg-white relative ${
+        isRecommended ? "ring-2 ring-black ring-opacity-50" : ""
+      }`}
+    >
+      {/* Recommended Tag */}
+      {isRecommended && (
+        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
+          <Badge className="bg-black hover:bg-gray-800 text-white font-semibold px-3 py-1 rounded-full shadow-lg">
+            Recommended
+          </Badge>
+        </div>
+      )}
       <CardHeader className="text-center pb-3 flex-shrink-0">
         {/* Avatar */}
         <div className="flex justify-center mb-3">
@@ -272,7 +351,7 @@ function TherapistCard({
               ✨ Specializes in:
             </p>
             <div className="flex flex-wrap gap-1.5 justify-center">
-              {therapist.focus.slice(0, 2).map((item, idx) => (
+              {therapist.focus.map((item, idx) => (
                 <span
                   key={idx}
                   className="text-xs bg-secondary px-2 py-0.5 rounded-full"
@@ -280,11 +359,6 @@ function TherapistCard({
                   {item}
                 </span>
               ))}
-              {therapist.focus.length > 2 && (
-                <span className="text-xs bg-secondary px-2 py-0.5 rounded-full">
-                  +{therapist.focus.length - 2} more
-                </span>
-              )}
             </div>
           </div>
         </div>

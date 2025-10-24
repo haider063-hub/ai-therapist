@@ -13,14 +13,14 @@ export async function POST(request: NextRequest) {
 
     const data = await request.json();
 
-    // Validate therapy needs (required field)
+    // Validate therapy needs (required field) - now a single string value
     if (
       !data.therapyNeeds ||
-      !Array.isArray(data.therapyNeeds) ||
-      data.therapyNeeds.length === 0
+      typeof data.therapyNeeds !== "string" ||
+      data.therapyNeeds.trim() === ""
     ) {
       return NextResponse.json(
-        { error: "Please select at least one therapy need" },
+        { error: "Please select a therapy need" },
         { status: 400 },
       );
     }
@@ -40,9 +40,9 @@ export async function POST(request: NextRequest) {
     profileData.preferredTherapyStyle = data.preferredTherapyStyle || null;
     profileData.specificConcerns = data.specificConcerns?.trim() || null;
 
-    // Therapy needs must be an array
-    if (data.therapyNeeds && Array.isArray(data.therapyNeeds)) {
-      profileData.therapyNeeds = JSON.stringify(data.therapyNeeds);
+    // Therapy needs is now a single string value
+    if (data.therapyNeeds && typeof data.therapyNeeds === "string") {
+      profileData.therapyNeeds = data.therapyNeeds.trim();
     }
 
     // Update user profile

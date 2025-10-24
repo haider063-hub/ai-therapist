@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Card,
   CardContent,
@@ -41,19 +41,10 @@ export default function ProfileSetupPage() {
     gender: "",
     country: "",
     religion: "",
-    therapyNeeds: [] as string[],
+    therapyNeeds: "",
     preferredTherapyStyle: "",
     specificConcerns: "",
   });
-
-  const handleTherapyNeedToggle = (value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      therapyNeeds: prev.therapyNeeds.includes(value)
-        ? prev.therapyNeeds.filter((need) => need !== value)
-        : [...prev.therapyNeeds, value],
-    }));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,8 +66,8 @@ export default function ProfileSetupPage() {
       toast.error("Please select your religion/beliefs");
       return;
     }
-    if (!formData.therapyNeeds || formData.therapyNeeds.length === 0) {
-      toast.error("Please select at least one therapy need");
+    if (!formData.therapyNeeds) {
+      toast.error("Please select a therapy need");
       return;
     }
     if (!formData.preferredTherapyStyle) {
@@ -259,22 +250,19 @@ export default function ProfileSetupPage() {
               <Label className="text-black">
                 What brings you here?{" "}
                 <span className="text-sm text-black">
-                  <span className="sm:hidden">(Required)</span>
-                  <span className="hidden sm:inline">
-                    (Required - Select all that apply)
-                  </span>
+                  (Required - Select one)
                 </span>
               </Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <RadioGroup
+                value={formData.therapyNeeds}
+                onValueChange={(value) =>
+                  setFormData({ ...formData, therapyNeeds: value })
+                }
+                className="grid grid-cols-1 md:grid-cols-2 gap-3"
+              >
                 {THERAPY_NEEDS.map((need) => (
                   <div key={need.value} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={need.value}
-                      checked={formData.therapyNeeds.includes(need.value)}
-                      onCheckedChange={() =>
-                        handleTherapyNeedToggle(need.value)
-                      }
-                    />
+                    <RadioGroupItem value={need.value} id={need.value} />
                     <label
                       htmlFor={need.value}
                       className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer text-black"
@@ -283,7 +271,7 @@ export default function ProfileSetupPage() {
                     </label>
                   </div>
                 ))}
-              </div>
+              </RadioGroup>
             </div>
 
             {/* Preferred Therapy Style */}

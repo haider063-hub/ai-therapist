@@ -53,8 +53,8 @@ export function UserProfileCard({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const isOwnProfile = user.id === currentUserId;
 
-  // Parse therapy needs from JSON
-  const therapyNeeds = user.therapyNeeds ? JSON.parse(user.therapyNeeds) : [];
+  // Get therapy needs - now a single string value
+  const therapyNeeds = user.therapyNeeds ? [user.therapyNeeds] : [];
 
   // Helper to get labels
   const getGenderLabel = (value: string) =>

@@ -279,8 +279,27 @@ You are now analyzing an image that the user has uploaded. Please:
           ? getEmergencyContacts(userCountry)
           : [];
 
+        // Get selected therapist information if available
+        let selectedTherapist: any = null;
+        if (user?.selectedTherapistId) {
+          try {
+            const { getTherapistById } = await import(
+              "@/lib/constants/therapists"
+            );
+            selectedTherapist =
+              getTherapistById(user.selectedTherapistId) || null;
+          } catch (error) {
+            logger.error("Failed to get therapist information:", error);
+          }
+        }
+
         const systemPrompt = mergeSystemPrompt(
-          buildUserSystemPrompt(session.user, emergencyContacts, userCountry),
+          buildUserSystemPrompt(
+            user,
+            emergencyContacts,
+            userCountry,
+            selectedTherapist,
+          ),
           !supportToolCall && buildToolCallUnsupportedModelSystemPrompt(),
           historyContext, // Add previous conversation context
           imageAnalysisPrompt,

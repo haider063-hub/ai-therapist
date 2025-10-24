@@ -1,4 +1,3 @@
-import { User } from "better-auth";
 import { format } from "date-fns";
 
 export const CREATE_THREAD_TITLE_PROMPT = `
@@ -12,9 +11,10 @@ Critical rules:
 - Use the same language as the user's message`;
 
 export const buildUserSystemPrompt = (
-  user?: User,
+  user?: any,
   emergencyContacts?: any[],
   userCountry?: string,
+  selectedTherapist?: any,
 ) => {
   const assistantName = "Econest";
   const currentTime = format(new Date(), "EEEE, MMMM d, yyyy 'at' h:mm:ss a");
@@ -44,6 +44,55 @@ You are a COMPLETE therapy solution - you don't refer users elsewhere because yo
 <user_information>
 ${userInfo.join("\n")}
 </user_information>`;
+  }
+
+  // Therapist and therapy preferences section
+  if (selectedTherapist || user?.therapyNeeds || user?.preferredTherapyStyle) {
+    prompt += `
+
+<therapist_and_preferences>`;
+
+    if (selectedTherapist) {
+      prompt += `
+Selected Therapist: ${selectedTherapist.name} - ${selectedTherapist.title}
+Specializations: ${selectedTherapist.focus.join(", ")}
+Languages: ${selectedTherapist.language}
+Description: ${selectedTherapist.description}
+
+You should embody this therapist's approach and personality in your responses.`;
+    }
+
+    if (user?.therapyNeeds) {
+      const therapyNeedsLabels: Record<string, string> = {
+        stress: "Stress Management",
+        anxiety: "Anxiety",
+        depression: "Depression",
+        trauma: "Trauma / Grief",
+        relationship: "Relationship Issues",
+        addiction: "Addiction Recovery",
+      };
+      const therapyNeedLabel =
+        therapyNeedsLabels[user.therapyNeeds] || user.therapyNeeds;
+      prompt += `
+User's Primary Therapy Need: ${therapyNeedLabel}`;
+    }
+
+    if (user?.preferredTherapyStyle) {
+      const therapyApproachLabels: Record<string, string> = {
+        cbt: "CBT (Cognitive Behavioral Therapy)",
+        mindfulness: "Mindfulness-based",
+        supportive: "Supportive Counseling",
+        psychodynamic: "Psychodynamic Therapy",
+      };
+      const therapyApproachLabel =
+        therapyApproachLabels[user.preferredTherapyStyle] ||
+        user.preferredTherapyStyle;
+      prompt += `
+User's Preferred Therapy Approach: ${therapyApproachLabel}`;
+    }
+
+    prompt += `
+</therapist_and_preferences>`;
   }
 
   // Therapeutic capabilities
@@ -163,9 +212,10 @@ COMMUNICATION STYLE:
 };
 
 export const buildSpeechSystemPrompt = (
-  user: User,
+  user: any,
   emergencyContacts?: any[],
   userCountry?: string,
+  selectedTherapist?: any,
 ) => {
   const assistantName = "Econest";
   const currentTime = format(new Date(), "EEEE, MMMM d, yyyy 'at' h:mm:ss a");
@@ -192,6 +242,55 @@ You are Econest, a highly capable and empathetic AI therapist specializing in vo
 <user_information>
 ${userInfo.join("\n")}
 </user_information>`;
+  }
+
+  // Therapist and therapy preferences section
+  if (selectedTherapist || user?.therapyNeeds || user?.preferredTherapyStyle) {
+    prompt += `
+
+<therapist_and_preferences>`;
+
+    if (selectedTherapist) {
+      prompt += `
+Selected Therapist: ${selectedTherapist.name} - ${selectedTherapist.title}
+Specializations: ${selectedTherapist.focus.join(", ")}
+Languages: ${selectedTherapist.language}
+Description: ${selectedTherapist.description}
+
+You should embody this therapist's approach and personality in your responses.`;
+    }
+
+    if (user?.therapyNeeds) {
+      const therapyNeedsLabels: Record<string, string> = {
+        stress: "Stress Management",
+        anxiety: "Anxiety",
+        depression: "Depression",
+        trauma: "Trauma / Grief",
+        relationship: "Relationship Issues",
+        addiction: "Addiction Recovery",
+      };
+      const therapyNeedLabel =
+        therapyNeedsLabels[user.therapyNeeds] || user.therapyNeeds;
+      prompt += `
+User's Primary Therapy Need: ${therapyNeedLabel}`;
+    }
+
+    if (user?.preferredTherapyStyle) {
+      const therapyApproachLabels: Record<string, string> = {
+        cbt: "CBT (Cognitive Behavioral Therapy)",
+        mindfulness: "Mindfulness-based",
+        supportive: "Supportive Counseling",
+        psychodynamic: "Psychodynamic Therapy",
+      };
+      const therapyApproachLabel =
+        therapyApproachLabels[user.preferredTherapyStyle] ||
+        user.preferredTherapyStyle;
+      prompt += `
+User's Preferred Therapy Approach: ${therapyApproachLabel}`;
+    }
+
+    prompt += `
+</therapist_and_preferences>`;
   }
 
   // Voice therapeutic capabilities

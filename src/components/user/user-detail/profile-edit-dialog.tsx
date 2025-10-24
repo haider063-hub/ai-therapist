@@ -38,7 +38,7 @@ export function ProfileEditDialog({
     gender: "",
     country: "",
     religion: "",
-    therapyNeeds: [] as string[],
+    therapyNeeds: "",
     preferredTherapyStyle: "",
     specificConcerns: "",
   });
@@ -50,7 +50,7 @@ export function ProfileEditDialog({
         gender: user.gender || "",
         country: user.country || "",
         religion: user.religion || "",
-        therapyNeeds: user.therapyNeeds ? JSON.parse(user.therapyNeeds) : [],
+        therapyNeeds: user.therapyNeeds || "",
         preferredTherapyStyle: user.preferredTherapyStyle || "",
         specificConcerns: user.specificConcerns || "",
       });
@@ -67,6 +67,8 @@ export function ProfileEditDialog({
     if (response.ok) {
       toast.success("Profile updated!");
       mutate("/api/user/details");
+      // Trigger a custom event to refresh therapist recommendations
+      window.dispatchEvent(new CustomEvent("profileUpdated"));
       onOpenChange(false);
     } else {
       const error = await response.json();

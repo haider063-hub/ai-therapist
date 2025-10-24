@@ -248,8 +248,24 @@ COMMUNICATION STYLE:
       ? getEmergencyContacts(userCountry)
       : [];
 
+    // Get selected therapist information if available
+    let selectedTherapist: any = null;
+    if (user?.selectedTherapistId) {
+      try {
+        const { getTherapistById } = await import("@/lib/constants/therapists");
+        selectedTherapist = getTherapistById(user.selectedTherapistId) || null;
+      } catch (error) {
+        logger.error("Failed to get therapist information:", error);
+      }
+    }
+
     const systemPrompt = mergeSystemPrompt(
-      buildSpeechSystemPrompt(session.user, emergencyContacts, userCountry),
+      buildSpeechSystemPrompt(
+        user,
+        emergencyContacts,
+        userCountry,
+        selectedTherapist,
+      ),
       historyContext, // Add history context to voice chat system prompt
       therapistContext, // Add therapist-specific context
     );

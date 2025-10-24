@@ -220,11 +220,9 @@ export const THERAPY_NEEDS = [
   { value: "stress", label: "Stress Management" },
   { value: "anxiety", label: "Anxiety" },
   { value: "depression", label: "Depression" },
-  { value: "relationship", label: "Relationship Issues" },
-  { value: "self-improvement", label: "Self-Improvement" },
   { value: "trauma", label: "Trauma / Grief" },
-  { value: "work-life", label: "Work-Life Balance" },
-  { value: "other", label: "Other" },
+  { value: "relationship", label: "Relationship Issues" },
+  { value: "addiction", label: "Addiction Recovery" },
 ];
 
 export const THERAPY_STYLES = [
@@ -232,5 +230,4 @@ export const THERAPY_STYLES = [
   { value: "mindfulness", label: "Mindfulness-based" },
   { value: "supportive", label: "Supportive Counseling" },
   { value: "psychodynamic", label: "Psychodynamic Therapy" },
-  { value: "other", label: "Other" },
 ];
